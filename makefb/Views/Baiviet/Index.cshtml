@@ -1,0 +1,17 @@
+﻿@model List<makefb.Models.Baiviet>
+
+<h2>Bảng tin</h2>
+
+@foreach(var bv in Model)
+{
+    <div style="border: 1px solid #ccc; padding: 10px; margin-bottom:10px">
+        <div style="display:flex">
+
+        </div>
+
+
+        <b>@bv.User.Ten</b>
+        <small>@bv.Ngaydang</small>
+        <p>@bv.Noidung</p>
+    </div>
+}

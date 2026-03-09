@@ -1,0 +1,65 @@
+﻿@model makefb.Models.User;
+@{
+    ViewData["Title"] = "Đăng ký";
+}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header text-center bg-primary text-white">
+                    <h4>Đăng ký tài khoản</h4>
+                </div>
+
+                <div class="card-body">
+                    <form asp-action="Dangky" method="post">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Tên</label>
+                            <input asp-for="Ten" type="text" class="form-control"/>
+                            <span asp-validation-for="Ten" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ngày sinh</label>
+                            <input asp-for="Ngaysinh" type="date" class="form-control" />
+                            <span asp-validation-for="Ngaysinh" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Giới tính</label>
+                            <input type="radio" asp-for="Gioitinh" value="Nam" /> Nam
+                            <input type="radio" asp-for="Gioitinh" value="Nữ" /> Nữ
+                            <input type="radio" asp-for="Gioitinh" value="Khác" /> Khác
+                            <br />
+                            <span asp-validation-for="Gioitinh" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email/SĐT</label>
+                            <input asp-for="EmailorSDT" type="text" class="form-control" />
+                            <span asp-validation-for="EmailorSDT" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mật khẩu</label>
+                            <input asp-for="Matkhau" type="password" class="form-control" />
+                            <span asp-validation-for="Matkhau" class="text-danger"></span>
+                        </div>
+
+                        <button class="btn btn-primary w-100">
+                            Đăng ký
+                        </button>
+
+                        <a href="/User/DangNhap" class="btn btn-link w-100 pt-1">
+                            Đăng nhập
+                        </a>
+                    </form>
+                    @section Scripts { <!--nạp js để kiểm tra form-->
+                        <partial name="_ValidationScriptsPartial" />
+                    } 
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

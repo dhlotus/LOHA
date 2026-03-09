@@ -1,0 +1,17 @@
+﻿@model makefb.Models.Baiviet
+
+<h3>Tạo bài viết</h3>
+
+<form asp-action="Taobaiviet" method="post" enctype="multipart/form-data">
+    
+    <div class="mb-3">
+        <textarea name="Noidung" class="form-control" placeholder="Bạn đang nghĩ gì?"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <input type="file" name="AnhFile" class="form-control"/>
+    </div>
+
+    <button class="btn btn-primary">Đăng bài</button>
+
+</form> 
