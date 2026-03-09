@@ -86,9 +86,10 @@ namespace makefb.Controllers // nhóm chứa các class
         //trang cá nhân
         public IActionResult Trangcanhan()
         {
-            /*
+            
             var userSesstion = HttpContext.Session.GetString("user"); // lấy email hoặc sdt từ sesstion
 
+            /*
             if(userSesstion == null) // nếu chưa đăng nhập thì quay lại trang đăng nhập
             {
                 return RedirectToAction("DangNhap");
@@ -96,6 +97,7 @@ namespace makefb.Controllers // nhóm chứa các class
             var user = _context.Users
                         .FirstOrDefault(x => x.EmailorSDT == userSesstion);
             */
+
             var user = _context.Users.FirstOrDefault(); // tạm để thiết kế UI thôi
             return View(user); // gửi dữ liệu user sang view
         }

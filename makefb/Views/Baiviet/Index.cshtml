@@ -1,17 +1,45 @@
-﻿@model List<makefb.Models.Baiviet>
+﻿@model List<makefb.Models.Baiviet> // view này sẽ nhận list <baiviet>
+
+@functions{
+    public string Tinhthoigian(DateTime ngaydang)
+    {
+        var khoangthoigian = DateTime.Now - ngaydang; // tính khoảng thời gian giữa thời điểm hiện tại 
+                                                      // và thời điểm bài viết được đăng
+
+        if(khoangthoigian.TotalMinutes < 1)
+            return "Vừa xong";
+
+        if (khoangthoigian.TotalMinutes < 60)
+            return $"{(int)khoangthoigian.TotalMinutes} phút trước";
+
+        if(khoangthoigian.TotalHours < 24)
+            return $"{(int)khoangthoigian.TotalHours} giờ trước";
+
+        if(khoangthoigian.TotalDays < 7)
+            return $"{(int)khoangthoigian.TotalDays} ngày trước";
+
+        return ngaydang.ToString("dd/MM/yyyy");
+    }
+}
 
 <h2>Bảng tin</h2>
 
-@foreach(var bv in Model)
+@foreach(var bv in Model) // model là list bv là từng bài viết
 {
-    <div style="border: 1px solid #ccc; padding: 10px; margin-bottom:10px">
-        <div style="display:flex">
+    <div class="card mb-3">
+        <div class="card-body">
 
+            <h6>@bv.User.Ten</h6>
+
+            <p>@bv.Noidung</p>
+
+            @if(bv.Anh != null) // kiểm tra xem bài viết có ảnh không
+            {
+                <img src="/baiviet/@bv.Anh" style="max-width:100%"/>
+            }
+            <p style="color: gray; font-size: 14px">
+                @Tinhthoigian(bv.Ngaydang)
+            </p>
         </div>
-
-
-        <b>@bv.User.Ten</b>
-        <small>@bv.Ngaydang</small>
-        <p>@bv.Noidung</p>
     </div>
 }

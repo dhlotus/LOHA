@@ -63,15 +63,74 @@
 
                     <div class="card mb-3">
                         <div class="card-body">
-                            <textarea class="form-control" rows="3" placeholder="Bạn đang nghĩ gì?"></textarea>
+                            <div class="d-flex">
+                                <img src="/images/default.png" 
+                                     class="rounded-circle me-2"
+                                     style="width:40px;
+                                            height: 40px;
+                                            object-fit:cover"/>
+                                <textarea class="form-control" 
+                                          rows="2"
+                                          max-line="5"
+                                          placeholder="Bạn đang nghĩ gì?"
+                                          style="max-height:140px"></textarea>
+                            </div>
+                            
                             <div class="text-end mt-2">
-                                <button class="btn btn-primary">
-                                    Bài đăng
-                                </but>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <button class="btn btn-light border">
+                                        📷 Ảnh / Video
+                                    </button>
+
+                                    <button class="btn btn-primary">
+                                        Bài đăng
+                                    </button>
+                                </div>
+                                
                             </div>
                         </div>
                     </div>
+
+                    <!--khung bài viết-->
+                    <div class="card">
+
+                        <div class="card-body">
+
+                            <div class="d-flex align-items-center mb-2">
+                                <img src="/images/default.png" 
+                                     class="rounded-circle me-2"
+                                     style="width:40px; height:40px; object-fit:cover"/>
+
+                                <div>
+                                    <strong>@Model.Ten</strong> <br />
+                                    <small class="text-muted">Bây giờ</small>
+                                </div>
+                            </div>
+                            <p>
+                                Status nha
+                            </p>
+                            <img src="/images/cover.jpg" class="img-fluid rounded" />
+                            <hr />
+                            <!--cảm xúc-->
+
+                            <div class="d-flex justify-content-around text-muted">
+                                <button class="btn btn-light">
+                                    👍 Thích
+                                </button>
+
+                                <button class="btn btn-light">
+                                    💬 Bình luận
+                                </button>
+
+                                <button class="btn btn-light">
+                                    ↗ Chia sẻ
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
+
             </div>
         </div>
         
