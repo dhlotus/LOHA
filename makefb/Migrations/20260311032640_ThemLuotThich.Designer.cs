@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using makefb.Models;
 
@@ -11,9 +12,11 @@ using makefb.Models;
 namespace makefb.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260311032640_ThemLuotThich")]
+    partial class ThemLuotThich
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,35 +53,6 @@ namespace makefb.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Baiviets");
-                });
-
-            modelBuilder.Entity("makefb.Models.Binhluan", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BaivietId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Ngaydang")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Noidung")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BaivietId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Binhluans");
                 });
 
             modelBuilder.Entity("makefb.Models.User", b =>
@@ -123,25 +97,6 @@ namespace makefb.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("makefb.Models.Binhluan", b =>
-                {
-                    b.HasOne("makefb.Models.Baiviet", "Baiviet")
-                        .WithMany()
-                        .HasForeignKey("BaivietId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("makefb.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Baiviet");
 
                     b.Navigation("User");
                 });

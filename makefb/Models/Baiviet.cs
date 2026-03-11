@@ -8,6 +8,7 @@ namespace makefb.Models
         public string? Anh {  get; set; } // tải ảnh nếu user upload
         public DateTime Ngaydang { get; set; } // thời gian đăng
         public int UserId { get; set; }
+        public int Luotthich { get; set; } = 0; // số lượt thích
         public User? User { get; set; } // thuộc tính điều hướng
     }
 }

@@ -53,5 +53,45 @@ namespace makefb.Controllers
 
             return RedirectToAction("Index");
         }
+        [HttpPost]
+        public JsonResult Thich(int id) // id của bài viết
+        {
+            var baiviet = _context.Baiviets.Find(id); // tìm bài viết trong db
+            if(baiviet != null)
+            {
+                baiviet.Luotthich += 1; // tăng lượt thích;
+                _context.SaveChanges(); // lưu thay đổi bào db
+
+                return Json(new { luothich = baiviet.Luotthich }); // server gửi lai jsoos like mới
+            }
+
+            return Json(new { luotthich = 0});
+        }
+
+        // thêm bình luận
+        [HttpPost]
+        public IActionResult ThemBinhLuan(int baivietId, string noidung) // bình luận thuộc bài viết nào và nội dung bình luận là gì
+        {
+            var user = HttpContext.Session.GetString("user"); // lấy id user đang đăng nhập
+
+            if (user == null)
+            {
+                return RedirectToAction("DangNhap", "User");
+            }
+
+            int userId = int.Parse(user);
+
+            Binhluan bl = new Binhluan(); // tạo oj bình luận, sau đó gán dữ liệu
+            bl.Noidung = noidung;
+            bl.Ngaydang = DateTime.Now;
+            bl.UserId = userId;
+            bl.BaivietId = baivietId;
+
+            // lưu vào db
+            _context.Binhluans.Add(bl);
+            _context.SaveChanges();
+
+            return RedirectToAction("Index");
+        }
     }
 }

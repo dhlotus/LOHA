@@ -6,16 +6,16 @@
         var khoangthoigian = DateTime.Now - ngaydang; // tính khoảng thời gian giữa thời điểm hiện tại 
                                                       // và thời điểm bài viết được đăng
 
-        if(khoangthoigian.TotalMinutes < 1)
+        if(khoangthoigian.TotalMinutes < 1) // tổng số phút đã trôi qua nhỏ hơn 1
             return "Vừa xong";
 
-        if (khoangthoigian.TotalMinutes < 60)
-            return $"{(int)khoangthoigian.TotalMinutes} phút trước";
+        if (khoangthoigian.TotalMinutes < 60) // nếu dưới 60  phút
+            return $"{(int)khoangthoigian.TotalMinutes} phút trước"; // ép kiểu nguyên để hiển thị phút
 
-        if(khoangthoigian.TotalHours < 24)
+        if (khoangthoigian.TotalHours < 24) // nếu hơn 60 phút
             return $"{(int)khoangthoigian.TotalHours} giờ trước";
 
-        if(khoangthoigian.TotalDays < 7)
+        if(khoangthoigian.TotalDays < 7) // nếu bài viết hơn 24 giờ
             return $"{(int)khoangthoigian.TotalDays} ngày trước";
 
         return ngaydang.ToString("dd/MM/yyyy");
@@ -28,18 +28,69 @@
 {
     <div class="card mb-3">
         <div class="card-body">
+            <div style="display:flex; align-items: center; margin-bottom: 10px">
+                <img src="/images/default.png" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px"/>
+                <div>
+                    <strong>@bv.User.Ten</strong> <br />
+                    <span style="color: gray; font-size :13px">
+                        @Tinhthoigian(bv.Ngaydang)
+                    </span>
+                </div>
+            </div>
 
-            <h6>@bv.User.Ten</h6>
-
-            <p>@bv.Noidung</p>
+            <p style="margin-top: 10px">@bv.Noidung</p>
 
             @if(bv.Anh != null) // kiểm tra xem bài viết có ảnh không
             {
-                <img src="/baiviet/@bv.Anh" style="max-width:100%"/>
+                <img src="/baiviet/@bv.Anh" style="max-width:100%; border-radius: 10px; margin-top: 10px;"/>
             }
-            <p style="color: gray; font-size: 14px">
-                @Tinhthoigian(bv.Ngaydang)
-            </p>
+            <hr />
+            <hr />
+            <!--các hành động dưới bài viết-->
+
+            <div style="display:flex; justify-content:space-around;">
+
+                <div style="color: gray; font-size: 14px; margin-top: 10px">
+                    👍 <span id="like-@bv.Id">@bv.Luotthich</span> Lượt thích
+                </div>
+                <button onclick="thichBaiviet(@bv.Id)" style="border:none;background:none;"> 
+                    <!--khi bấm nút js fun thichBaiviet sẽ chạy-->
+                    👍 Thích
+                </button>
+
+                    <button style="border:none;background:none;">
+                    💬 Bình luận
+                </button>
+
+                <button style="border:none;background:none;">
+                    ↗ Chia sẻ
+                </button>
+
+            </div>
+            
         </div>
     </div>
 }
+<!--js tăng like ngay ko cần load lại trang-->
+<script>
+    function thichBaiviet(id) { // nhận id bài viết
+
+        fetch("/Baiviet/Thich", { // gửi request đến Thich()
+            method: "POST", 
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ id: id })
+        })
+        .then(response => response.json())
+        .then(data => {
+
+            var spanLike = document.getElementById("like-" + id);
+
+            if(spanLike){
+                spanLike.innerText = data.luotthich; // cập nhật lượt like lên giao diện
+            }
+
+        });
+    }
+</script>
