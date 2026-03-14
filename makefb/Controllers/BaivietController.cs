@@ -14,12 +14,14 @@ namespace makefb.Controllers
         }
         public IActionResult Index()
         {
-            var danhsach = _context.Baiviets // lấy tất cả bài viết
-                .Include(x => x.User) // lấy thông tin user của bài viết) 
-                .OrderByDescending(x => x.Ngaydang) // sắp xếp mới nhất trước
-                .ToList(); // chuyển thành list
+            var baiviets = _context.Baiviets // lấy tất cả bài viết
+                .Include(b => b.User) //lấy thông tin user
+                .Include(b => b.Binhluans) //ds comment
+                .ThenInclude(bl => bl.User) // lấy thông tin user của từng comment
+                .OrderByDescending(b => b.Ngaydang) // bài viết mới lên đầu
+                .ToList(); //query và trả về list bài viết
 
-            return View(danhsach);
+            return View(baiviets);
         }
         public IActionResult Taobaiviet()
         {
@@ -70,28 +72,43 @@ namespace makefb.Controllers
 
         // thêm bình luận
         [HttpPost]
-        public IActionResult ThemBinhLuan(int baivietId, string noidung) // bình luận thuộc bài viết nào và nội dung bình luận là gì
+        public IActionResult ThemBinhLuan(int baivietId, string noidung, string anchor) //anchor id của bv
         {
-            var user = HttpContext.Session.GetString("user"); // lấy id user đang đăng nhập
+            var userId = HttpContext.Session.GetInt32("UserId");
 
-            if (user == null)
+            if (userId == null)
             {
                 return RedirectToAction("DangNhap", "User");
             }
 
-            int userId = int.Parse(user);
+            var binhluan = new Binhluan
+            {
+                BaivietId = baivietId,
+                UserId = userId.Value,
+                Noidung = noidung,
+                Ngaydang = DateTime.Now
+            };
 
-            Binhluan bl = new Binhluan(); // tạo oj bình luận, sau đó gán dữ liệu
-            bl.Noidung = noidung;
-            bl.Ngaydang = DateTime.Now;
-            bl.UserId = userId;
-            bl.BaivietId = baivietId;
-
-            // lưu vào db
-            _context.Binhluans.Add(bl);
+            _context.Binhluans.Add(binhluan);
             _context.SaveChanges();
 
-            return RedirectToAction("Index");
+            return Redirect("/Baiviet/Index#" + anchor); // cuộn tới bv đó
+        }
+        // trang chi tiết bài viết
+        public IActionResult ChiTiet(int id)
+        {
+            var baiviet = _context.Baiviets
+                .Include(b => b.User) // lấy người đăng bài
+                .Include(b => b.Binhluans) // lấy danh sách bình luận
+                .ThenInclude(bl => bl.User) // lấy thông tin người bình luận
+                .FirstOrDefault(b => b.Id == id); // tìm bài viết theo id
+
+            if (baiviet == null) // nếu không tìm thấy bài viết, trả về trang lỗi
+            {
+                return NotFound();
+            }
+
+            return View(baiviet);
         }
     }
 }
