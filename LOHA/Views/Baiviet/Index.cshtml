@@ -1,0 +1,136 @@
+﻿@model List<LOHA.Models.Baiviet> // view này sẽ nhận list <baiviet>
+
+@functions{
+    public string Tinhthoigian(DateTime ngaydang)
+    {
+        var khoangthoigian = DateTime.Now - ngaydang; // tính khoảng thời gian giữa thời điểm hiện tại 
+                                                      // và thời điểm bài viết được đăng
+
+        if(khoangthoigian.TotalMinutes < 1) // tổng số phút đã trôi qua nhỏ hơn 1
+            return "Vừa xong";
+
+        if (khoangthoigian.TotalMinutes < 60) // nếu dưới 60  phút
+            return $"{(int)khoangthoigian.TotalMinutes} phút trước"; // ép kiểu nguyên để hiển thị phút
+
+        if (khoangthoigian.TotalHours < 24) // nếu hơn 60 phút
+            return $"{(int)khoangthoigian.TotalHours} giờ trước";
+
+        if(khoangthoigian.TotalDays < 7) // nếu bài viết hơn 24 giờ
+            return $"{(int)khoangthoigian.TotalDays} ngày trước";
+
+        return ngaydang.ToString("dd/MM/yyyy");
+    }
+}
+
+<h2>Bảng tin</h2>
+
+@foreach(var bv in Model) // model là list bv là từng bài viết
+{
+    <div class="card mb-3" id="baiviet-@bv.Id">
+        <div class="card-body">
+            <div style="display:flex; align-items: center; margin-bottom: 10px">
+                <img src="/images/default.png" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px"/>
+                <div>
+                    <strong>@bv.User.Ten</strong> <br />
+                    <span style="color: gray; font-size :13px">
+                        @Tinhthoigian(bv.Ngaydang)
+                    </span>
+                </div>
+            </div>
+
+            <p style="margin-top: 10px">@bv.Noidung</p>
+
+            @if(bv.Anh != null) // kiểm tra xem bài viết có ảnh không
+            {
+                <img src="/baiviet/@bv.Anh" style="max-width:100%; border-radius: 10px; margin-top: 10px;"/>
+            }
+            <hr />
+            <hr />
+            <!--các hành động dưới bài viết-->
+
+            <div style="display:flex; justify-content:space-around;">
+
+                <!-- NÚT THÍCH -->
+                    <button onclick="thichBaiViet(@bv.Id)" class="btn btn-light">
+                    👍 <span id="soLike-@bv.Id">@bv.Thichs.Count</span>
+                </button>
+                <!--Form viết bình luận-->
+                    <!-- khu vực bình luận -->
+                <div id="binhluan-@bv.Id" style="display:none; margin-top:10px;"> <!--mỗi bài viết có khu bl riêng-->
+
+                    <!--Danh sách bình luận-->
+                    @if (bv.Binhluans != null && bv.Binhluans.Count > 0)
+                    {
+                        foreach (var bl in bv.Binhluans) // lặp lại qua ds bv
+                        {
+                            <p>
+                                <strong>@bl.User.Ten:</strong> @bl.Noidung
+                            </p>
+                        }
+                    }
+                    else
+                    {
+                        <p style="color:gray">Chưa có bình luận</p>
+                    }
+
+                    <!--Form viết bình luận-->
+                    <form method="post" action="/Baiviet/ThemBinhLuan" class="mt-2">
+
+                        <input type="hidden" name="baivietId" value="@bv.Id" />
+                        <input type="hidden" name="anchor" value="baiviet-@bv.Id" />
+
+                        <div class="input-group">
+                            <input type="text"
+                                    name="noidung"
+                                    class="form-control"
+                                    placeholder="Viết bình luận..." />
+
+                            <button class="btn btn-primary">
+                                Gửi
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+                <a href="/Baiviet/ChiTiet/@bv.Id" style="border:none;background:none;text-decoration:none;color:black;">
+                    💬 @bv.Binhluans.Count Bình luận
+                </a>
+
+                <button style="border:none;background:none;">
+                    ↗ Chia sẻ
+                </button>
+
+            </div>
+            
+        </div>
+    </div>
+}
+
+<!--js tăng like ngay ko cần load lại trang-->
+<script>
+    function thichBaiViet(id) {
+        fetch("/Baiviet/ThichBaiViet?baiVietId=" + id, {
+            method: "POST"
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("soLike-" + id).innerText = data.soLuong;
+        });
+    }
+
+    // js mở khu vực bình luận
+    function moBinhLuan(baivietId)
+    {
+        var div = document.getElementById("binhluan-" + baivietId); // tìm div bl của bv
+
+            if(div.style.display === "none") // nếu đang ẩn thì hiện lên
+            {
+                div.style.display = "block"; 
+            }
+            else
+            { 
+                div.style.display = "none"; // nếu đang hiện thì ẩn đi
+            }
+    }
+</script>
