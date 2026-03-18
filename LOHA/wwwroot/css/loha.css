@@ -1,0 +1,382 @@
+﻿/* ===== LOHA SOCIAL MEDIA - MINIMAL TECH EDITION ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ===== VARIABLES ===== */
+:root {
+    /* Màu sắc chính */
+    --loha-navy: #1E2A78;
+    --loha-navy-light: #2A3A98;
+    --loha-purple: #6C63FF;
+    --loha-purple-light: #7D76FF;
+    --loha-bg: #F8FAFF;
+    --loha-card: #FFFFFF;
+    --loha-text-primary: #1A1E2B;
+    --loha-text-secondary: #6B7280;
+    --loha-border: #E5E7EB;
+    --loha-border-light: #F0F2F5;
+    /* Gradient */
+    --loha-gradient: linear-gradient(135deg, #1E2A78, #6C63FF);
+    /* Shadow */
+    --loha-shadow: 0 4px 15px rgba(0, 0, 0, 0.02), 0 2px 5px rgba(0, 0, 0, 0.01);
+    --loha-shadow-hover: 0 10px 25px -5px rgba(30, 42, 120, 0.1), 0 5px 10px -5px rgba(108, 99, 255, 0.05);
+    /* Border radius */
+    --loha-radius-card: 20px;
+    --loha-radius-btn: 12px;
+    --loha-radius-input: 12px;
+    /* Spacing */
+    --loha-spacing: 20px;
+    /* Transition */
+    --loha-transition: all 0.2s ease-in-out;
+}
+
+/* ===== GLOBAL ===== */
+body {
+    background-color: var(--loha-bg);
+    font-family: 'Inter', sans-serif;
+    color: var(--loha-text-primary);
+    line-height: 1.6;
+}
+
+/* ===== NAVBAR ===== */
+.loha-navbar {
+    height: 70px;
+    background: white;
+    border-bottom: 1px solid var(--loha-border-light);
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.loha-logo {
+    font-size: 24px;
+    font-weight: 700;
+    background: var(--loha-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+
+.loha-search {
+    position: relative;
+    width: 300px;
+}
+
+    .loha-search i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--loha-text-secondary);
+        font-size: 18px;
+    }
+
+    .loha-search input {
+        width: 100%;
+        height: 42px;
+        border: 1px solid var(--loha-border);
+        border-radius: var(--loha-radius-input);
+        padding: 0 16px 0 42px;
+        font-size: 14px;
+        transition: var(--loha-transition);
+    }
+
+        .loha-search input:focus {
+            outline: none;
+            border-color: var(--loha-purple);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+        }
+
+        .loha-search input::placeholder {
+            color: var(--loha-text-secondary);
+        }
+
+.loha-nav-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: var(--loha-text-primary);
+    font-size: 20px;
+    transition: var(--loha-transition);
+    cursor: pointer;
+}
+
+    .loha-nav-icon:hover {
+        background: var(--loha-border-light);
+        color: var(--loha-purple);
+    }
+
+/* ===== SIDEBAR ===== */
+.loha-sidebar {
+    width: 260px;
+    position: sticky;
+    top: 90px;
+    height: calc(100vh - 90px);
+    overflow-y: auto;
+}
+
+.loha-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: var(--loha-text-primary);
+    font-weight: 500;
+    transition: var(--loha-transition);
+    margin-bottom: 4px;
+    cursor: pointer;
+}
+
+    .loha-menu-item i {
+        width: 24px;
+        font-size: 20px;
+        margin-right: 12px;
+        color: var(--loha-text-secondary);
+    }
+
+    .loha-menu-item:hover {
+        background: #F3F4F6;
+    }
+
+    .loha-menu-item.active {
+        background: #F0F2FF;
+        color: var(--loha-purple);
+    }
+
+        .loha-menu-item.active i {
+            color: var(--loha-purple);
+        }
+
+/* ===== CARD ===== */
+.loha-card {
+    background: var(--loha-card);
+    border-radius: var(--loha-radius-card);
+    box-shadow: var(--loha-shadow);
+    transition: var(--loha-transition);
+    margin-bottom: var(--loha-spacing);
+    border: 1px solid var(--loha-border-light);
+    overflow: hidden;
+}
+
+    .loha-card:hover {
+        box-shadow: var(--loha-shadow-hover);
+        transform: translateY(-2px);
+    }
+
+.loha-card-body {
+    padding: 20px;
+}
+
+/* ===== POST ===== */
+.loha-post-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.loha-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 12px;
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.loha-post-user {
+    font-weight: 600;
+    color: var(--loha-navy);
+    margin-bottom: 2px;
+}
+
+.loha-post-time {
+    font-size: 13px;
+    color: var(--loha-text-secondary);
+}
+
+    .loha-post-time i {
+        font-size: 12px;
+        margin-right: 4px;
+    }
+
+.loha-post-content {
+    margin-bottom: 16px;
+    line-height: 1.6;
+}
+
+.loha-post-image {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 16px;
+    margin-bottom: 16px;
+}
+
+.loha-post-stats {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-top: 1px solid var(--loha-border-light);
+    border-bottom: 1px solid var(--loha-border-light);
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--loha-text-secondary);
+}
+
+.loha-post-actions {
+    display: flex;
+    justify-content: space-around;
+}
+
+.loha-post-action {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    border-radius: var(--loha-radius-btn);
+    color: var(--loha-text-secondary);
+    font-weight: 500;
+    transition: var(--loha-transition);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+}
+
+    .loha-post-action i {
+        font-size: 18px;
+    }
+
+    .loha-post-action:hover {
+        background: #F5F3FF;
+        color: var(--loha-purple);
+    }
+
+    .loha-post-action.liked {
+        color: var(--loha-purple);
+    }
+
+        .loha-post-action.liked i {
+            font-weight: 900;
+            color: var(--loha-purple);
+        }
+
+/* ===== BUTTON ===== */
+.loha-btn {
+    padding: 8px 16px;
+    border-radius: var(--loha-radius-btn);
+    font-weight: 500;
+    transition: var(--loha-transition);
+    border: none;
+    cursor: pointer;
+}
+
+.loha-btn-primary {
+    background: var(--loha-gradient);
+    color: white;
+}
+
+    .loha-btn-primary:hover {
+        background: linear-gradient(135deg, #2A3A98, #7D76FF);
+        transform: scale(1.02);
+    }
+
+.loha-btn-outline {
+    background: transparent;
+    border: 1px solid var(--loha-border);
+    color: var(--loha-text-primary);
+}
+
+    .loha-btn-outline:hover {
+        border-color: var(--loha-purple);
+        color: var(--loha-purple);
+    }
+
+/* ===== FRIEND SUGGESTION ===== */
+.loha-suggestion-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-radius: 12px;
+    transition: var(--loha-transition);
+}
+
+    .loha-suggestion-item:hover {
+        background: #F3F4F6;
+    }
+
+.loha-suggestion-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 12px;
+}
+
+.loha-suggestion-info {
+    flex: 1;
+}
+
+.loha-suggestion-name {
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.loha-suggestion-mutual {
+    font-size: 12px;
+    color: var(--loha-text-secondary);
+}
+
+.loha-btn-friend {
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 20px;
+    background: transparent;
+    border: 1px solid var(--loha-purple);
+    color: var(--loha-purple);
+    transition: var(--loha-transition);
+}
+
+    .loha-btn-friend:hover {
+        background: var(--loha-purple);
+        color: white;
+    }
+
+/* ===== DIVIDER ===== */
+.loha-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--loha-purple), transparent);
+    margin: 20px 0;
+    opacity: 0.2;
+}
+
+/* ===== UTILITY ===== */
+.loha-gradient-text {
+    background: var(--loha-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+    .loha-sidebar-right {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .loha-sidebar-left {
+        display: none;
+    }
+
+    .loha-search {
+        width: 200px;
+    }
+}

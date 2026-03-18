@@ -1,65 +1,115 @@
-﻿@model LOHA.Models.User;
+﻿@model LOHA.Models.User
 @{
     ViewData["Title"] = "Đăng ký";
+    Layout = "_LayoutAuth";
 }
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header text-center bg-primary text-white">
-                    <h4>Đăng ký tài khoản</h4>
-                </div>
 
-                <div class="card-body">
-                    <form asp-action="Dangky" method="post">
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Tên</label>
-                            <input asp-for="Ten" type="text" class="form-control"/>
-                            <span asp-validation-for="Ten" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Ngày sinh</label>
-                            <input asp-for="Ngaysinh" type="date" class="form-control" />
-                            <span asp-validation-for="Ngaysinh" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Giới tính</label>
-                            <input type="radio" asp-for="Gioitinh" value="Nam" /> Nam
-                            <input type="radio" asp-for="Gioitinh" value="Nữ" /> Nữ
-                            <input type="radio" asp-for="Gioitinh" value="Khác" /> Khác
-                            <br />
-                            <span asp-validation-for="Gioitinh" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Email/SĐT</label>
-                            <input asp-for="EmailorSDT" type="text" class="form-control" />
-                            <span asp-validation-for="EmailorSDT" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Mật khẩu</label>
-                            <input asp-for="Matkhau" type="password" class="form-control" />
-                            <span asp-validation-for="Matkhau" class="text-danger"></span>
-                        </div>
-
-                        <button class="btn btn-primary w-100">
-                            Đăng ký
-                        </button>
-
-                        <a href="/User/DangNhap" class="btn btn-link w-100 pt-1">
-                            Đăng nhập
-                        </a>
-                    </form>
-                    @section Scripts { <!--nạp js để kiểm tra form-->
-                        <partial name="_ValidationScriptsPartial" />
-                    } 
-
-                </div>
+<div class="auth-form">
+    <form asp-action="Dangky" method="post">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert-danger mb-4">
+                <i class="fa-regular fa-circle-exclamation me-2"></i>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             </div>
+        }
+
+        <!-- Họ tên -->
+        <div class="mb-3">
+            <label class="form-label">
+                <i class="fa-regular fa-user me-2" style="color: #6C63FF;"></i>Họ tên
+            </label>
+            <input asp-for="Ten" type="text" class="loha-input" placeholder="Nhập họ tên của bạn" />
+            <span asp-validation-for="Ten" class="text-danger small"></span>
         </div>
-    </div>
+
+        <!-- Ngày sinh -->
+        <div class="mb-3">
+            <label class="form-label">
+                <i class="fa-regular fa-calendar me-2" style="color: #6C63FF;"></i>Ngày sinh
+            </label>
+            <input asp-for="Ngaysinh" type="date" class="loha-input" />
+            <span asp-validation-for="Ngaysinh" class="text-danger small"></span>
+        </div>
+
+        <!-- Giới tính -->
+        <div class="mb-3">
+            <label class="form-label d-block">
+                <i class="fa-regular fa-venus-mars me-2" style="color: #6C63FF;"></i>Giới tính
+            </label>
+            <div class="d-flex gap-4">
+                <label class="radio-option">
+                    <input type="radio" asp-for="Gioitinh" value="Nam" />
+                    <span>Nam</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" asp-for="Gioitinh" value="Nữ" />
+                    <span>Nữ</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" asp-for="Gioitinh" value="Khác" />
+                    <span>Khác</span>
+                </label>
+            </div>
+            <span asp-validation-for="Gioitinh" class="text-danger small"></span>
+        </div>
+
+        <!-- Email/SĐT -->
+        <div class="mb-3">
+            <label class="form-label">
+                <i class="fa-regular fa-envelope me-2" style="color: #6C63FF;"></i>Email / Số điện thoại
+            </label>
+            <input asp-for="EmailorSDT" type="text" class="loha-input" placeholder="Nhập email hoặc số điện thoại" />
+            <span asp-validation-for="EmailorSDT" class="text-danger small"></span>
+        </div>
+
+        <!-- Mật khẩu -->
+        <div class="mb-4">
+            <label class="form-label">
+                <i class="fa-regular fa-lock me-2" style="color: #6C63FF;"></i>Mật khẩu
+            </label>
+            <input asp-for="Matkhau" type="password" class="loha-input" placeholder="Tối thiểu 6 ký tự" />
+            <span asp-validation-for="Matkhau" class="text-danger small"></span>
+        </div>
+
+        <!-- Nút đăng ký -->
+        <button type="submit" class="loha-btn-primary">
+            <i class="fa-regular fa-user-plus me-2"></i>Đăng ký
+        </button>
+
+        <!-- Link đăng nhập -->
+        <div class="divider">hoặc</div>
+
+        <div class="text-center">
+            <span class="text-secondary">Đã có tài khoản? </span>
+            <a href="/User/DangNhap" class="forgot-password" style="font-weight: 600;">Đăng nhập ngay</a>
+        </div>
+    </form>
 </div>
+
+<!-- Style bổ sung cho radio button -->
+<style>
+    .radio-option {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        color: #4B5563;
+        font-size: 15px;
+    }
+
+        .radio-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #6C63FF;
+            cursor: pointer;
+        }
+
+        .radio-option span {
+            margin-left: 2px;
+        }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

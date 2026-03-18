@@ -1,94 +1,166 @@
-﻿@model LOHA.Models.Baiviet //chỉ nhận 1 bv không phải list
+﻿@model LOHA.Models.Baiviet
+
+@{
+    ViewData["Title"] = "Chi tiết bài viết";
+    var userId = Context.Session.GetString("user");
+    bool daThich = ViewBag.DaThich ?? false;
+}
 
 <div class="container mt-4">
-
-    <a href="/Baiviet/Index" class="btn btn-secondary mb-3">
-        ← Quay lại bảng feed
-    </a>
-
-    <div class="card">
-        <div class="card-body">
-
-            <!--Thông tin người đăng-->
-            <div style="display:flex; align-items:center; margin-bottom:10px">
-                <img src="/images/default.png"
-                     style="width:40px;height:40px;border-radius:50%;margin-right:10px" />
-
-                <div>
-                    <strong>@Model.User?.Ten</strong> <!--nếu user khác null thì lấy tên, null thì bỏ qua-->
-                    <span style="color:gray;font-size:13px">
-                        @Model.Ngaydang
-                    </span>
-                </div>
-            </div>
-
-            <!--Nội dung bài viết-->
-            <p>@Model.Noidung</p>
-
-            @if (Model.Anh != null)
-            {
-                <img src="/baiviet/@Model.Anh"
-                     style="max-width:100%;border-radius:10px" />
-            }
-
-            <hr />
-
-            <!--Lượt thích-->
-            <div>
-                👍 @(Model.Thichs != null ? Model.Thichs.Count : 0) Lượt thích
-            </div>
-
-        </div>
-    </div>
-
-    <!--KHU VỰC BÌNH LUẬN-->
-
-    <div class="mt-4">
-
-        <h5>Bình luận</h5>
-
-        @if (Model.Binhluans != null && Model.Binhluans.Count > 0)
-        {
-            foreach (var bl in Model.Binhluans)
-            {
-                <div style="margin-bottom:10px">
-
-                    <strong>@bl.User?.Ten:</strong>
-                    @bl.Noidung
-
-                    <div style="font-size:12px;color:gray">
-                        @bl.Ngaydang
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <!-- Card bài viết chính -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <!-- Header: avatar + tên + thời gian -->
+                    <div class="d-flex align-items-center mb-2">
+                        <img src="/images/default.png" class="rounded-circle me-2" style="width:40px;height:40px;object-fit:cover" />
+                        <div>
+                            <b>@Model.User?.Ten</b><br />
+                            <small class="text-muted">@Model.Ngaydang.ToString("dd/MM/yyyy HH:mm")</small>
+                        </div>
                     </div>
 
+                    <!-- Nội dung bài viết -->
+                    <p>@Model.Noidung</p>
+
+                    <!-- Ảnh (nếu có) -->
+                    @if (!string.IsNullOrEmpty(Model.Anh))
+                    {
+                        <img src="/baiviet/@Model.Anh" class="img-fluid rounded mb-2" style="max-height:400px; width:100%; object-fit:cover" />
+                    }
+
+                    <!-- Nút Like -->
+                    <div class="d-flex justify-content-around border-top pt-2">
+                        <button onclick="thichBaiViet(@Model.Id)"
+                                class="btn w-50 @(daThich ? "btn-primary" : "btn-light")"
+                                id="btn-like-@Model.Id">
+                            👍 Thích (<span id="soLike-@Model.Id">@Model.Thichs.Count</span>)
+                        </button>
+                    </div>
                 </div>
-            }
-        }
-        else
-        {
-            <p style="color:gray">Chưa có bình luận</p>
-        }
+            </div>
 
-    </div>
+            <!-- ===== KHU VỰC BÌNH LUẬN ===== -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>Bình luận (@Model.Binhluans?.Count ?? 0)</h5>
+                </div>
+                <div class="card-body">
 
-    <!--FORM VIẾT BÌNH LUẬN-->
+                    <!--HIỂN THỊ DANH SÁCH BÌNH LUẬN -->
+                    <!-- Danh sách bình luận - thêm ID để JavaScript có thể cập nhật -->
+                    <div id="danh-sach-binhluan">
+                        @if (Model.Binhluans != null && Model.Binhluans.Any())
+                        {
+                            @foreach (var bl in Model.Binhluans.OrderBy(b => b.Ngaydang))
+                            {
+                                <div class="d-flex mb-3" id="binhluan-@bl.Id">
+                                    <img src="/images/default.png"
+                                         class="rounded-circle me-2"
+                                         style="width:32px;height:32px;object-fit:cover" />
+                                    <div class="bg-light p-2 rounded flex-grow-1">
+                                        <div class="d-flex justify-content-between">
+                                            <b>@bl.User?.Ten</b>
+                                            <small class="text-muted">@bl.Ngaydang.ToString("HH:mm dd/MM")</small>
+                                        </div>
+                                        <p class="mb-0 mt-1">@bl.Noidung</p>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p id="khong-co-bl" class="text-muted text-center">Chưa có bình luận nào. Hãy là người đầu tiên bình luận!</p>
+                        }
+                    </div>
 
-    <form method="post" action="/Baiviet/ThemBinhLuan" class="mt-3">
-
-        <input type="hidden" name="baivietId" value="@Model.Id" /> <!--cmt thuộc bài viết nào-->
-
-        <div class="input-group">
-
-            <input type="text"
-                   name="noidung"
-                   class="form-control"
-                   placeholder="Viết bình luận..." />
-
-            <button class="btn btn-primary">
-                Gửi
-            </button>
-
+                    <!-- Form thêm bình luận bằng AJAX -->
+                    @if (!string.IsNullOrEmpty(userId))
+                    {
+                        <div class="mt-3">
+                            <div class="input-group">
+                                <input type="text"
+                                       id="noidung-binhluan"
+                                       class="form-control"
+                                       placeholder="Viết bình luận..."
+                                       required />
+                                <button onclick="guiBinhLuan(@Model.Id)" class="btn btn-primary">Gửi</button>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mt-3">
+                            Vui lòng <a href="/User/DangNhap">đăng nhập</a> để bình luận.
+                        </div>
+                    }
+                </div>
+            </div>
         </div>
-
-    </form>
-
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        function thichBaiViet(id) {
+            fetch("/Baiviet/ThichBaiViet?baiVietId=" + id, { method: "POST" })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("soLike-" + id).innerText = data.soLuong;
+                    var btn = document.getElementById("btn-like-" + id);
+                    if (data.daThich) {
+                        btn.classList.remove("btn-light");
+                        btn.classList.add("btn-primary");
+                    } else {
+                        btn.classList.remove("btn-primary");
+                        btn.classList.add("btn-light");
+                    }
+                });
+        }
+            function guiBinhLuan(baivietId) {
+            // Lấy nội dung từ ô input
+            var noidung = document.getElementById("noidung-binhluan").value;
+
+            // Kiểm tra nếu rỗng thì báo lỗi
+            if (noidung.trim() === "") {
+                alert("Vui lòng nhập nội dung bình luận");
+                return;
+            }
+
+            // Gửi request AJAX
+            fetch("/Baiviet/ThemBinhLuan", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: `baivietId=${baivietId}&noidung=${encodeURIComponent(noidung)}&anchor=`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    //  Xóa thông báo "Chưa có bình luận" nếu có
+                    var thongBao = document.getElementById("khong-co-bl");
+                    if (thongBao) {
+                        thongBao.remove();
+                    }
+
+                    // Thêm bình luận mới vào đầu danh sách (hoặc cuối tùy ý)
+                    document.getElementById("danh-sach-binhluan").insertAdjacentHTML("beforeend", data.html);
+
+                    //Cập nhật số lượng bình luận
+                    document.querySelector(".card-header h5").innerText = "Bình luận (" + data.soLuong + ")";
+
+                    // Xóa nội dung trong ô input
+                    document.getElementById("noidung-binhluan").value = "";
+                } else {
+                    alert("Lỗi: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Có lỗi xảy ra khi gửi bình luận");
+            });
+        }
+    </script>
+}

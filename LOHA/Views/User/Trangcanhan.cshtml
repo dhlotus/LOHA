@@ -97,10 +97,12 @@
                     }
 
                     <div class="d-flex justify-content-around border-top pt-2">
-                        <button onclick="thichBaiViet(@bv.Id)" class="btn btn-light w-50">
+                        <button onclick="thichBaiViet(@bv.Id)" 
+                                class="btn w-50 @(ViewBag.Thichs.Contains(bv.Id) ? "btn-primary" : "btn-light")" 
+                                id="btn-like-@bv.Id">
                             👍 <span id="soLike-@bv.Id">@bv.Thichs.Count</span>
                         </button>
-                        <button class="btn btn-light w-50">💬 Bình luận</button>
+                        <a href="/Baiviet/ChiTiet/@bv.Id" class="btn btn-light w-50">💬 Bình luận</a>
                     </div>
 
                 </div>
@@ -116,7 +118,20 @@ function thichBaiViet(id) {
     })
     .then(response => response.json())
     .then(data => {
+        // Cập nhật số like
         document.getElementById("soLike-" + id).innerText = data.soLuong;
+        
+        // Lấy nút like
+        var btn = document.getElementById("btn-like-" + id);
+        
+        // Đổi màu dựa vào trạng thái mới
+        if (data.daThich) {
+            btn.classList.remove("btn-light");
+            btn.classList.add("btn-primary");
+        } else {
+            btn.classList.remove("btn-primary");
+            btn.classList.add("btn-light");
+        }
     });
 }
 </script>

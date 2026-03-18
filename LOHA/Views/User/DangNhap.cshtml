@@ -1,20 +1,63 @@
-﻿@model LOHA.Models.LoginViewModel;
+﻿@model LOHA.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Đăng nhập";
+    Layout = "_LayoutAuth";
+}
 
-<form asp-action="DangNhap" method="post">
-    <div class="mb-3">
-        <label>Email hoặc SĐT</label>
-        <input asp-for="EmailorSDT" class="form-control" type="text"/>
-        <span asp-validation-for="EmailorSDT" class="text-danger"></span>
-    </div>
+<div class="auth-form">
+    <form asp-action="DangNhap" method="post">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert-danger mb-4">
+                <i class="fa-regular fa-circle-exclamation me-2"></i>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            </div>
+        }
 
-    <div class="mb-3">
-        <label>Mật khẩu</label>
-        <input asp-for="Matkhau" class="form-control" type="password"/>
-        <span asp-validation-for="Matkhau" class="text-danger"></span>
-    </div>
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <button type="submit" class="btn btn-primary">
-        Đăng nhập
-    </button>
-    <p class="p-5">Bạn chưa có tài khoản <a href="/User/DangKy" class="btn-link">Đăng ký</a></p>
-</form>
+        <!-- Email/SĐT -->
+        <div class="mb-3">
+            <label class="form-label">
+                <i class="fa-regular fa-envelope me-2" style="color: #6C63FF;"></i>Email hoặc số điện thoại
+            </label>
+            <input asp-for="EmailorSDT" class="loha-input" type="text" placeholder="Nhập email hoặc số điện thoại" />
+            <span asp-validation-for="EmailorSDT" class="text-danger small"></span>
+        </div>
+
+        <!-- Mật khẩu -->
+        <div class="mb-4">
+            <label class="form-label">
+                <i class="fa-regular fa-lock me-2" style="color: #6C63FF;"></i>Mật khẩu
+            </label>
+            <input asp-for="Matkhau" class="loha-input" type="password" placeholder="••••••••" />
+            <span asp-validation-for="Matkhau" class="text-danger small"></span>
+        </div>
+
+        <!-- Ghi nhớ đăng nhập & Quên mật khẩu -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="remember" />
+                <label class="form-check-label" for="remember" style="color: #4B5563; font-size: 14px;">
+                    Ghi nhớ đăng nhập
+                </label>
+            </div>
+            <a href="#" class="forgot-password">Quên mật khẩu?</a>
+        </div>
+
+        <!-- Nút đăng nhập -->
+        <button type="submit" class="loha-btn-primary">
+            <i class="fa-regular fa-arrow-right-to-bracket me-2"></i>Đăng nhập
+        </button>
+
+        <!-- Link đăng ký -->
+        <div class="divider">hoặc</div>
+
+        <div class="text-center">
+            <span class="text-secondary">Chưa có tài khoản? </span>
+            <a href="/User/DangKy" class="forgot-password" style="font-weight: 600;">Đăng ký ngay</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

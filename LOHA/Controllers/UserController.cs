@@ -87,32 +87,34 @@ namespace LOHA.Controllers // nhóm chứa các class
         //trang cá nhân
         public IActionResult Trangcanhan()
         {
-            var userSession = HttpContext.Session.GetString("user"); // lấy thông tin đăng nhập từ sesstion
-
-            if (userSession == null) // trả về trang đăng nhập nếu chưa đăng nhập
-            {
+            // Lấy email/sdt từ session
+            var userSession = HttpContext.Session.GetString("user");
+            if (string.IsNullOrEmpty(userSession))
                 return RedirectToAction("DangNhap");
-            }
 
-            var user = _context.Users.
-                FirstOrDefault(x => x.EmailorSDT == userSession); // lấy thTin user trong db
-
-            //var user = _context.Users.FirstOrDefault(); // tạm để thiết kế UI thôi
-
-            if (user == null) // nếu không tìm thấy user trong db trả về trang đăng nhập
-            {
+            // Tìm user trong DB
+            var user = _context.Users.FirstOrDefault(u => u.EmailorSDT == userSession);
+            if (user == null)
                 return RedirectToAction("DangNhap");
-            }
 
+            // Lấy danh sách bài viết của user này
             var baiviets = _context.Baiviets
+                .Include(b => b.Thichs)   // cần để đếm like
                 .Where(b => b.UserId == user.ID)
-                .Include(b => b.Binhluans)
-                .Include(b => b.Thichs) // ✅ THÊM DÒNG NÀY
+                .OrderByDescending(b => b.Ngaydang)
+                .ToList();
+
+            // Lấy danh sách ID bài viết mà user hiện tại đã like
+            var thichs = _context.Thichs
+                .Where(t => t.UserId == user.ID)
+                .Select(t => t.BaivietId)
                 .ToList();
 
             ViewBag.Baiviets = baiviets;
+            ViewBag.Thichs = thichs;   // 👈 quan trọng: gửi danh sách đã like xuống view
 
-            return View(user);   // QUAN TRỌNG
+            return View(user);
         }
+
     }
 }
