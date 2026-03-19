@@ -1,0 +1,151 @@
+﻿@model List<LOHA.Models.KetBan>
+
+@{
+    ViewData["Title"] = "Lời mời kết bạn";
+}
+
+<div class="container mt-4">
+    <div class="d-flex align-items-center mb-4">
+        <a href="javascript:history.back()" class="btn btn-outline-secondary rounded-circle me-3">
+            <i class="fa-regular fa-arrow-left"></i>
+        </a>
+        <h2 class="fw-bold" style="color: #1E2A78;">
+            <i class="fa-regular fa-user-group me-2"></i>Lời mời kết bạn
+        </h2>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+            <i class="fa-regular fa-bell-slash fa-4x text-secondary mb-3"></i>
+            <h4 class="fw-bold">Không có lời mời nào</h4>
+            <p class="text-secondary">Hiện tại bạn chưa có lời mời kết bạn nào</p>
+            <a href="/User/Trangcanhan" class="btn btn-primary rounded-pill px-4 mt-3">
+                <i class="fa-regular fa-house me-2"></i>Về trang cá nhân
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var loiMoi in Model)
+            {
+                <div class="col-md-6 mb-3" id="loiMoi-@loiMoi.Id">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center gap-3">
+                                <!-- Avatar -->
+                                <img src="/images/default.png"
+                                     class="rounded-circle"
+                                     style="width: 70px; height: 70px; object-fit: cover;" />
+
+                                <!-- Thông tin -->
+                                <div class="flex-grow-1">
+                                    <h5 class="fw-bold mb-1">@loiMoi.NguoiGui?.Ten</h5>
+                                    <small class="text-secondary">
+                                        <i class="fa-regular fa-clock me-1"></i>
+                                        @loiMoi.NgayGui.ToString("dd/MM/yyyy HH:mm")
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Nút hành động -->
+                            <div class="d-flex gap-2 mt-3">
+                                <button onclick="chapNhanLoiMoi(@loiMoi.Id)"
+                                        class="btn btn-success flex-fill rounded-pill">
+                                    <i class="fa-regular fa-check me-2"></i>Chấp nhận
+                                </button>
+                                <button onclick="tuChoiLoiMoi(@loiMoi.Id)"
+                                        class="btn btn-outline-danger flex-fill rounded-pill">
+                                    <i class="fa-regular fa-xmark me-2"></i>Từ chối
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+                // Hàm cập nhật thông báo (copy từ layout)
+        function capNhatThongBao() {
+            fetch('/User/DemLoiMoiKetBan')
+                .then(response => response.json())
+                .then(data => {
+                    var badge = window.parent.document.getElementById('notification-badge');
+                    if (badge) {
+                        if (data.count > 0) {
+                            badge.style.display = 'inline-block';
+                            badge.innerText = data.count > 99 ? '99+' : data.count;
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(error => console.error('Lỗi khi lấy thông báo:', error));
+        }
+
+
+        function chapNhanLoiMoi(loiMoiId) {
+            fetch('/User/ChapNhanLoiMoi', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'loiMoiId=' + loiMoiId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Xóa lời mời khỏi danh sách
+                    document.getElementById('loiMoi-' + loiMoiId).remove();
+                    alert('Đã chấp nhận lời mời kết bạn!');
+
+                    // Nếu hết lời mời, reload để hiển thị thông báo "Không có lời mời"
+                    if (document.querySelectorAll('[id^="loiMoi-"]').length === 0) {
+                        location.reload();
+                    }
+                    capNhatThongBao();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra');
+            });
+        }
+
+        function tuChoiLoiMoi(loiMoiId) {
+            fetch('/User/TuChoiLoiMoi', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'loiMoiId=' + loiMoiId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Xóa lời mời khỏi danh sách
+                    document.getElementById('loiMoi-' + loiMoiId).remove();
+                    alert('Đã từ chối lời mời kết bạn!');
+
+                    if (document.querySelectorAll('[id^="loiMoi-"]').length === 0) {
+                        location.reload();
+                    }
+                    capNhatThongBao();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra');
+            });
+        }
+    </script>
+}

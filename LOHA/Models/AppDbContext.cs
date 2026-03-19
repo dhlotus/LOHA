@@ -12,6 +12,7 @@ namespace LOHA.Models
         public DbSet<Binhluan> Binhluans { get; set; } // tạo bảng Binhluans trong db
         
         public DbSet<Thich> Thichs { get; set; } // tạo bảng Thiches trong db
+        public DbSet<KetBan> KetBans { get; set; } // tạo bảng KetBans trong db
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder); // ❗ bắt buộc

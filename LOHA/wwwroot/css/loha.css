@@ -432,3 +432,22 @@ body {
         padding-bottom: 70px !important; /* Tránh bị bottom nav che */
     }
 }
+
+/* Badge thông báo */
+#notification-badge {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1) translate(-50%, -50%);
+    }
+
+    50% {
+        transform: scale(1.1) translate(-45%, -45%);
+    }
+
+    100% {
+        transform: scale(1) translate(-50%, -50%);
+    }
+}

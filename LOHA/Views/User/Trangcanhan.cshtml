@@ -1,4 +1,5 @@
-﻿@model LOHA.Models.User
+﻿<!--BÙI ĐỨC HÀ - LOTUS ->
+@model LOHA.Models.User
 
 @{
     // Kiểm tra ảnh bìa mặc định
@@ -26,7 +27,45 @@
 
     <!-- ===== PROFILE INFO ===== -->
     <div class="mt-5 pt-4" style="margin-left: 220px;">
-        <h1 class="fw-bold" style="color: #1E2A78;">@Model.Ten</h1>
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h1 class="fw-bold" style="color: #1E2A78;">@Model.Ten</h1>
+            </div>
+
+            <!-- 👉 NÚT KẾT BẠN  -->
+            @if (ViewBag.CurrentUserId != Model.ID) // Nếu không phải trang của mình
+            {
+                if (ViewBag.DaLaBanBe)
+                {
+                    <button class="btn btn-success rounded-pill px-4" disabled>
+                        <i class="fa-regular fa-check me-2"></i>Bạn bè
+                    </button>
+                }
+                else if (ViewBag.DaGuiLoiMoi)
+                {
+                    <button onclick="huyLoiMoiKetBan(@Model.ID)"
+                            class="btn btn-warning rounded-pill px-4"
+                            id="btnKetBan-@Model.ID">
+                        <i class="fa-regular fa-clock me-2"></i>Đã gửi lời mời
+                    </button>
+                }
+                else
+                {
+                    <button onclick="guiLoiMoiKetBan(@Model.ID)"
+                            class="btn btn-primary rounded-pill px-4"
+                            id="btnKetBan-@Model.ID">
+                        <i class="fa-regular fa-user-plus me-2"></i>Kết bạn
+                    </button>
+                }
+            }
+            else
+            {
+                <!-- Nếu là trang của mình thì hiện nút chỉnh sửa -->
+                <button class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="fa-regular fa-pen-to-square me-2"></i>Chỉnh sửa trang
+                </button>
+            }
+        </div>
 
         <!-- Stats -->
         <div class="d-flex gap-5 mt-3">
@@ -35,7 +74,7 @@
                 <span class="text-secondary">Bài viết</span>
             </div>
             <div class="text-center">
-                <span class="d-block fw-bold fs-4" style="color: #1E2A78;">0</span>
+                <span class="d-block fw-bold fs-4" style="color: #1E2A78;">@ViewBag.SoBanBe</span>
                 <span class="text-secondary">Bạn bè</span>
             </div>
         </div>
@@ -184,14 +223,49 @@
             </div>
         </div>
 
-        <!-- Tab Bạn bè -->
-        <div id="friends-tab" class="tab-pane">
+    <!-- Tab Bạn bè -->
+    <div id="friends-tab" class="tab-pane">
+        @if (ViewBag.DanhSachBanBe != null && ViewBag.DanhSachBanBe.Count > 0)
+        {
+            <div class="row g-3">
+                @foreach (var ban in ViewBag.DanhSachBanBe)
+                {
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body d-flex align-items-center gap-3">
+                                <!-- Avatar -->
+                                <img src="/images/default.png"
+                                     class="rounded-circle"
+                                     style="width: 60px; height: 60px; object-fit: cover;" />
+
+                                <!-- Thông tin -->
+                                <div class="flex-grow-1">
+                                    <h6 class="fw-bold mb-1">@ban.Ten</h6>
+                                    <small class="text-secondary">
+                                        <i class="fa-regular fa-clock me-1"></i>
+                                        Kết bạn từ @ViewBag.NgayKetBan[ban.ID].ToString("dd/MM/yyyy")
+                                    </small>
+                                </div>
+
+                                <!-- Nút nhắn tin -->
+                                <a href="#" class="btn btn-outline-primary rounded-circle">
+                                    <i class="fa-regular fa-message"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
             <div class="text-center py-5 bg-white rounded-4 shadow-sm">
                 <i class="fa-regular fa-user-group fa-4x text-secondary mb-3"></i>
                 <h4 class="fw-bold">Chưa có bạn bè</h4>
-                <p class="text-secondary">Kết bạn để bắt đầu kết nối</p>
+                <p class="text-secondary">Hãy kết bạn để bắt đầu kết nối</p>
             </div>
-        </div>
+        }
+    </div>
     </div>
 </div>
 
@@ -283,6 +357,70 @@
 
     function openEmojiPicker() {
         alert('Tính năng đang phát triển');
+    }
+
+    function guiLoiMoiKetBan(nguoiNhanId) {
+        fetch('/User/GuiLoiMoiKetBan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'nguoiNhanId=' + nguoiNhanId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var btn = document.getElementById('btnKetBan-' + nguoiNhanId);
+
+                var newBtn = document.createElement('button');
+                newBtn.className = 'btn btn-warning rounded-pill px-4';
+                newBtn.id = 'btnKetBan-' + nguoiNhanId;
+                newBtn.setAttribute('onclick', 'huyLoiMoiKetBan(' + nguoiNhanId + ')');
+                newBtn.innerHTML = '<i class="fa-regular fa-clock me-2"></i>Đã gửi lời mời';
+
+                btn.parentNode.replaceChild(newBtn, btn);
+            } else {
+                console.error('Lỗi:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+
+    function huyLoiMoiKetBan(nguoiNhanId) {
+        fetch('/User/HuyLoiMoiKetBan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'nguoiNhanId=' + nguoiNhanId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Tìm nút hiện tại
+                var btn = document.getElementById('btnKetBan-' + nguoiNhanId);
+
+                // Tạo nút mới thay thế
+                var newBtn = document.createElement('button');
+                newBtn.className = 'btn btn-primary rounded-pill px-4';
+                newBtn.id = 'btnKetBan-' + nguoiNhanId;
+                newBtn.setAttribute('onclick', 'guiLoiMoiKetBan(' + nguoiNhanId + ')');
+                newBtn.innerHTML = '<i class="fa-regular fa-user-plus me-2"></i>Kết bạn';
+
+                // Thay thế nút cũ bằng nút mới
+                btn.parentNode.replaceChild(newBtn, btn);
+            } else {
+                // Không cần alert, chỉ log lỗi ra console
+                console.error('Lỗi:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    
     }
 </script>
 
