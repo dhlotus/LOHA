@@ -1,0 +1,128 @@
+﻿@model LOHA.Models.Baiviet
+
+@{
+    string avatarDefault = "/images/default.png";
+}
+
+<div class="post-item mb-4" id="post-@Model.Id">
+    <div class="card border-0 shadow-sm post-card">
+        <div class="card-body">
+            <!-- Header -->
+            <div class="d-flex align-items-center mb-3">
+                <img src="@avatarDefault"
+                     class="rounded-circle me-2"
+                     style="width: 48px; height: 48px; object-fit: cover;" />
+                <div class="flex-grow-1">
+                    <h5 class="mb-0 fw-bold" style="color: #1E2A78;">@Model.User?.Ten</h5>
+                    <small class="text-secondary">
+                        <i class="fa-regular fa-clock me-1"></i>@Tinhthoigian(Model.Ngaydang)
+                    </small>
+                </div>
+                <button class="btn btn-light btn-sm rounded-circle">
+                    <i class="fa-regular fa-ellipsis-vertical"></i>
+                </button>
+            </div>
+
+            <!-- Nội dung -->
+            <p class="mb-3" style="line-height: 1.6;">@Model.Noidung</p>
+
+            <!-- Ảnh -->
+            @if (!string.IsNullOrEmpty(Model.Anh))
+            {
+                <div class="post-image-container mb-3">
+                    <img src="/baiviet/@Model.Anh"
+                         class="img-fluid w-100"
+                         style="max-height: 400px; object-fit: contain; background: #f8f9fa;" />
+                </div>
+            }
+
+            <!-- Stats -->
+            <div class="d-flex justify-content-between text-secondary small py-2 border-top border-bottom">
+                <div>
+                    <i class="fa-regular fa-heart me-1" style="color: #FF4D6D;"></i>
+                    <span id="total-like-@Model.Id">@Model.Thichs.Count</span> lượt thích
+                </div>
+                <div>
+                    <i class="fa-regular fa-comment me-1" style="color: #6C63FF;"></i>
+                    <span id="comment-count-@Model.Id">@(Model.Binhluans?.Count ?? 0)</span> bình luận
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex gap-2 mt-3 post-actions">
+                <button onclick="thichBaiViet(@Model.Id, this)"
+                        class="btn flex-fill @(ViewBag.Thichs?.Contains(Model.Id) == true ? "btn-primary liked" : "btn-light") rounded-pill like-btn">
+                    <i class="fa-regular fa-thumbs-up me-2"></i>
+                    <span>Thích</span>
+                    <span class="like-count ms-1" id="like-count-@Model.Id">@Model.Thichs.Count</span>
+                </button>
+
+                <button onclick="moBinhLuan(@Model.Id, this)"
+                        class="btn btn-light flex-fill rounded-pill">
+                    <i class="fa-regular fa-comment me-2"></i>
+                    <span>Bình luận</span>
+                </button>
+
+                <button class="btn btn-light flex-fill rounded-pill">
+                    <i class="fa-regular fa-share-from-square me-2"></i>
+                    <span>Chia sẻ</span>
+                </button>
+            </div>
+
+            <!-- Khu vực bình luận (ẩn mặc định) -->
+            <div id="comment-section-@Model.Id" style="display: none;" class="mt-3">
+                <!-- Danh sách bình luận -->
+                <div id="comment-list-@Model.Id" class="mb-3">
+                    @if (Model.Binhluans != null && Model.Binhluans.Any())
+                    {
+                        foreach (var bl in Model.Binhluans.OrderByDescending(b => b.Ngaydang))
+                        {
+                            <div class="d-flex mb-2">
+                                <img src="@avatarDefault"
+                                     class="rounded-circle me-2"
+                                     style="width: 32px; height: 32px; object-fit: cover;" />
+                                <div class="bg-light p-2 rounded-3 flex-grow-1">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="fw-bold small">@bl.User?.Ten</span>
+                                        <small class="text-secondary">@bl.Ngaydang.ToString("HH:mm")</small>
+                                    </div>
+                                    <p class="mb-0 small">@bl.Noidung</p>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+
+                <!-- Form bình luận -->
+                <div class="d-flex gap-2">
+                    <img src="@avatarDefault"
+                         class="rounded-circle"
+                         style="width: 32px; height: 32px; object-fit: cover;" />
+                    <div class="input-group">
+                        <input type="text"
+                               class="form-control form-control-sm rounded-pill"
+                               id="comment-input-@Model.Id"
+                               placeholder="Viết bình luận..."
+                               onkeypress="if(event.key === 'Enter') guiBinhLuan(@Model.Id, 'comment-input-@Model.Id')" />
+                        <button class="btn btn-primary btn-sm rounded-pill ms-2 px-3"
+                                onclick="guiBinhLuan(@Model.Id, 'comment-input-@Model.Id')">
+                            <i class="fa-regular fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string Tinhthoigian(DateTime ngaydang)
+    {
+        var khoangthoigian = DateTime.Now - ngaydang;
+        if (khoangthoigian.TotalMinutes < 1) return "Vừa xong";
+        if (khoangthoigian.TotalMinutes < 60) return $"{(int)khoangthoigian.TotalMinutes} phút trước";
+        if (khoangthoigian.TotalHours < 24) return $"{(int)khoangthoigian.TotalHours} giờ trước";
+        if (khoangthoigian.TotalDays < 7) return $"{(int)khoangthoigian.TotalDays} ngày trước";
+        return ngaydang.ToString("dd/MM/yyyy");
+    }
+}

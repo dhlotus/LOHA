@@ -1,0 +1,196 @@
+﻿body {
+    background: linear-gradient(135deg, #1E2A78 0%, #6C63FF 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 450px;
+    margin: 0 auto;
+}
+
+.auth-card {
+    background: white;
+    border-radius: 24px;
+    padding: 40px 35px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.auth-logo {
+    font-size: 42px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #1E2A78, #6C63FF);
+    /* Fallback cho trình duyệt cũ */
+    color: #1E2A78;
+    text-align: center;
+    margin-bottom: 15px;
+    letter-spacing: -1px;
+}
+
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+    .auth-logo {
+        background: linear-gradient(135deg, #1E2A78, #6C63FF);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: transparent;
+    }
+}
+
+.auth-title {
+    text-align: center;
+    color: #1E2A78;
+    font-weight: 600;
+    font-size: 24px;
+    margin-bottom: 30px;
+    font-family: 'Playfair Display', serif;
+}
+
+/* Style cho input */
+.loha-input {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid #E5E7EB;
+    border-radius: 14px;
+    font-size: 15px;
+    transition: all 0.2s ease;
+    background: #F9FAFB;
+    color: #1E2A78;
+}
+
+    .loha-input:focus {
+        outline: none;
+        border-color: #6C63FF;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.1);
+    }
+
+    .loha-input::placeholder {
+        color: #9CA3AF;
+        font-size: 14px;
+    }
+
+/* Style cho label */
+.form-label {
+    font-weight: 600;
+    color: #1E2A78;
+    margin-bottom: 8px;
+    font-size: 14px;
+    display: block;
+}
+
+/* Style cho checkbox */
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #E5E7EB;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    .form-check-input:checked {
+        background-color: #6C63FF;
+        border-color: #6C63FF;
+    }
+
+.form-check-label {
+    color: #4B5563;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Style cho nút đăng nhập */
+.loha-btn-primary {
+    background: linear-gradient(135deg, #1E2A78, #6C63FF);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+}
+
+    .loha-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(108, 99, 255, 0.4);
+    }
+
+/* Style cho link quên mật khẩu */
+.forgot-password {
+    color: #6C63FF;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+    .forgot-password:hover {
+        text-decoration: underline;
+    }
+
+/* Style cho footer copyright */
+.auth-footer {
+    text-align: center;
+    margin-top: 25px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    font-weight: 400;
+}
+
+    .auth-footer a {
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+/* Style cho alert lỗi */
+.alert-danger {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: 14px;
+    padding: 15px;
+    margin-bottom: 25px;
+    color: #DC2626;
+    font-size: 14px;
+}
+
+/* Style cho divider */
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 25px 0;
+    color: #9CA3AF;
+    font-size: 14px;
+}
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #E5E7EB;
+    }
+
+    .divider::before {
+        margin-right: 15px;
+    }
+
+    .divider::after {
+        margin-left: 15px;
+    }
+

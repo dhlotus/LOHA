@@ -1,136 +1,325 @@
-﻿@model List<LOHA.Models.Baiviet> // view này sẽ nhận list <baiviet>
+﻿@model List<LOHA.Models.Baiviet>
 
-@functions{
+@functions {
     public string Tinhthoigian(DateTime ngaydang)
     {
-        var khoangthoigian = DateTime.Now - ngaydang; // tính khoảng thời gian giữa thời điểm hiện tại 
-                                                      // và thời điểm bài viết được đăng
+        var khoangthoigian = DateTime.Now - ngaydang;
 
-        if(khoangthoigian.TotalMinutes < 1) // tổng số phút đã trôi qua nhỏ hơn 1
+        if (khoangthoigian.TotalMinutes < 1)
             return "Vừa xong";
-
-        if (khoangthoigian.TotalMinutes < 60) // nếu dưới 60  phút
-            return $"{(int)khoangthoigian.TotalMinutes} phút trước"; // ép kiểu nguyên để hiển thị phút
-
-        if (khoangthoigian.TotalHours < 24) // nếu hơn 60 phút
+        if (khoangthoigian.TotalMinutes < 60)
+            return $"{(int)khoangthoigian.TotalMinutes} phút trước";
+        if (khoangthoigian.TotalHours < 24)
             return $"{(int)khoangthoigian.TotalHours} giờ trước";
-
-        if(khoangthoigian.TotalDays < 7) // nếu bài viết hơn 24 giờ
+        if (khoangthoigian.TotalDays < 7)
             return $"{(int)khoangthoigian.TotalDays} ngày trước";
-
         return ngaydang.ToString("dd/MM/yyyy");
     }
 }
 
-<h2>Bảng tin</h2>
-
-@foreach(var bv in Model) // model là list bv là từng bài viết
-{
-    <div class="card mb-3" id="baiviet-@bv.Id">
-        <div class="card-body">
-            <div style="display:flex; align-items: center; margin-bottom: 10px">
-                <img src="/images/default.png" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px"/>
-                <div>
-                    <strong>@bv.User.Ten</strong> <br />
-                    <span style="color: gray; font-size :13px">
-                        @Tinhthoigian(bv.Ngaydang)
-                    </span>
-                </div>
-            </div>
-
-            <p style="margin-top: 10px">@bv.Noidung</p>
-
-            @if(bv.Anh != null) // kiểm tra xem bài viết có ảnh không
-            {
-                <img src="/baiviet/@bv.Anh" style="max-width:100%; border-radius: 10px; margin-top: 10px;"/>
-            }
-            <hr />
-            <hr />
-            <!--các hành động dưới bài viết-->
-
-            <div style="display:flex; justify-content:space-around;">
-
-                <!-- NÚT THÍCH -->
-                    <button onclick="thichBaiViet(@bv.Id)" class="btn btn-light">
-                    👍 <span id="soLike-@bv.Id">@bv.Thichs.Count</span>
-                </button>
-                <!--Form viết bình luận-->
-                    <!-- khu vực bình luận -->
-                <div id="binhluan-@bv.Id" style="display:none; margin-top:10px;"> <!--mỗi bài viết có khu bl riêng-->
-
-                    <!--Danh sách bình luận-->
-                    @if (bv.Binhluans != null && bv.Binhluans.Count > 0)
-                    {
-                        foreach (var bl in bv.Binhluans) // lặp lại qua ds bv
-                        {
-                            <p>
-                                <strong>@bl.User.Ten:</strong> @bl.Noidung
-                            </p>
-                        }
-                    }
-                    else
-                    {
-                        <p style="color:gray">Chưa có bình luận</p>
-                    }
-
-                    <!--Form viết bình luận-->
-                    <form method="post" action="/Baiviet/ThemBinhLuan" class="mt-2">
-
-                        <input type="hidden" name="baivietId" value="@bv.Id" />
-                        <input type="hidden" name="anchor" value="baiviet-@bv.Id" />
-
-                        <div class="input-group">
-                            <input type="text"
-                                    name="noidung"
-                                    class="form-control"
-                                    placeholder="Viết bình luận..." />
-
-                            <button class="btn btn-primary">
-                                Gửi
-                            </button>
-                        </div>
-
-                    </form>
-
-                </div>
-                <a href="/Baiviet/ChiTiet/@bv.Id" style="border:none;background:none;text-decoration:none;color:black;">
-                    💬 @bv.Binhluans.Count Bình luận
-                </a>
-
-                <button style="border:none;background:none;">
-                    ↗ Chia sẻ
-                </button>
-
-            </div>
-            
-        </div>
+<div class="container">
+    <!-- Header bảng tin -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold" style="color: #1E2A78;">
+            <i class="fa-regular fa-newspaper me-2"></i>Bảng tin
+        </h2>
+        <span class="badge bg-primary rounded-pill px-3 py-2" id="total-posts">@Model.Count bài viết</span>
     </div>
-}
 
-<!--js tăng like ngay ko cần load lại trang-->
+    <!-- Loading spinner -->
+    <div id="loading-spinner" class="text-center py-4" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+        </div>
+        <p class="mt-2 text-secondary">Đang tải thêm bài viết...</p>
+    </div>
+
+    <!-- Danh sách bài viết -->
+    <div id="posts-container">
+        @foreach (var bv in Model)
+        {
+            @await Html.PartialAsync("Baidang", bv)
+        }
+    </div>
+
+    <!-- Nút tải thêm -->
+    <div class="text-center my-4" id="load-more-container">
+        <button class="btn btn-outline-primary rounded-pill px-5 py-2" onclick="loadMorePosts()" id="load-more-btn">
+            <i class="fa-regular fa-arrow-down me-2"></i>Tải thêm bài viết
+        </button>
+    </div>
+
+    <!-- Hết bài viết -->
+    <div class="text-center my-4 text-secondary" id="end-message" style="display: none;">
+        <i class="fa-regular fa-circle-check me-2"></i>Đã hiển thị tất cả bài viết
+    </div>
+</div>
+
+<!-- Style -->
+<style>
+    /* Animation cho bài viết mới */
+    .post-item {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Hover effect */
+    .post-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+    }
+
+        .post-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(30, 42, 120, 0.1) !important;
+        }
+
+    /* Image hover */
+    .post-image-container {
+        overflow: hidden;
+        border-radius: 16px;
+    }
+
+        .post-image-container img {
+            transition: transform 0.3s;
+        }
+
+        .post-image-container:hover img {
+            transform: scale(1.02);
+        }
+
+    /* Like animation */
+    .like-btn.liked i {
+        animation: likePop 0.3s ease-out;
+    }
+
+    @@keyframes likePop {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.2);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .post-actions .btn span {
+            display: none;
+        }
+
+        .post-actions .btn i {
+            margin-right: 0 !important;
+            font-size: 1.2rem;
+        }
+    }
+</style>
+
+<!-- JavaScript cho load more và infinite scroll -->
 <script>
-    function thichBaiViet(id) {
+    let currentPage = 1;
+    let loading = false;
+    let hasMore = true;
+    const postsPerPage = 5; // Mỗi lần load 5 bài
+
+    // Load more posts
+        function loadMorePosts() {
+        if (loading || !hasMore) return;
+
+        loading = true;
+        document.getElementById('loading-spinner').style.display = 'block';
+        document.getElementById('load-more-btn').disabled = true;
+
+        currentPage++;
+
+        fetch(`/Baiviet/TaiThemBaiViet?page=${currentPage}&pageSize=${postsPerPage}`)
+            .then(response => {
+                if (!response.ok) {
+                    // Nếu response không ok, log chi tiết
+                    console.log('Status:', response.status);
+                    console.log('Status Text:', response.statusText);
+                    return response.text().then(text => {
+                        throw new Error(`HTTP ${response.status}: ${text.substring(0, 200)}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.html && data.html.trim() !== '') {
+                    document.getElementById('posts-container').insertAdjacentHTML('beforeend', data.html);
+
+                    if (!data.hasMore) {
+                        hasMore = false;
+                        document.getElementById('load-more-container').style.display = 'none';
+                        document.getElementById('end-message').style.display = 'block';
+                    }
+
+                    document.getElementById('total-posts').innerText = data.totalPosts + ' bài viết';
+                } else {
+                    hasMore = false;
+                    document.getElementById('load-more-container').style.display = 'none';
+                    document.getElementById('end-message').style.display = 'block';
+                }
+
+                loading = false;
+                document.getElementById('loading-spinner').style.display = 'none';
+                document.getElementById('load-more-btn').disabled = false;
+            })
+            .catch(error => {
+                console.error('Chi tiết lỗi:', error); // Log chi tiết ra console
+                alert('Có lỗi xảy ra khi tải thêm bài viết: ' + error.message);
+                loading = false;
+                document.getElementById('loading-spinner').style.display = 'none';
+                document.getElementById('load-more-btn').disabled = false;
+            });
+    }
+
+    // Infinite scroll - tự động load khi cuộn gần cuối
+    window.addEventListener('scroll', () => {
+        if (!hasMore || loading) return;
+
+        const scrollPosition = window.scrollY + window.innerHeight;
+        const pageHeight = document.documentElement.scrollHeight;
+
+        // Khi cuộn đến 80% trang, tự động load thêm
+        if (scrollPosition > pageHeight * 0.8) {
+            loadMorePosts();
+        }
+    });
+
+    // Like function với animation
+    function thichBaiViet(id, btn) {
         fetch("/Baiviet/ThichBaiViet?baiVietId=" + id, {
             method: "POST"
         })
         .then(response => response.json())
         .then(data => {
-            document.getElementById("soLike-" + id).innerText = data.soLuong;
+            // Cập nhật số like trên nút
+            const likeSpan = btn.querySelector('.like-count');
+            if (likeSpan) likeSpan.innerText = data.soLuong;
+
+            // Cập nhật số like ở stats
+            const totalLikeSpan = document.getElementById('total-like-' + id);
+            if (totalLikeSpan) totalLikeSpan.innerText = data.soLuong;
+
+            // Đổi màu và animation
+            if (data.daThich) {
+                btn.classList.remove('btn-light');
+                btn.classList.add('btn-primary', 'liked');
+
+                // Thêm hiệu ứng trái tim bay
+                createHeartEffect(btn);
+            } else {
+                btn.classList.remove('btn-primary', 'liked');
+                btn.classList.add('btn-light');
+            }
         });
     }
 
-    // js mở khu vực bình luận
-    function moBinhLuan(baivietId)
-    {
-        var div = document.getElementById("binhluan-" + baivietId); // tìm div bl của bv
+    // Hiệu ứng trái tim bay khi like
+    function createHeartEffect(btn) {
+        for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+                const heart = document.createElement('i');
+                heart.className = 'fa-regular fa-heart';
+                heart.style.position = 'absolute';
+                heart.style.color = '#FF4D6D';
+                heart.style.fontSize = '20px';
+                heart.style.pointerEvents = 'none';
+                heart.style.zIndex = '1000';
 
-            if(div.style.display === "none") // nếu đang ẩn thì hiện lên
-            {
-                div.style.display = "block"; 
+                const rect = btn.getBoundingClientRect();
+                heart.style.left = (rect.left + rect.width / 2) + 'px';
+                heart.style.top = (rect.top) + 'px';
+
+                document.body.appendChild(heart);
+
+                // Animation bay lên
+                let y = 0;
+                const interval = setInterval(() => {
+                    y -= 2;
+                    heart.style.transform = `translateY(${y}px) scale(${1 + y/50})`;
+                    heart.style.opacity = 1 + y/50;
+
+                    if (y < -50) {
+                        clearInterval(interval);
+                        heart.remove();
+                    }
+                }, 20);
+            }, i * 100);
+        }
+    }
+
+    // Toggle bình luận
+    function moBinhLuan(baivietId, btn) {
+        const commentSection = document.getElementById('comment-section-' + baivietId);
+
+        if (commentSection.style.display === 'none') {
+            commentSection.style.display = 'block';
+            btn.innerHTML = '<i class="fa-regular fa-comment-dots me-2"></i><span>Ẩn bình luận</span>';
+
+            // Focus vào ô input
+            setTimeout(() => {
+                const input = document.getElementById('comment-input-' + baivietId);
+                if (input) input.focus();
+            }, 100);
+        } else {
+            commentSection.style.display = 'none';
+            btn.innerHTML = '<i class="fa-regular fa-comment me-2"></i><span>Bình luận</span>';
+        }
+    }
+
+    // Gửi bình luận
+    function guiBinhLuan(baivietId, inputId) {
+        const input = document.getElementById(inputId);
+        const noidung = input.value.trim();
+
+        if (noidung === '') {
+            alert('Vui lòng nhập nội dung bình luận');
+            return;
+        }
+
+        fetch('/Baiviet/ThemBinhLuan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `baivietId=${baivietId}&noidung=${encodeURIComponent(noidung)}&anchor=`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Thêm bình luận mới vào đầu danh sách
+                const commentList = document.getElementById('comment-list-' + baivietId);
+                commentList.insertAdjacentHTML('afterbegin', data.html);
+
+                // Xóa input
+                input.value = '';
+
+                // Cập nhật số lượng bình luận
+                const commentCount = document.getElementById('comment-count-' + baivietId);
+                commentCount.innerText = data.soLuong;
+
+                // Hiệu ứng cho bình luận mới
+                const newComment = commentList.firstElementChild;
+                newComment.style.animation = 'fadeInUp 0.3s ease-out';
             }
-            else
-            { 
-                div.style.display = "none"; // nếu đang hiện thì ẩn đi
-            }
+        });
     }
 </script>

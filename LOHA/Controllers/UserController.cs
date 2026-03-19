@@ -20,62 +20,62 @@ namespace LOHA.Controllers // nhóm chứa các class
             return View();
         }
 
-        [HttpPost] // chạy khi ấn nút đăng ký
-        public IActionResult DangKy(User user) // model binding tự ánh xạ đến từng biến
+        [HttpPost]
+        public IActionResult DangKy(User user)
         {
-            if(ModelState.IsValid) // kiểm tra form hợp lệ không
+            if (ModelState.IsValid)
             {
-                // kiểm tra email sđt đã tồn tại chưa
-                var check = _context.Users.FirstOrDefault(x => x.EmailorSDT == user.EmailorSDT);
-
-                if (check != null) {
-                    ModelState.AddModelError("EmailorSDT", "Email hoặc số điện thoại đã tồn tại");
+                // Kiểm tra email/sdt đã tồn tại chưa
+                var existingUser = _context.Users.FirstOrDefault(u => u.EmailorSDT == user.EmailorSDT);
+                if (existingUser != null)
+                {
+                    ModelState.AddModelError("EmailorSDT", "Email hoặc số điện thoại đã được sử dụng");
                     return View(user);
                 }
-                // mã hoá mật khẩu
-                var hasher = new PasswordHasher<User>();
-                user.Matkhau = hasher.HashPassword(user, user.Matkhau);
 
-                _context.Users.Add(user); // thêm user vào database
-                _context.SaveChanges(); // lưu thay đổi
-                return RedirectToAction("DangKy"); // trả về trang đăng ký
+                // Thêm user mới
+                user.Ngaytao = DateTime.Now;
+                _context.Users.Add(user);
+                _context.SaveChanges();
+
+                // Lưu thông báo thành công vào TempData
+                TempData["DangKyThanhCong"] = "true";
+                TempData["ThongBao"] = "Đăng ký tài khoản thành công!";
+
+                // Chuyển hướng về trang đăng nhập
+                return RedirectToAction("DangNhap");
             }
-            return View(user); // chưa nhập đủ trả lại trang nhưng vẫn giữ lại dữ liệu
+            return View(user);
         }
-        
+
         // trang đăng nhập
         public IActionResult DangNhap()
         {
             return View();
         }
 
-        [HttpPost] // chạy khi gửi dữ liệu bằng post
-        public IActionResult DangNhap(LoginViewModel model) // tự động gán dữ liệu từ form vào model
+        [HttpPost]
+        public IActionResult DangNhap(LoginViewModel model)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return View(model);
             }
-            var user = _context.Users
-                .FirstOrDefault(x => x.EmailorSDT == model.EmailorSDT); // tìm user trong db
-            if(user == null) // kiểm tra mật khẩu
-            {
-                ModelState.AddModelError("", "Sai email hoặc mật khẩu"); // thêm lỗi vào modelview
-                return View(model); // quay lại login giữa lại dữ liệu user đã nhập
-            }
 
-            var hasher = new PasswordHasher<User>();
-            var result = hasher.VerifyHashedPassword( // xác minh mật khẩu đã mã hoá
-                user, // user trong
-                user.Matkhau, // pass đã hash trong db
-                model.Matkhau // pass user nhập
-                );
-            if (result == PasswordVerificationResult.Failed) { // nếu nhập sai mật khẩu
+            var user = _context.Users
+                .FirstOrDefault(x => x.EmailorSDT == model.EmailorSDT);
+
+            if (user == null || user.Matkhau != model.Matkhau) // So sánh trực tiếp
+            {
                 ModelState.AddModelError("", "Sai email hoặc mật khẩu");
                 return View(model);
             }
-            HttpContext.Session.SetString("user", user.EmailorSDT); // lưu sesstion khi login thành công
-            return RedirectToAction("Trangcanhan"); // nếu đúng chuyển sang trang home
+
+            if (user?.EmailorSDT != null)
+            {
+                HttpContext.Session.SetString("user", user.EmailorSDT);
+            }
+            return RedirectToAction("Trangcanhan");
         }
 
         // đăng xuất
@@ -111,7 +111,7 @@ namespace LOHA.Controllers // nhóm chứa các class
                 .ToList();
 
             ViewBag.Baiviets = baiviets;
-            ViewBag.Thichs = thichs;   // 👈 quan trọng: gửi danh sách đã like xuống view
+            ViewBag.Thichs = thichs;   
 
             return View(user);
         }

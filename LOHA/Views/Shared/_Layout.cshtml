@@ -8,15 +8,15 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <!-- Font Awesome (dùng kit của bạn) -->
+    <script src="https://kit.fontawesome.com/b0445c983b.js" crossorigin="anonymous"></script>
 
     <!-- LOHA CSS -->
     <link rel="stylesheet" href="~/css/loha.css" asp-append-version="true" />
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="loha-navbar d-flex align-items-center">
+    <!-- Navbar (Desktop) -->
+    <nav class="loha-navbar d-flex align-items-center d-none d-lg-flex">
         <div class="d-flex align-items-center" style="width: 260px;">
             <span class="loha-logo">LOHA</span>
         </div>
@@ -43,122 +43,67 @@
 
     <div class="container-fluid">
         <div class="row">
-            <!-- Sidebar trái -->
-            <div class="col-lg-3">
+            <!-- Sidebar trái (Desktop) -->
+            <div class="col-lg-3 d-none d-lg-block">
                 <div class="loha-sidebar">
-                    <div class="loha-menu-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                    <a href="/Baiviet/Index" class="loha-menu-item text-decoration-none @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
                         <i class="fa-regular fa-house"></i>
                         <span>Trang chủ</span>
-                    </div>
-                    <div class="loha-menu-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Trangcanhan" ? "active" : "")">
+                    </a>
+                    <a href="/User/Trangcanhan" class="loha-menu-item text-decoration-none @(ViewContext.RouteData.Values["action"]?.ToString() == "Trangcanhan" ? "active" : "")">
                         <i class="fa-regular fa-user"></i>
                         <span>Hồ sơ</span>
-                    </div>
-                    <div class="loha-menu-item">
+                    </a>
+                    <a href="#" class="loha-menu-item text-decoration-none">
                         <i class="fa-regular fa-user-group"></i>
                         <span>Bạn bè</span>
-                    </div>
-                    <div class="loha-menu-item">
+                    </a>
+                    <a href="#" class="loha-menu-item text-decoration-none">
                         <i class="fa-regular fa-message"></i>
                         <span>Tin nhắn</span>
-                    </div>
+                    </a>
 
                     <div class="loha-divider"></div>
 
-                    <div style="padding: 8px 16px;">
-                        <small class="text-secondary fw-bold">KHÁM PHÁ</small>
-                    </div>
-                    <div class="loha-menu-item">
-                        <i class="fa-regular fa-hashtag"></i>
-                        <span>Trending</span>
-                    </div>
-                    <div class="loha-menu-item">
-                        <i class="fa-regular fa-calendar"></i>
-                        <span>Sự kiện</span>
-                    </div>
-
-                    <div class="loha-divider"></div>
-
-                    <div class="loha-menu-item text-danger">
+                    <a href="/User/DangXuat" class="loha-menu-item text-danger text-decoration-none">
                         <i class="fa-regular fa-arrow-right-from-bracket"></i>
                         <span>Đăng xuất</span>
-                    </div>
+                    </a>
                 </div>
             </div>
 
-            <!-- Content chính -->
-            <div class="col-lg-6">
-                <main role="main" style="padding: 20px 0;">
+            <!-- Content chính (chiếm hết trên mobile) -->
+            <div class="col-lg-6 col-12">
+                <main role="main" style="padding: 20px 0;" class="main-content">
                     @RenderBody()
                 </main>
             </div>
 
-            <!-- Sidebar phải -->
-            <div class="col-lg-3">
-                <div class="loha-sidebar" style="width: 100%;">
-                    <!-- Gợi ý bạn bè -->
-                    <div class="loha-card">
-                        <div class="loha-card-body">
-                            <h6 class="fw-bold mb-3">Gợi ý cho bạn</h6>
-
-                            <div class="loha-suggestion-item">
-                                <img src="/images/default.png" class="loha-suggestion-avatar" />
-                                <div class="loha-suggestion-info">
-                                    <div class="loha-suggestion-name">Nguyễn Văn A</div>
-                                    <div class="loha-suggestion-mutual">12 bạn chung</div>
-                                </div>
-                                <button class="loha-btn-friend">
-                                    <i class="fa-regular fa-user-plus"></i>
-                                </button>
-                            </div>
-
-                            <div class="loha-suggestion-item">
-                                <img src="/images/default.png" class="loha-suggestion-avatar" />
-                                <div class="loha-suggestion-info">
-                                    <div class="loha-suggestion-name">Trần Thị B</div>
-                                    <div class="loha-suggestion-mutual">8 bạn chung</div>
-                                </div>
-                                <button class="loha-btn-friend">
-                                    <i class="fa-regular fa-user-plus"></i>
-                                </button>
-                            </div>
-
-                            <div class="loha-suggestion-item">
-                                <img src="/images/default.png" class="loha-suggestion-avatar" />
-                                <div class="loha-suggestion-info">
-                                    <div class="loha-suggestion-name">Lê Văn C</div>
-                                    <div class="loha-suggestion-mutual">5 bạn chung</div>
-                                </div>
-                                <button class="loha-btn-friend">
-                                    <i class="fa-regular fa-user-plus"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Hoạt động gần đây -->
-                    <div class="loha-card">
-                        <div class="loha-card-body">
-                            <h6 class="fw-bold mb-3">Hoạt động</h6>
-                            <div class="text-secondary small">
-                                <div class="d-flex align-items-start gap-2 mb-3">
-                                    <i class="fa-regular fa-heart" style="color: #6C63FF;"></i>
-                                    <span>Nguyễn Văn A đã thích bài viết của bạn</span>
-                                </div>
-                                <div class="d-flex align-items-start gap-2 mb-3">
-                                    <i class="fa-regular fa-comment" style="color: #6C63FF;"></i>
-                                    <span>Trần Thị B đã bình luận: "Đẹp quá!"</span>
-                                </div>
-                                <div class="d-flex align-items-start gap-2">
-                                    <i class="fa-regular fa-share" style="color: #6C63FF;"></i>
-                                    <span>Lê Văn C đã chia sẻ bài viết</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Sidebar phải (Desktop) - ĐÃ XÓA gợi ý và hoạt động -->
+            <div class="col-lg-3 d-none d-lg-block">
+                <!-- ĐỂ TRỐNG -->
             </div>
         </div>
+    </div>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <div class="bottom-nav d-lg-none">
+        <a href="/Baiviet/Index" class="bottom-nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+            <i class="fa-regular fa-house"></i>
+            <span>Trang chủ</span>
+        </a>
+        <a href="/User/Trangcanhan" class="bottom-nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Trangcanhan" ? "active" : "")">
+            <i class="fa-regular fa-user"></i>
+            <span>Hồ sơ</span>
+        </a>
+        <a href="#" class="bottom-nav-item">
+            <i class="fa-regular fa-user-group"></i>
+            <span>Bạn bè</span>
+        </a>
+        <a href="#" class="bottom-nav-item">
+            <i class="fa-regular fa-message"></i>
+            <span>Tin nhắn</span>
+        </a>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

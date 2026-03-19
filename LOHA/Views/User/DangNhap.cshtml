@@ -5,6 +5,23 @@
 }
 
 <div class="auth-form">
+    <!-- POPUP THÔNG BÁO ĐĂNG KÝ THÀNH CÔNG -->
+    @if (TempData["DangKyThanhCong"] != null && TempData["DangKyThanhCong"].ToString() == "true")
+    {
+        <div class="popup-success show" id="successPopup">
+            <div class="popup-content">
+                <div class="popup-icon">
+                    <i class="fa-regular fa-circle-check"></i>
+                </div>
+                <h5 class="popup-title">Thành công!</h5>
+                <p class="popup-message">@TempData["ThongBao"]</p>
+                <div class="popup-progress">
+                    <div class="popup-progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+        </div>
+    }
+
     <form asp-action="DangNhap" method="post">
         @if (!ViewData.ModelState.IsValid)
         {
@@ -60,4 +77,25 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Tự động ẩn popup sau 3 giây
+        setTimeout(function() {
+            var popup = document.getElementById('successPopup');
+            if (popup) {
+                popup.style.animation = 'slideInRight 0.3s ease reverse forwards';
+                setTimeout(function() {
+                    popup.remove();
+                }, 300);
+            }
+        }, 3000);
+
+        // Focus vào ô email/sdt sau khi đăng ký thành công
+        document.addEventListener('DOMContentLoaded', function() {
+        var emailInput = document.querySelector('input[name="EmailorSDT"]');
+        if (emailInput != null) {
+            emailInput.focus();
+        }
+        });
+    </script>
 }

@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using LOHA.Models;
+﻿using LOHA.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewEngines;     
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.ViewEngines;
 
 namespace LOHA.Controllers
 {
@@ -217,5 +221,79 @@ namespace LOHA.Controllers
             return View(baiviet);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> TaiThemBaiViet(int page = 1, int pageSize = 5)
+        {
+            var baiviets = _context.Baiviets
+                .Include(b => b.User)
+                .Include(b => b.Binhluans)
+                    .ThenInclude(bl => bl.User)
+                .Include(b => b.Thichs)
+                .OrderByDescending(b => b.Ngaydang)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize + 1) // Lấy thêm 1 để kiểm tra còn không
+                .ToList();
+
+            bool hasMore = baiviets.Count > pageSize;
+            var postsToReturn = baiviets.Take(pageSize).ToList();
+
+            // Lấy danh sách bài viết đã like của user hiện tại
+            var userSession = HttpContext.Session.GetString("user");
+            List<int> thichs = new List<int>();
+
+            if (!string.IsNullOrEmpty(userSession))
+            {
+                var user = _context.Users.FirstOrDefault(u => u.EmailorSDT == userSession);
+                if (user != null)
+                {
+                    thichs = _context.Thichs
+                        .Where(t => t.UserId == user.ID)
+                        .Select(t => t.BaivietId)
+                        .ToList();
+                }
+            }
+
+            ViewBag.Thichs = thichs;
+
+            string html = "";
+            foreach (var bv in postsToReturn)
+            {
+                html += await RenderPartialViewToStringAsync("Baidang", bv);
+            }
+
+            return Json(new
+            {
+                html = html,
+                hasMore = hasMore,
+                totalPosts = _context.Baiviets.Count()
+            });
+        }
+
+        private async Task<string> RenderPartialViewToStringAsync(string viewName, object model)
+        {
+            ViewData.Model = model;
+            using (var sw = new StringWriter())
+            {
+                var viewEngine = HttpContext.RequestServices.GetService(typeof(ICompositeViewEngine)) as ICompositeViewEngine;
+                var viewResult = viewEngine.FindView(ControllerContext, viewName, false);
+
+                if (!viewResult.Success)
+                {
+                    throw new Exception($"Không tìm thấy partial view: {viewName}");
+                }
+
+                var viewContext = new ViewContext(
+                    ControllerContext,
+                    viewResult.View,
+                    ViewData,
+                    TempData,
+                    sw,
+                    new HtmlHelperOptions()
+                );
+
+                await viewResult.View.RenderAsync(viewContext); // await được phép dùng
+                return sw.ToString();
+            }
+        }
     }
 }
