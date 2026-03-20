@@ -294,5 +294,64 @@ namespace LOHA.Controllers
                 return sw.ToString();
             }
         }
+        // === XOÁ BÀI VIẾT ===
+        [HttpPost]
+        public async Task<IActionResult> XoaBaiViet(int id)
+        {
+            try
+            {
+                // Lấy user hiện tại
+                var userSession = HttpContext.Session.GetString("user");
+                if (string.IsNullOrEmpty(userSession))
+                {
+                    return Json(new { success = false, message = "Vui lòng đăng nhập" });
+                }
+
+                var currentUser = await _context.Users
+                    .FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
+
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy người dùng" });
+                }
+
+                // Tìm bài viết
+                var baiViet = await _context.Baiviets
+                    .Include(b => b.Thichs)
+                    .Include(b => b.Binhluans)
+                    .FirstOrDefaultAsync(b => b.Id == id);
+
+                if (baiViet == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bài viết" });
+                }
+
+                // Kiểm tra quyền: chỉ chủ bài viết mới được xoá
+                if (baiViet.UserId != currentUser.ID)
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền xoá bài viết này" });
+                }
+
+                // Xoá ảnh nếu có
+                if (!string.IsNullOrEmpty(baiViet.Anh))
+                {
+                    string imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/baiviet", baiViet.Anh);
+                    if (System.IO.File.Exists(imagePath))
+                    {
+                        System.IO.File.Delete(imagePath);
+                    }
+                }
+
+                // Xoá bài viết (EF sẽ tự xoá các Thich và BinhLuan liên quan do Cascade)
+                _context.Baiviets.Remove(baiViet);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Đã xoá bài viết" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
     }
 }

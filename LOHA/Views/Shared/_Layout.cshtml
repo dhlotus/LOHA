@@ -3,7 +3,7 @@
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@ViewData["Title"] - LOHA</title>
 
     <!-- Bootstrap CSS -->
@@ -15,6 +15,33 @@
 <link rel="stylesheet" href="~/css/loha.css" asp-append-version="true" />
 </head>
 <body>
+    <!-- Mobile Header (chỉ hiện trên điện thoại) -->
+    <div class="mobile-header d-lg-none" id="mobileHeader">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center justify-content-between py-2">
+                <span class="loha-logo fs-4">LOHA</span>
+                <div class="d-flex gap-3">
+                    <!-- Icon search chuyển sang trang tìm kiếm (có animation) -->
+                    <a href="/User/TimKiem" class="search-trigger" style="color: #1E2A78;">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </a>
+                    <div class="position-relative">
+                        <a href="/Chat/Index" style="color: #1E2A78;">
+                            <i class="fa-regular fa-message fs-5"></i>
+                        </a>
+                        <span id="mobile-chat-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">0</span>
+                    </div>
+                    <div class="position-relative">
+                        <a href="/User/LoiMoiKetBan" style="color: #1E2A78;">
+                            <i class="fa-regular fa-bell fs-5"></i>
+                        </a>
+                        <span id="mobile-notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Navbar (Desktop) -->
     <nav class="loha-navbar d-flex align-items-center d-none d-lg-flex">
         <div class="d-flex align-items-center" style="width: 260px;">
@@ -22,10 +49,13 @@
         </div>
 
         <div class="flex-grow-1 d-flex justify-content-center">
-            <div class="loha-search">
+            <form action="/User/TimKiem" method="get" class="loha-search">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Tìm kiếm bạn bè..." />
-            </div>
+                <input type="text"
+                       name="tuKhoa"
+                       placeholder="Tìm kiếm bạn bè..."
+                       value="@Context.Request.Query["tuKhoa"]" />
+            </form>
         </div>
 
         <div class="d-flex align-items-center gap-2" style="width: 260px; justify-content: flex-end;">
@@ -51,7 +81,7 @@
                         <span>Trang chủ</span>
                     </a>
                     <a href="/User/Trangcanhan" class="loha-menu-item text-decoration-none @(ViewContext.RouteData.Values["action"]?.ToString() == "Trangcanhan" ? "active" : "")">
-                        <i class="fa-regular fa-user"></i>
+                        <i class="fa-solid fa-user"></i>
                         <span>Hồ sơ</span>
                     </a>
                     <a href="#" class="loha-menu-item text-decoration-none">
@@ -112,7 +142,7 @@
     <!-- Bottom Navigation (Mobile) -->
     <div class="bottom-nav d-lg-none">
         <a href="/Baiviet/Index" class="bottom-nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
-            <i class="fa-regular fa-house"></i>
+            <i class="fa-solid fa-house"></i>
             <span>Trang chủ</span>
         </a>
         <a href="/User/Trangcanhan" class="bottom-nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Trangcanhan" ? "active" : "")">
@@ -120,7 +150,7 @@
             <span>Hồ sơ</span>
         </a>
         <a href="#" class="bottom-nav-item">
-            <i class="fa-regular fa-user-group"></i>
+            <i class="fa-solid fa-user-group"></i>
             <span>Bạn bè</span>
         </a>
         <div class="loha-menu-item" onclick="location.href='/Chat/Index'">
@@ -191,7 +221,159 @@
                 })
                 .catch(error => console.error('Lỗi đếm tin nhắn:', error));
         }
-    </script>
 
+
+                 // Cập nhật badge mobile cho tin nhắn
+        function demTinNhanChuaDoc() {
+            fetch('/Chat/DemTinNhanChuaDoc')
+                .then(response => response.json())
+                .then(data => {
+                    var badgeMobile = document.getElementById('mobile-chat-badge');
+                    if (badgeMobile) {
+                        if (data.count > 0) {
+                            badgeMobile.style.display = 'inline-block';
+                            badgeMobile.innerText = data.count > 99 ? '99+' : data.count;
+                        } else {
+                            badgeMobile.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(error => console.error('Lỗi đếm tin nhắn:', error));
+        }
+
+        // Cập nhật badge mobile cho lời mời
+        function capNhatThongBao() {
+            fetch('/User/DemLoiMoiKetBan')
+                .then(response => response.json())
+                .then(data => {
+                    var badgeMobile = document.getElementById('mobile-notification-badge');
+                    if (badgeMobile) {
+                        if (data.count > 0) {
+                            badgeMobile.style.display = 'inline-block';
+                            badgeMobile.innerText = data.count > 99 ? '99+' : data.count;
+                        } else {
+                            badgeMobile.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(error => console.error('Lỗi khi lấy thông báo:', error));
+        }
+
+        // Gọi khi load trang
+        document.addEventListener('DOMContentLoaded', function() {
+            capNhatThongBao();
+            demTinNhanChuaDoc();
+        });
+
+        // Tự động cập nhật mỗi 30 giây
+        setInterval(capNhatThongBao, 30000);
+        setInterval(demTinNhanChuaDoc, 30000);
+
+            // Hiệu ứng ẩn/hiện header khi cuộn trên mobile
+        (function() {
+            var lastScrollTop = 0;
+            var header = document.getElementById('mobileHeader');
+            var ticking = false;
+
+            if (!header) return; // Nếu không có header mobile thì thoát
+
+            window.addEventListener('scroll', function() {
+                var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+                // Yêu cầu animation frame để tối ưu hiệu suất
+                if (!ticking) {
+                    window.requestAnimationFrame(function() {
+                        // Cuộn xuống (ẩn header)
+                        if (scrollTop > lastScrollTop && scrollTop > 50) {
+                            header.classList.add('hide');
+                        }
+                        // Cuộn lên (hiện header)
+                        else if (scrollTop < lastScrollTop) {
+                            header.classList.remove('hide');
+                        }
+
+                        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+                        ticking = false;
+                    });
+
+                    ticking = true;
+                }
+            });
+
+            // Hiện header khi chạm lên đầu trang
+            window.addEventListener('scroll', function() {
+                if (window.scrollY <= 0) {
+                    header.classList.remove('hide');
+                }
+            });
+        })();
+        
+            // Mở thanh tìm kiếm
+        function moThanhTimKiem() {
+            var header = document.getElementById('mobileHeader');
+            var searchBar = document.getElementById('mobileSearchBar');
+
+            // Ẩn header
+            header.classList.add('hide-for-search');
+
+            // Hiện thanh tìm kiếm
+            searchBar.classList.add('show');
+
+            // Focus vào input sau khi animation kết thúc
+            setTimeout(function() {
+                document.getElementById('searchInput').focus();
+            }, 300);
+        }
+
+        // Đóng thanh tìm kiếm
+        function dongThanhTimKiem() {
+            var header = document.getElementById('mobileHeader');
+            var searchBar = document.getElementById('mobileSearchBar');
+
+            // Hiện header
+            header.classList.remove('hide-for-search');
+
+            // Ẩn thanh tìm kiếm
+            searchBar.classList.remove('show');
+        }
+
+        // Tự động submit form khi nhấn Enter
+        document.getElementById('searchInput')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('searchForm').submit();
+            }
+        });
+
+        // Đóng thanh tìm kiếm khi click back button
+        window.addEventListener('popstate', function() {
+            dongThanhTimKiem();
+        });
+    </script>
+    <!-- POPUP XÁC NHẬN XOÁ BÀI VIẾT -->
+    <div class="modal fade" id="confirmXoaBaiVietModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-body text-center p-4">
+                    <div class="mb-3">
+                        <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex p-3">
+                            <i class="fa-regular fa-trash-can fa-3x text-danger"></i>
+                        </div>
+                    </div>
+                    <h5 class="f2-bold mb-2">Xoá bài viết?</h5>
+                    <p class="text-secondary mb-4">Bài viết sẽ bị xoá vĩnh viễn. Bạn có chắc chắn?</p>
+                    <input type="hidden" id="postIdToDelete" value="" />
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">
+                            <i class="fa-regular fa-xmark me-2"></i>Huỷ
+                        </button>
+                        <button type="button" class="btn btn-danger rounded-pill px-4" id="confirmXoaBtn">
+                            <i class="fa-regular fa-check me-2"></i>Xoá
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

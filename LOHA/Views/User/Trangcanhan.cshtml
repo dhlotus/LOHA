@@ -6,27 +6,22 @@
     string coverImage = "/images/cover.jpg"; // Ảnh bìa mặc định
     string avatarImage = "/images/default.png"; // Avatar mặc định
 }
-
-<div class="container mt-4">
+<div class="container-fluid mt-4 px-2 px-md-4">
     <!-- ===== COVER & AVATAR ===== -->
 <div class="position-relative">
     <!-- Ảnh bìa -->
     <img src="@coverImage"
-         class="img-fluid w-100 rounded-4"
-         style="height: 350px; object-fit: cover;"
-         id="coverImage" />
+         class="img-fluid w-100 rounded-4 cover-img" />
 
     <!-- Avatar -->
-    <div class="position-absolute" style="bottom: -60px; left: 40px; z-index: 10;">
+    <div class="position-absolute avatar-wrapper">
         <img src="@avatarImage"
-             class="rounded-circle border border-4 border-white shadow"
-             style="width: 150px; height: 150px; object-fit: cover;"
-             id="avatarImage" />
+             class="rounded-circle border border-4 border-white shadow avatar-img" />
     </div>
 </div>
 
 <!-- ===== PROFILE INFO ===== -->
-<div class="mt-5 pt-4" style="margin-left: 220px;">
+<div class="mt-5 pt-4 ms-md-5 ms-lg-6">
     <div class="d-flex align-items-center justify-content-between">
         <div>
             <h1 class="fw-bold" style="color: #1E2A78;">@Model.Ten</h1>
@@ -89,7 +84,7 @@
     </div>
 
     <!-- Stats -->
-    <div class="d-flex gap-5 mt-3">
+    <div class="d-flex flex-wrap gap-3 mt-3">
         <div class="text-center">
             <span class="d-block fw-bold fs-4" style="color: #1E2A78;">@ViewBag.Baiviets.Count</span>
             <span class="text-secondary">Bài viết</span>
@@ -102,7 +97,7 @@
 </div>
 
 <!-- ===== TABS ===== -->
-<div class="d-flex gap-2 bg-white p-2 rounded-pill shadow-sm my-4">
+<div class="d-flex flex-wrap gap-2 bg-white p-2 rounded-3 shadow-sm my-4">
     <button class="flex-fill btn btn-outline-primary rounded-pill py-2 active" onclick="switchTab('posts')">
         <i class="fa-regular fa-newspaper me-2"></i>Bài viết
     </button>
@@ -125,11 +120,11 @@
                     <div class="d-flex gap-3">
                         <img src="@avatarImage" class="rounded-circle" style="width: 48px; height: 48px; object-fit: cover;" />
                         <textarea name="Noidung"
-                                  class="form-control rounded-pill"
-                                  rows="1"
+                                  class="form-control rounded-3" 
+                                  rows="2"
                                   placeholder="Bạn đang nghĩ gì, @Model.Ten?"
                                   id="postContent"
-                                  style="resize: none;"></textarea>
+                                  ></textarea>
                     </div>
 
                     <!-- Preview ảnh -->
@@ -186,7 +181,7 @@
                                 </small>
                             </div>
                             <button class="btn btn-light btn-sm rounded-circle">
-                                <i class="fa-regular fa-ellipsis-vertical"></i>
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
                             </button>
                         </div>
 
@@ -251,7 +246,7 @@
             <div class="row g-3">
                 @foreach (var ban in ViewBag.DanhSachBanBe)
                 {
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6 col-lg-4">
                         <div class="card border-0 shadow-sm">
                             <div class="card-body d-flex align-items-center gap-3">
                                 <!-- Avatar -->
@@ -556,7 +551,42 @@
         transition: box-shadow 0.2s;
     }
 
-        .card:hover {
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08) !important;
+    .card:hover {
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08) !important;
+    }
+
+    .avatar-wrapper {
+        bottom: -40px;
+        left: 20px;
+        z-index: 10;
+    }
+
+    .avatar-img {
+        width: 90px;
+        height: 90px;
+        object-fit: cover;
+    }
+
+    @@media (min-width: 768px) {
+        .avatar-wrapper {
+            bottom: -60px;
+            left: 40px;
         }
+
+        .avatar-img {
+            width: 150px;
+            height: 150px;
+        }
+    }
+
+    .cover-img {
+        height: 200px;
+        object-fit: cover;
+    }
+
+    @@media (min-width: 768px) {
+        .cover-img {
+            height: 350px;
+        }
+    }
 </style>

@@ -475,6 +475,67 @@ namespace LOHA.Controllers // nhóm chứa các class
                 return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
             }
         }
+        // === TRANG TÌM KIẾM NGƯỜI DÙNG ===
+        public async Task<IActionResult> TimKiem(string tuKhoa)
+        {
+            // Lấy user hiện tại
+            var userSession = HttpContext.Session.GetString("user");
+            if (string.IsNullOrEmpty(userSession))
+                return RedirectToAction("DangNhap");
+
+            var currentUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
+
+            if (currentUser == null)
+                return RedirectToAction("DangNhap");
+
+            // Nếu không có từ khóa, trả về view rỗng
+            if (string.IsNullOrEmpty(tuKhoa))
+            {
+                ViewBag.KetQua = new List<User>();
+                return View();
+            }
+            
+            // Tìm kiếm người dùng theo tên (không phân biệt hoa thường)
+            var ketQua = await _context.Users
+                .Where(u => u.Ten.Contains(tuKhoa) && u.ID != currentUser.ID)
+                .Take(20) // Giới hạn 20 kết quả
+                .ToListAsync();
+
+            // Lấy thông tin kết bạn cho mỗi kết quả
+            var ketQuaVoiTrangThai = new List<dynamic>();
+            foreach (var user in ketQua)
+            {
+                bool daLaBanBe = await _context.KetBans
+                    .AnyAsync(k =>
+                        ((k.NguoiGuiId == currentUser.ID && k.NguoiNhanId == user.ID) ||
+                         (k.NguoiGuiId == user.ID && k.NguoiNhanId == currentUser.ID)) &&
+                        k.TrangThai == 1);
+
+                bool daGuiLoiMoi = false;
+                if (!daLaBanBe)
+                {
+                    daGuiLoiMoi = await _context.KetBans
+                        .AnyAsync(k =>
+                            k.NguoiGuiId == currentUser.ID &&
+                            k.NguoiNhanId == user.ID &&
+                            k.TrangThai == 0);
+                }
+
+                ketQuaVoiTrangThai.Add(new
+                {
+                    User = user,
+                    DaLaBanBe = daLaBanBe,
+                    DaGuiLoiMoi = daGuiLoiMoi
+                });
+            }
+
+            ViewBag.KetQua = ketQuaVoiTrangThai;
+            ViewBag.TuKhoa = tuKhoa;
+            ViewBag.CurrentUserId = currentUser.ID;
+
+            return View();
+        }
 
     }
 }

@@ -1,0 +1,268 @@
+﻿@{
+    ViewData["Title"] = "Tìm kiếm bạn bè";
+    Layout = "_Layout";
+}
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<!-- Header tìm kiếm (thay thế mobile header) -->
+<div class="search-header d-lg-none bg-white border-bottom sticky-top">
+    <div class="container-fluid">
+        <div class="d-flex align-items-center gap-2 py-2">
+            <a href="javascript:history.back()" class="btn btn-link p-0 text-decoration-none text-dark">
+                <i class="fa-regular fa-arrow-left fs-4"></i>
+            </a>
+            <form action="/User/TimKiem" method="get" class="flex-grow-1" id="searchForm">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-0 position-absolute top-50 start-0 translate-middle-y z-1 ms-2">
+                        <i class="fa-regular fa-magnifying-glass text-secondary"></i>
+                    </span>
+                    <input type="text"
+                           name="tuKhoa"
+                           class="form-control rounded-pill ps-5"
+                           placeholder="Tìm kiếm bạn bè..."
+                           value="@Context.Request.Query["tuKhoa"]"
+                           autofocus
+                           id="searchInput">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Header desktop (giữ nguyên) -->
+<div class="d-none d-lg-block">
+    <!-- Desktop header sẽ hiển thị bình thường -->
+</div>
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Kết quả tìm kiếm -->
+            @if (ViewBag.KetQua != null)
+            {
+                if (ViewBag.KetQua.Count == 0)
+                {
+                    <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+                        <i class="fa-regular fa-user-slash fa-4x text-secondary mb-3"></i>
+                        <h4 class="fw-bold">Không tìm thấy kết quả</h4>
+                        <p class="text-secondary">Thử tìm kiếm với từ khóa khác</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="row g-3">
+                        @foreach (var item in ViewBag.KetQua)
+                        {
+                            var user = item.User;
+                            <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                                <div class="card h-100 border-0 shadow-sm hover-shadow transition">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex flex-column align-items-center text-center">
+                                            <!-- Avatar -->
+                                            <img src="/images/default.png"
+                                                 class="rounded-circle mb-3"
+                                                 style="width: 100px; height: 100px; object-fit: cover; border: 3px solid var(--loha-purple);" />
+
+                                            <!-- Thông tin -->
+                                            <h5 class="fw-bold mb-1">@user.Ten</h5>
+                                            <p class="text-secondary small mb-3">
+                                                <i class="fa-regular fa-envelope me-1"></i>@user.EmailorSDT
+                                            </p>
+
+                                            <!-- Nút hành động -->
+                                            <div class="d-flex gap-2 w-100 mt-auto">
+                                                @if (item.DaLaBanBe)
+                                                {
+                                                    <a href="/Chat/ChatVoi?userId=@user.ID"
+                                                       class="btn btn-outline-success flex-fill rounded-pill">
+                                                        <i class="fa-regular fa-message me-1"></i>Nhắn tin
+                                                    </a>
+                                                    <a href="/User/Trangcanhan?id=@user.ID"
+                                                       class="btn btn-outline-secondary rounded-circle"
+                                                       style="width: 42px;">
+                                                        <i class="fa-regular fa-eye"></i>
+                                                    </a>
+                                                }
+                                                else if (item.DaGuiLoiMoi)
+                                                {
+                                                    <button class="btn btn-outline-warning flex-fill rounded-pill" disabled>
+                                                        <i class="fa-regular fa-clock me-1"></i>Đã gửi
+                                                    </button>
+                                                    <a href="/User/Trangcanhan?id=@user.ID"
+                                                       class="btn btn-outline-secondary rounded-circle"
+                                                       style="width: 42px;">
+                                                        <i class="fa-regular fa-eye"></i>
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <button onclick="guiLoiMoiKetBan(@user.ID)"
+                                                            class="btn btn-primary flex-fill rounded-pill"
+                                                            id="btnTimKiem-@user.ID">
+                                                        <i class="fa-regular fa-user-plus me-1"></i>Kết bạn
+                                                    </button>
+                                                    <a href="/User/Trangcanhan?id=@user.ID"
+                                                       class="btn btn-outline-secondary rounded-circle"
+                                                       style="width: 42px;">
+                                                        <i class="fa-regular fa-eye"></i>
+                                                    </a>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Style tối thiểu (bổ sung cho Bootstrap) -->
+<style>
+    /* Ẩn mobile header mặc định trên trang tìm kiếm */
+    body .mobile-header {
+        display: none;
+    }
+
+    /* Hiệu ứng hover cho card */
+    .hover-shadow {
+        transition: all 0.2s ease-in-out;
+    }
+
+        .hover-shadow:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
+        }
+
+    /* Transition cho các nút */
+    .transition {
+        transition: all 0.2s ease-in-out;
+    }
+
+    /* Sticky header tìm kiếm */
+    .search-header {
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    /* Đảm bảo nút tròn không bị méo */
+    .btn-outline-secondary.rounded-circle {
+        width: 42px;
+        height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+
+    /* Responsive avatar trên mobile */
+    @@media (max-width: 576px) {
+        .rounded-circle.mb-3 {
+            width: 80px !important;
+            height: 80px !important;
+        }
+
+        .card-body {
+            padding: 1rem !important;
+        }
+
+        .btn {
+            font-size: 0.85rem !important;
+            padding: 0.5rem 0.75rem !important;
+        }
+
+        .btn-outline-secondary.rounded-circle {
+            width: 38px !important;
+            height: 38px !important;
+        }
+    }
+
+    /* Desktop */
+    @@media (min-width: 992px) {
+        .rounded-circle.mb-3 {
+            width: 120px !important;
+            height: 120px !important;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function guiLoiMoiKetBan(nguoiNhanId) {
+            fetch('/User/GuiLoiMoiKetBan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'nguoiNhanId=' + nguoiNhanId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    var btn = document.getElementById('btnTimKiem-' + nguoiNhanId);
+                    btn.outerHTML = '<button class="btn btn-warning flex-fill rounded-pill" disabled>' +
+                                    '<i class="fa-regular fa-clock me-2"></i>Đã gửi lời mời</button>';
+                } else {
+                    console.error('Lỗi:', data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+            // Kiểm tra form trước khi submit
+        function kiemTraForm() {
+            var tuKhoa = document.getElementById('searchInput').value.trim();
+            if (tuKhoa === '') {
+                // Nếu không có từ khóa, focus lại vào input
+                document.getElementById('searchInput').focus();
+                return false; // Ngăn không submit
+            }
+            return true; // Cho phép submit
+        }
+
+        // Xử lý khi nhấn Enter (phòng trường hợp)
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Ngăn hành vi mặc định
+                var tuKhoa = this.value.trim();
+                if (tuKhoa !== '') {
+                    document.getElementById('searchForm').submit();
+                }
+            }
+        });
+
+        // Focus vào input khi load trang
+        document.addEventListener('DOMContentLoaded', function() {
+            var searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.focus();
+                // Di chuyển con trỏ đến cuối nếu có giá trị
+                if (searchInput.value) {
+                    searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+                }
+            }
+        });
+        // hiệu ứng loading khi submit
+                document.getElementById('searchForm').addEventListener('submit', function() {
+            var submitBtn = this.querySelector('button[type="submit"]');
+            if (!submitBtn) return; // Không có nút submit trong form này
+
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang tìm...';
+            submitBtn.disabled = true;
+        });
+
+        $(document).ready(function() {
+            // Hiệu ứng fade in cho kết quả
+            $('.col-12, .col-sm-6').hide().fadeIn(300);
+
+            // Animation cho card khi hover (nếu muốn)
+            $('.card').hover(
+                function() { $(this).addClass('shadow-lg'); },
+                function() { $(this).removeClass('shadow-lg'); }
+            );
+        });
+        $('.col-12, .col-sm-6').css('opacity', 0).animate({opacity: 1}, 300);
+    </script>
+}
