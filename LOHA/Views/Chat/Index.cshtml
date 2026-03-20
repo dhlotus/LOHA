@@ -1,0 +1,91 @@
+﻿@{
+    ViewData["Title"] = "Tin nhắn";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex align-items-center mb-4">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary rounded-circle me-3">
+                    <i class="fa-regular fa-arrow-left"></i>
+                </a>
+                <h2 class="fw-bold" style="color: #1E2A78;">
+                    <i class="fa-regular fa-message me-2"></i>Tin nhắn
+                </h2>
+            </div>
+
+            @if (ViewBag.DanhSachUser != null && ViewBag.DanhSachUser.Count > 0)
+            {
+                <div class="list-group">
+                    @foreach (var user in ViewBag.DanhSachUser)
+                    {
+                        var tinCuoi = ViewBag.TinCuoi != null && ViewBag.TinCuoi.ContainsKey(user.ID)
+                        ? ViewBag.TinCuoi[user.ID]
+                        : null;
+
+                        <a href="/Chat/ChatVoi?userId=@user.ID" class="list-group-item list-group-item-action border-0 shadow-sm mb-2 rounded-3">
+                            <div class="d-flex align-items-center">
+                                <!-- Avatar -->
+                                <img src="/images/default.png"
+                                     class="rounded-circle me-3"
+                                     style="width: 50px; height: 50px; object-fit: cover;" />
+
+                                <!-- Thông tin -->
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="fw-bold mb-0">@user.Ten</h6>
+                                        @if (tinCuoi != null)
+                                        {
+                                            <small class="text-secondary">@tinCuoi.ThoiGian.ToString("HH:mm")</small>
+                                        }
+                                    </div>
+
+                                    @if (tinCuoi != null)
+                                    {
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-secondary">
+                                                @if (tinCuoi.NguoiGuiID == ViewBag.CurrentUserId)
+                                                {
+                                                    <span>Bạn: </span>
+                                                }
+                                                @tinCuoi.NoiDung
+                                            </small>
+                                            @if (!tinCuoi.DaXem && tinCuoi.NguoiNhanID == ViewBag.CurrentUserId)
+                                            {
+                                                <span class="badge bg-danger rounded-pill">Mới</span>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <small class="text-secondary">Chưa có tin nhắn</small>
+                                    }
+                                </div>
+                            </div>
+                        </a>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+                    <i class="fa-regular fa-message fa-4x text-secondary mb-3"></i>
+                    <h4 class="fw-bold">Chưa có tin nhắn nào</h4>
+                    <p class="text-secondary">Hãy kết bạn và bắt đầu trò chuyện</p>
+                    <a href="/User/Trangcanhan" class="btn btn-primary rounded-pill px-4 mt-3">
+                        <i class="fa-regular fa-user-group me-2"></i>Tìm bạn bè
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Tự động kiểm tra tin nhắn mới và bạn bè mới mỗi 10 giây
+        setInterval(function() {
+            location.reload(); // Reload để cập nhật danh sách
+        }, 10000);
+    </script>
+}

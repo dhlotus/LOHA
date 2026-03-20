@@ -331,22 +331,20 @@ namespace LOHA.Controllers // nhóm chứa các class
         }
 
         // ===== TỪ CHỐI LỜI MỜI KẾT BẠN =====
+     
         [HttpPost]
         public async Task<IActionResult> TuChoiLoiMoi(int loiMoiId)
         {
             try
             {
-                // Tìm lời mời
                 var loiMoi = await _context.KetBans.FindAsync(loiMoiId);
                 if (loiMoi == null)
                 {
                     return Json(new { success = false, message = "Không tìm thấy lời mời" });
                 }
 
-                // Cập nhật trạng thái thành 2 (từ chối)
-                loiMoi.TrangThai = 2;
-                loiMoi.NgayPhanHoi = DateTime.Now;
-
+                // 👉 XOÁ HẲN BẢN GHI (không giữ lại)
+                _context.KetBans.Remove(loiMoi);
                 await _context.SaveChangesAsync();
 
                 return Json(new { success = true, message = "Đã từ chối lời mời kết bạn" });
@@ -428,6 +426,51 @@ namespace LOHA.Controllers // nhóm chứa các class
                 return Json(new { success = true, message = "Đã huỷ lời mời kết bạn" });
             }
             catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        [HttpPost]  
+        public async Task<IActionResult> HuyKetBan(int banId)  // banId là ID của người muốn huỷ
+        {
+            try  // Bắt mọi lỗi có thể xảy ra
+            {
+                // LẤY THÔNG TIN NGƯỜI DÙNG HIỆN TẠI ===
+                var userSession = HttpContext.Session.GetString("user");  // Lấy email/sdt từ session
+                if (string.IsNullOrEmpty(userSession))
+                {
+                    return Json(new { success = false, message = "Vui lòng đăng nhập" });
+                }
+
+                var currentUser = await _context.Users
+                    .FirstOrDefaultAsync(u => u.EmailorSDT == userSession);  // Tìm user trong DB theo email
+
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy thông tin người dùng" });
+                }
+
+                // TÌM MỐI QUAN HỆ BẠN BÈ GIỮA 2 NGƯỜI ===
+                var ketBan = await _context.KetBans
+                    .FirstOrDefaultAsync(k =>
+                        ((k.NguoiGuiId == currentUser.ID && k.NguoiNhanId == banId) ||  // TH1: Mình gửi, bạn nhận
+                         (k.NguoiGuiId == banId && k.NguoiNhanId == currentUser.ID)) && // TH2: Bạn gửi, mình nhận
+                        k.TrangThai == 1); // Trạng thái 1 = bạn bè
+
+                if (ketBan == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy mối quan hệ bạn bè" });
+                }
+
+                // XOÁ BẢN GHI KẾT BẠN ===
+                _context.KetBans.Remove(ketBan);  // Xoá khỏi DbContext
+                await _context.SaveChangesAsync();  // Lưu thay đổi xuống database
+
+                //TRẢ VỀ KẾT QUẢ ===
+                return Json(new { success = true, message = "Đã huỷ kết bạn" });
+            }
+            catch (Exception ex)  // Nếu có lỗi bất kỳ
             {
                 return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
             }

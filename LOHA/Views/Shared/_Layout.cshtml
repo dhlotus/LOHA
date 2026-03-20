@@ -7,12 +7,12 @@
     <title>@ViewData["Title"] - LOHA</title>
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-    <!-- LOHA CSS -->
-    <link rel="stylesheet" href="~/css/loha.css" asp-append-version="true" />
+<!-- LOHA CSS -->
+<link rel="stylesheet" href="~/css/loha.css" asp-append-version="true" />
 </head>
 <body>
     <!-- Navbar (Desktop) -->
@@ -58,9 +58,18 @@
                         <i class="fa-solid fa-user-group me-2"></i>
                         <span>Bạn bè</span>
                     </a>
-                    <a href="#" class="loha-menu-item text-decoration-none">
-                        <i class="fa-regular fa-message"></i>
-                        <span>Tin nhắn</span>
+                    <a href="/Chat/Index" class="loha-menu-item text-decoration-none position-relative">
+                        <div class="d-flex align-items-center">
+                            <i class="fa-regular fa-message me-2"></i>
+                            <span>Tin nhắn</span>
+
+                            <!-- Chấm đỏ báo tin nhắn chưa đọc -->
+                            <span id="chat-notification-badge-desktop"
+                                  class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger"
+                                  style="display: none; font-size: 10px; min-width: 18px; height: 18px; line-height: 18px; padding: 0 5px; margin-left: 15px; margin-top: -5px;">
+                                0
+                            </span>
+                        </div>
                     </a>
 
                     <div class="loha-menu-item" onclick="location.href='/User/LoiMoiKetBan'">
@@ -114,10 +123,17 @@
             <i class="fa-regular fa-user-group"></i>
             <span>Bạn bè</span>
         </a>
-        <a href="#" class="bottom-nav-item">
+        <div class="loha-menu-item" onclick="location.href='/Chat/Index'">
             <i class="fa-regular fa-message"></i>
             <span>Tin nhắn</span>
-        </a>
+
+            <!-- Chấm đỏ báo tin nhắn chưa đọc -->
+            <span id="chat-notification-badge"
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                  style="display: none; font-size: 10px; min-width: 18px; height: 18px; line-height: 18px; padding: 0 5px; margin-left: -5px; margin-top: -5px;">
+                0
+            </span>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -145,6 +161,36 @@
 
         // Tự động cập nhật mỗi 30 giây
         setInterval(capNhatThongBao, 30000);
+
+                // Hàm đếm tin nhắn chưa đọc
+        function demTinNhanChuaDoc() {
+            fetch('/Chat/DemTinNhanChuaDoc')
+                .then(response => response.json())
+                .then(data => {
+                    // Cập nhật badge desktop
+                    var badgeDesktop = document.getElementById('chat-notification-badge-desktop');
+                    if (badgeDesktop) {
+                        if (data.count > 0) {
+                            badgeDesktop.style.display = 'inline-block';
+                            badgeDesktop.innerText = data.count > 99 ? '99+' : data.count;
+                        } else {
+                            badgeDesktop.style.display = 'none';
+                        }
+                    }
+
+                    // Cập nhật badge mobile
+                    var badgeMobile = document.getElementById('chat-notification-badge');
+                    if (badgeMobile) {
+                        if (data.count > 0) {
+                            badgeMobile.style.display = 'inline-block';
+                            badgeMobile.innerText = data.count > 99 ? '99+' : data.count;
+                        } else {
+                            badgeMobile.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(error => console.error('Lỗi đếm tin nhắn:', error));
+        }
     </script>
 
 </body>

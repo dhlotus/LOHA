@@ -1,0 +1,191 @@
+﻿<!--BÙI ĐỨC HÀ - LOTUS-->
+@model List<LOHA.Models.TinNhan>
+@{
+    if (ViewBag.NguoiNhan == null)
+    {
+        <div class="alert alert-danger">Không tìm thấy người dùng</div>
+        return;
+    }
+    ViewData["Title"] = "Chat với " + ViewBag.NguoiNhan.Ten;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header chat -->
+            <div class="d-flex align-items-center mb-3">
+                <a href="/Chat/Index" class="btn btn-outline-secondary rounded-circle me-3">
+                    <i class="fa-regular fa-arrow-left"></i>
+                </a>
+                <img src="/images/default.png"
+                     class="rounded-circle me-2"
+                     style="width: 40px; height: 40px; object-fit: cover;" />
+                <div>
+                    <h5 class="fw-bold mb-0" style="color: #1E2A78;">@ViewBag.NguoiNhan.Ten</h5>
+                    <small class="text-secondary">Đang hoạt động</small>
+                </div>
+            </div>
+
+            <!-- Khung chat -->
+            <div class="card border-0 shadow-sm" style="height: 70vh;">
+                <div class="card-body overflow-auto" id="khungChat" style="height: calc(100% - 70px);">
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        @foreach (var tin in Model)
+                        {
+                            if (tin.NguoiGuiID == ViewBag.CurrentUserId)
+                            {
+                                <!-- Tin nhắn của mình (bên phải) -->
+                                <div class="d-flex justify-content-end mb-3">
+                                    <div class="bg-primary text-white p-3 rounded-3" style="max-width: 70%;">
+                                        <p class="mb-1">@tin.NoiDung</p>
+                                        <div class="text-end">
+                                            <small class="text-white-50">
+                                                @tin.ThoiGian.ToString("HH:mm")
+                                                @if (tin.DaXem)
+                                                {
+                                                    <i class="fa-regular fa-check-double ms-1"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="fa-regular fa-check ms-1"></i>
+                                                }
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <!-- Tin nhắn của bạn (bên trái) -->
+                                <div class="d-flex mb-3">
+                                    <img src="/images/default.png"
+                                         class="rounded-circle me-2"
+                                         style="width: 32px; height: 32px; object-fit: cover;" />
+                                    <div class="bg-light p-3 rounded-3" style="max-width: 70%;">
+                                        <p class="mb-1">@tin.NoiDung</p>
+                                        <small class="text-secondary">@tin.ThoiGian.ToString("HH:mm")</small>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fa-regular fa-comment-dots fa-4x text-secondary mb-3"></i>
+                            <p class="text-secondary">Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!</p>
+                        </div>
+                    }
+                </div>
+
+                <!-- Form gửi tin nhắn -->
+                <div class="card-footer bg-white border-0">
+                    <div class="input-group">
+                        <input type="text"
+                               class="form-control rounded-pill"
+                               id="noiDungTinNhan"
+                               placeholder="Nhập tin nhắn..."
+                               onkeypress="if(event.key === 'Enter') guiTinNhan()" />
+                        <button class="btn btn-primary rounded-pill ms-2 px-4" onclick="guiTinNhan()">
+                            <i class="fa-regular fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+
+    <script>
+        // Biến connection SignalR
+        var connection = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var khungChat = document.getElementById('khungChat');
+            if (khungChat) {
+                khungChat.scrollTop = khungChat.scrollHeight;
+            }
+
+            // Kết nối SignalR
+            ketNoiSignalR();
+        });
+
+        // Hàm kết nối SignalR
+        function ketNoiSignalR() {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("/chathub?userId=@ViewBag.CurrentUserId")
+                .withAutomaticReconnect()
+                .build();
+
+            // Lắng nghe sự kiện nhận tin nhắn mới
+            connection.on("NhanTinMoi", function(nguoiGuiId, noiDung, thoiGian) {
+                // Kiểm tra nếu tin nhắn là từ người đang chat
+                if (nguoiGuiId == @(ViewBag.NguoiNhan?.ID ?? 0)) {
+                    var html = `
+                        <div class='d-flex mb-3'>
+                            <img src='/images/default.png'
+                                 class='rounded-circle me-2'
+                                 style='width: 32px; height: 32px; object-fit: cover;' />
+                            <div class='bg-light p-3 rounded-3' style='max-width: 70%;'>
+                                <p class='mb-1'>${noiDung}</p>
+                                <small class='text-secondary'>${thoiGian}</small>
+                            </div>
+                        </div>
+                    `;
+
+                    document.getElementById('khungChat').insertAdjacentHTML('beforeend', html);
+                    var khungChat = document.getElementById('khungChat');
+                    if (khungChat) {
+                        khungChat.scrollTop = khungChat.scrollHeight;
+                    }
+                }
+            });
+
+            // Bắt đầu kết nối
+            connection.start().catch(function(err) {
+                console.error('Lỗi kết nối SignalR:', err);
+            });
+        }
+
+        // Hàm gửi tin nhắn
+        function guiTinNhan() {
+            var noiDung = document.getElementById('noiDungTinNhan').value.trim();
+            var nguoiNhanId = @(ViewBag.NguoiNhan?.ID ?? 0);
+
+            if (noiDung === '') return;
+
+            fetch('/Chat/GuiTinNhan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'nguoiNhanId=' + nguoiNhanId + '&noiDung=' + encodeURIComponent(noiDung)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Thêm tin nhắn vào khung chat (phía mình)
+                    document.getElementById('khungChat').insertAdjacentHTML('beforeend', data.html);
+
+                    // Xóa nội dung input
+                    document.getElementById('noiDungTinNhan').value = '';
+
+                    // Cuộn xuống tin nhắn mới
+                    var khungChat = document.getElementById('khungChat');
+                    if (khungChat) {
+                        khungChat.scrollTop = khungChat.scrollHeight;
+                    }
+                } else {
+                    console.error('Lỗi:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+}

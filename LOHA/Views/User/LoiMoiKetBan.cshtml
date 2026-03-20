@@ -89,6 +89,7 @@
         }
 
 
+                // ===== CHẤP NHẬN LỜI MỜI =====
         function chapNhanLoiMoi(loiMoiId) {
             fetch('/User/ChapNhanLoiMoi', {
                 method: 'POST',
@@ -102,23 +103,27 @@
                 if (data.success) {
                     // Xóa lời mời khỏi danh sách
                     document.getElementById('loiMoi-' + loiMoiId).remove();
-                    alert('Đã chấp nhận lời mời kết bạn!');
+
+                    // Cập nhật lại số thông báo
+                    if (typeof capNhatThongBao === 'function') {
+                        capNhatThongBao();
+                    }
 
                     // Nếu hết lời mời, reload để hiển thị thông báo "Không có lời mời"
                     if (document.querySelectorAll('[id^="loiMoi-"]').length === 0) {
                         location.reload();
                     }
-                    capNhatThongBao();
                 } else {
-                    alert('Lỗi: ' + data.message);
+                    // Chỉ log lỗi ra console, không alert
+                    console.error('Lỗi chấp nhận lời mời:', data.message);
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Có lỗi xảy ra');
+                console.error('Lỗi kết nối:', error);
             });
         }
 
+        // ===== TỪ CHỐI LỜI MỜI =====
         function tuChoiLoiMoi(loiMoiId) {
             fetch('/User/TuChoiLoiMoi', {
                 method: 'POST',
@@ -132,19 +137,23 @@
                 if (data.success) {
                     // Xóa lời mời khỏi danh sách
                     document.getElementById('loiMoi-' + loiMoiId).remove();
-                    alert('Đã từ chối lời mời kết bạn!');
 
+                    // Cập nhật lại số thông báo
+                    if (typeof capNhatThongBao === 'function') {
+                        capNhatThongBao();
+                    }
+
+                    // Nếu hết lời mời, reload để hiển thị thông báo "Không có lời mời"
                     if (document.querySelectorAll('[id^="loiMoi-"]').length === 0) {
                         location.reload();
                     }
-                    capNhatThongBao();
                 } else {
-                    alert('Lỗi: ' + data.message);
+                    // Chỉ log lỗi ra console
+                    console.error('Lỗi từ chối lời mời:', data.message);
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Có lỗi xảy ra');
+                console.error('Lỗi kết nối:', error);
             });
         }
     </script>
