@@ -33,8 +33,24 @@
     text-align: center;
     margin-bottom: 15px;
     letter-spacing: -1px;
+    display: flex;
+    align-items: center; /* căn giữa theo chiều dọc */
+    justify-content: center;
+    gap: 10px;
+}
+.logo-img {
+    width: 46px;
+    height: 46px;
+    object-fit: cover;
+    border-radius: 30%;
 }
 
+.logo-text {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #1E2A78; /* màu thương hiệu */
+}
 @supports (-webkit-background-clip: text) or (background-clip: text) {
     .auth-logo {
         background: linear-gradient(135deg, #1E2A78, #6C63FF);

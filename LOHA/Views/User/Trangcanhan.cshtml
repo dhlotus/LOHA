@@ -214,8 +214,8 @@
                             <button onclick="thichBaiViet(@bv.Id)"
                                     class="btn flex-fill @(ViewBag.Thichs.Contains(bv.Id) ? "btn-primary" : "btn-light") rounded-pill"
                                     id="like-btn-@bv.Id">
-                                <i class="fa-regular fa-thumbs-up me-2"></i>
-                                Thích <span id="like-count-@bv.Id">@bv.Thichs.Count</span>
+                                <i class="fa-solid fa-heart"></i>
+                                Thích <span id="like-count-@bv.Id"></span>
                             </button>
 
                             <a href="/Baiviet/ChiTiet/@bv.Id" class="btn btn-light flex-fill rounded-pill">
