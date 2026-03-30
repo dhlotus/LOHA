@@ -3,7 +3,9 @@
     ViewData["Title"] = "Đăng ký";
     Layout = "_LayoutAuth";
 }
-
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
 <div class="auth-form">
     <form asp-action="Dangky" method="post">
         @if (!ViewData.ModelState.IsValid)

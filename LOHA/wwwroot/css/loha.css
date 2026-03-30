@@ -162,10 +162,9 @@ body {
     overflow: hidden;
 }
 
-    .loha-card:hover {
-        box-shadow: var(--loha-shadow-hover);
-        transform: translateY(-2px);
-    }
+.loha-card:hover {
+    box-shadow: var(--loha-shadow-hover);
+}
 
 .loha-card-body {
     padding: 20px;

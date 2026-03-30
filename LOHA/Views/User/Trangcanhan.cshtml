@@ -1,319 +1,259 @@
-﻿<!--BÙI ĐỨC HÀ - LOTUS ->
+﻿<!--BÙI ĐỨC HÀ - LOTUS -->
 @model LOHA.Models.User
 
 @{
     // Kiểm tra ảnh bìa mặc định
-    string coverImage = "/images/cover.jpg"; // Ảnh bìa mặc định
-    string avatarImage = "/images/default.png"; // Avatar mặc định
+    string coverImage = "/images/cover.jpg";
+    string avatarImage = "/images/default.png";
 }
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
 <div class="container-fluid mt-4 px-2 px-md-4">
     <!-- ===== COVER & AVATAR ===== -->
-<div class="position-relative">
-    <!-- Ảnh bìa -->
-    <img src="@coverImage"
-         class="img-fluid w-100 rounded-4 cover-img" />
+    <div class="position-relative">
+        <!-- Ảnh bìa - responsive với Bootstrap -->
+        <img src="@coverImage"
+             class="img-fluid w-100 rounded-4"
+             style="height: 200px; object-fit: cover;"
+             class="cover-img" />
 
-    <!-- Avatar -->
-    <div class="position-absolute avatar-wrapper">
-        <img src="@avatarImage"
-             class="rounded-circle border border-4 border-white shadow avatar-img" />
-    </div>
-</div>
-
-<!-- ===== PROFILE INFO ===== -->
-<div class="mt-5 pt-4 ms-md-5 ms-lg-6">
-    <div class="d-flex align-items-center justify-content-between">
-        <div>
-            <h1 class="fw-bold" style="color: #1E2A78;">@Model.Ten</h1>
+        <!-- Avatar - responsive với Bootstrap -->
+        <div class="position-absolute" style="bottom: -40px; left: 20px; z-index: 10;">
+            <img src="@avatarImage"
+                 class="rounded-circle border border-4 border-white shadow"
+                 style="width: 90px; height: 90px; object-fit: cover;" />
         </div>
+    </div>
 
-        <!-- 👉 NÚT KẾT BẠN  -->
-        @if (ViewBag.CurrentUserId != Model.ID) // Nếu không phải trang của mình
-        {
-            if (ViewBag.DaLaBanBe)
+    <!-- ===== PROFILE INFO ===== -->
+    <div class="mt-5 pt-4">
+        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+            <div>
+                <h1 class="fw-bold display-6 display-md-5" style="color: #1E2A78;">@Model.Ten</h1>
+            </div>
+
+            <!-- NÚT KẾT BẠN -->
+            @if (ViewBag.CurrentUserId != Model.ID)
             {
-                <div class="dropdown">
-                    <button class="btn btn-success rounded-pill px-4 dropdown-toggle"
-                            type="button"
-                            id="dropdownMenuButton-@Model.ID"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                        <i class="fa-solid fa-user-group"></i> Bạn bè
+                if (ViewBag.DaLaBanBe)
+                {
+                    <div class="dropdown">
+                        <button class="btn btn-success rounded-pill px-4 dropdown-toggle"
+                                type="button"
+                                id="dropdownMenuButton-@Model.ID"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                            <i class="fa-solid fa-user-group"></i> Bạn bè
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-@Model.ID">
+                            <li>
+                                <a class="dropdown-item text-danger"
+                                   href="#"
+                                   onclick="huyKetBan(@Model.ID); return false;">
+                                    <i class="fa-regular fa-user-slash me-2"></i>Huỷ kết bạn
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/Chat/ChatVoi?userId=@Model.ID">
+                                    <i class="fa-regular fa-message me-2"></i>Nhắn tin
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                }
+                else if (ViewBag.DaGuiLoiMoi)
+                {
+                    <button onclick="huyLoiMoiKetBan(@Model.ID)"
+                            class="btn btn-warning rounded-pill px-4"
+                            id="btnKetBan-@Model.ID">
+                        <i class="fa-regular fa-clock me-2"></i>Đã gửi lời mời
                     </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-@Model.ID">
-                        <li>
-                            <a class="dropdown-item text-danger"
-                               href="#"
-                               onclick="huyKetBan(@Model.ID); return false;">
-                                <i class="fa-regular fa-user-slash me-2"></i>Huỷ kết bạn
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/Chat/ChatVoi?userId=@Model.ID">
-                                <i class="fa-regular fa-message me-2"></i>Nhắn tin
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            }
-
-            else if (ViewBag.DaGuiLoiMoi)
-            {
-                <button onclick="huyLoiMoiKetBan(@Model.ID)"
-                        class="btn btn-warning rounded-pill px-4"
-                        id="btnKetBan-@Model.ID">
-                    <i class="fa-regular fa-clock me-2"></i>Đã gửi lời mời
-                </button>
+                }
+                else
+                {
+                    <button onclick="guiLoiMoiKetBan(@Model.ID)"
+                            class="btn btn-primary rounded-pill px-4"
+                            id="btnKetBan-@Model.ID">
+                        <i class="fa-regular fa-user-plus me-2"></i>Kết bạn
+                    </button>
+                }
             }
             else
             {
-                <button onclick="guiLoiMoiKetBan(@Model.ID)"
-                        class="btn btn-primary rounded-pill px-4"
-                        id="btnKetBan-@Model.ID">
-                    <i class="fa-regular fa-user-plus me-2"></i>Kết bạn
+                <button class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="fa-regular fa-pen-to-square me-2"></i>Chỉnh sửa
                 </button>
             }
-        }
-        else
-        {
-            <!-- Nếu là trang của mình thì hiện nút chỉnh sửa -->
-            <button class="btn btn-outline-secondary rounded-pill px-4">
-                <i class="fa-regular fa-pen-to-square me-2"></i>Chỉnh sửa trang
+        </div>
+
+        <!-- Stats -->
+        <div class="d-flex flex-wrap gap-3 mt-3">
+            <div class="text-center">
+                <span class="d-block fw-bold fs-3" style="color: #1E2A78;">@ViewBag.Baiviets.Count</span>
+                <span class="text-secondary small">Bài viết</span>
+            </div>
+            <div class="text-center">
+                <span class="d-block fw-bold fs-3" style="color: #1E2A78;">@ViewBag.SoBanBe</span>
+                <span class="text-secondary small">Bạn bè</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TABS ===== -->
+    <ul class="nav nav-tabs profile-tabs mt-4" id="profileTab" role="tablist">
+        <li class="nav-item flex-fill" role="presentation">
+            <button class="nav-link active w-100" id="posts-tab-btn" data-bs-toggle="tab" data-bs-target="#posts" type="button" role="tab">
+                <i class="fa-regular fa-newspaper me-2"></i>Bài viết
             </button>
-        }
-    </div>
+        </li>
+        <li class="nav-item flex-fill" role="presentation">
+            <button class="nav-link w-100" id="photos-tab-btn" data-bs-toggle="tab" data-bs-target="#photos" type="button" role="tab">
+                <i class="fa-regular fa-images me-2"></i>Ảnh
+            </button>
+        </li>
+        <li class="nav-item flex-fill" role="presentation">
+            <button class="nav-link w-100" id="friends-tab-btn" data-bs-toggle="tab" data-bs-target="#friends" type="button" role="tab">
+                <i class="fa-solid fa-user-group me-2"></i>Bạn bè
+            </button>
+        </li>
+    </ul>
 
-    <!-- Stats -->
-    <div class="d-flex flex-wrap gap-3 mt-3">
-        <div class="text-center">
-            <span class="d-block fw-bold fs-4" style="color: #1E2A78;">@ViewBag.Baiviets.Count</span>
-            <span class="text-secondary">Bài viết</span>
-        </div>
-        <div class="text-center">
-            <span class="d-block fw-bold fs-4" style="color: #1E2A78;">@ViewBag.SoBanBe</span>
-            <span class="text-secondary">Bạn bè</span>
-        </div>
-    </div>
-</div>
+    <!-- ===== CONTENT ===== -->
+    <div class="tab-content mt-3">
+        <!-- Tab Bài viết -->
+        <div class="tab-pane fade show active" id="posts" role="tabpanel">
+            <!-- Form đăng bài -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <form action="/Baiviet/Taobaiviet" method="post" enctype="multipart/form-data" id="postForm">
+                        <div class="d-flex gap-3">
+                            <img src="@avatarImage" class="rounded-circle" style="width: 48px; height: 48px; object-fit: cover;" />
+                            <textarea name="Noidung"
+                                      class="form-control rounded-3"
+                                      rows="2"
+                                      placeholder="Bạn đang nghĩ gì, @Model.Ten?"
+                                      id="postContent"
+                                      style="resize: none;"></textarea>
+                        </div>
 
-<!-- ===== TABS ===== -->
-<div class="d-flex flex-wrap gap-2 bg-white p-2 rounded-3 shadow-sm my-4">
-    <button class="flex-fill btn btn-outline-primary rounded-pill py-2 active" onclick="switchTab('posts')">
-        <i class="fa-regular fa-newspaper me-2"></i>Bài viết
-    </button>
-    <button class="flex-fill btn btn-outline-primary rounded-pill py-2" onclick="switchTab('photos')">
-        <i class="fa-regular fa-images me-2"></i>Ảnh
-    </button>
-    <button class="flex-fill btn btn-outline-primary rounded-pill py-2" onclick="switchTab('friends')">
-        <i class="fa-solid fa-user-group"></i> Bạn bè
-    </button>
-</div>
-
-<!-- ===== CONTENT ===== -->
-<div class="tab-content">
-    <!-- Tab Bài viết -->
-    <div id="posts-tab" class="tab-pane active">
-        <!-- Form đăng bài -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body">
-                <form action="/Baiviet/Taobaiviet" method="post" enctype="multipart/form-data" id="postForm">
-                    <div class="d-flex gap-3">
-                        <img src="@avatarImage" class="rounded-circle" style="width: 48px; height: 48px; object-fit: cover;" />
-                        <textarea name="Noidung"
-                                  class="form-control rounded-3" 
-                                  rows="2"
-                                  placeholder="Bạn đang nghĩ gì, @Model.Ten?"
-                                  id="postContent"
-                                  ></textarea>
-                    </div>
-
-                    <!-- Preview ảnh -->
-                    <div id="imagePreviewArea" class="mt-3 position-relative" style="display: none;">
-                        <img id="imagePreview" class="img-fluid rounded-3" style="max-height: 300px; width: 100%; object-fit: contain;" />
-                        <button type="button" class="position-absolute top-0 end-0 m-2 btn btn-dark btn-sm rounded-circle"
-                                onclick="removeImage()">
-                            <i class="fa-regular fa-xmark"></i>
-                        </button>
-                    </div>
-
-                    <!-- Toolbar -->
-                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                        <div class="d-flex gap-2">
-                            <label for="postImage" class="btn btn-outline-secondary rounded-pill">
-                                <i class="fa-regular fa-image me-2"></i>Ảnh
-                            </label>
-                            <input type="file" name="AnhFile" id="postImage" class="d-none" accept="image/*" onchange="previewPostImage(this)" />
-
-                            <button type="button" class="btn btn-outline-secondary rounded-pill" onclick="openEmojiPicker()">
-                                <i class="fa-regular fa-face-smile me-2"></i>Cảm xúc
+                        <!-- Preview ảnh -->
+                        <div id="imagePreviewArea" class="mt-3 position-relative" style="display: none;">
+                            <img id="imagePreview" class="img-fluid rounded-3" style="max-height: 300px; width: 100%; object-fit: contain;" />
+                            <button type="button" class="position-absolute top-0 end-0 m-2 btn btn-dark btn-sm rounded-circle"
+                                    onclick="removeImage()">
+                                <i class="fa-regular fa-xmark"></i>
                             </button>
                         </div>
-                        <button type="submit" class="btn btn-primary rounded-pill px-4" id="submitPostBtn" disabled>
-                            <i class="fa-regular fa-paper-plane me-2"></i>Đăng
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
 
-        <!-- Danh sách bài viết -->
-        @if (ViewBag.Baiviets.Count == 0)
-        {
-            <div class="text-center py-5 bg-white rounded-4 shadow-sm">
-                <i class="fa-regular fa-newspaper fa-4x text-secondary mb-3"></i>
-                <h4 class="fw-bold">Chưa có bài viết nào</h4>
-                <p class="text-secondary">Hãy là người đầu tiên viết bài!</p>
+                        <!-- Toolbar -->
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                            <div class="d-flex gap-2">
+                                <label for="postImage" class="btn btn-outline-secondary rounded-pill">
+                                    <i class="fa-regular fa-image me-2"></i>Ảnh
+                                </label>
+                                <input type="file" name="AnhFile" id="postImage" class="d-none" accept="image/*" onchange="previewPostImage(this)" />
+                                <button type="button" class="btn btn-outline-secondary rounded-pill" onclick="openEmojiPicker()">
+                                    <i class="fa-regular fa-face-smile me-2"></i>Cảm xúc
+                                </button>
+                            </div>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4" id="submitPostBtn" disabled>
+                                <i class="fa-regular fa-paper-plane me-2"></i>Đăng
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        }
-        else
-        {
-            @foreach (var bv in ViewBag.Baiviets)
+
+            <!-- Danh sách bài viết -->
+            @if (ViewBag.Baiviets.Count == 0)
             {
-                <div class="card border-0 shadow-sm mb-3" id="post-@bv.Id">
-                    <div class="card-body">
-                        <!-- Header bài viết -->
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="@avatarImage" class="rounded-circle me-2" style="width: 48px; height: 48px; object-fit: cover;" />
-                            <div class="flex-grow-1">
-                                <h5 class="mb-0 fw-bold">@Model.Ten</h5>
-                                <small class="text-secondary">
-                                    <i class="fa-regular fa-clock me-1"></i>@bv.Ngaydang.ToString("dd/MM/yyyy HH:mm")
-                                </small>
-                            </div>
-                            <button class="btn btn-light btn-sm rounded-circle">
-                                <i class="fa-solid fa-ellipsis-vertical"></i>
-                            </button>
-                        </div>
-
-                        <!-- Nội dung bài viết -->
-                        <p class="mb-3">@bv.Noidung</p>
-
-                        <!-- Ảnh bài viết - TẤT CẢ ĐỒNG NHẤT -->
-                        @if (!string.IsNullOrEmpty(bv.Anh))
-                        {
-                            <div class="mb-3 text-center bg-light rounded-3 p-2">
-                                <img src="/baiviet/@bv.Anh"
-                                     class="img-fluid rounded-3"
-                                     style="max-height: 400px; width: 100%; object-fit: contain;" />
-                            </div>
-                        }
-
-                        <!-- Stats - SỐ LƯỢNG BÌNH LUẬN BÊN PHẢI -->
-                        <div class="d-flex justify-content-between text-secondary small py-2 border-top border-bottom">
-                            <div>
-                                <i class="fa-regular fa-heart me-1" style="color: #FF4D6D;"></i>
-                                <span id="total-like-@bv.Id">@bv.Thichs.Count</span>
-                            </div>
-                            <div>
-                                <span id="total-comment-@bv.Id">@(bv.Binhluans?.Count ?? 0)</span> bình luận
-                            </div>
-                        </div>
-
-                        <!-- Actions -->
-                        <div class="d-flex gap-2 mt-2">
-                            <button onclick="thichBaiViet(@bv.Id)"
-                                    class="btn flex-fill @(ViewBag.Thichs.Contains(bv.Id) ? "btn-primary" : "btn-light") rounded-pill"
-                                    id="like-btn-@bv.Id">
-                                <i class="fa-solid fa-heart"></i>
-                                Thích <span id="like-count-@bv.Id"></span>
-                            </button>
-
-                            <a href="/Baiviet/ChiTiet/@bv.Id" class="btn btn-light flex-fill rounded-pill">
-                                <i class="fa-regular fa-comment me-2"></i>
-                                Bình luận
-                            </a>
-
-                        </div>
-                    </div>
+                <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+                    <i class="fa-regular fa-newspaper fa-4x text-secondary mb-3"></i>
+                    <h4 class="fw-bold">Chưa có bài viết nào</h4>
+                    <p class="text-secondary">Hãy là người đầu tiên viết bài!</p>
                 </div>
             }
-        }
-    </div>
-
-    <!-- Tab Ảnh -->
-    <div id="photos-tab" class="tab-pane">
-        <div class="text-center py-5 bg-white rounded-4 shadow-sm">
-            <i class="fa-regular fa-images fa-4x text-secondary mb-3"></i>
-            <h4 class="fw-bold">Chưa có ảnh nào</h4>
-            <p class="text-secondary">Ảnh từ bài viết sẽ hiển thị ở đây</p>
-        </div>
-    </div>
-
-    <!-- Tab Bạn bè -->
-    <div id="friends-tab" class="tab-pane">
-        @if (ViewBag.DanhSachBanBe != null && ViewBag.DanhSachBanBe.Count > 0)
-        {
-            <div class="row g-3">
-                @foreach (var ban in ViewBag.DanhSachBanBe)
+            else
+            {
+                var danhSachBaiViet = ViewBag.Baiviets as List<LOHA.Models.Baiviet>;
+                @foreach (var bv in danhSachBaiViet)
                 {
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body d-flex align-items-center gap-3">
-                                <!-- Avatar -->
-                                <img src="/images/default.png"
-                                     class="rounded-circle"
-                                     style="width: 60px; height: 60px; object-fit: cover;" />
+                    @await Html.PartialAsync("/Views/Baiviet/Baidang.cshtml", bv)
+                }
+            }
+        </div>
 
-                                <!-- Thông tin -->
-                                <div class="flex-grow-1">
-                                    <h6 class="fw-bold mb-1">@ban.Ten</h6>
-                                    <small class="text-secondary">
-                                        <i class="fa-regular fa-clock me-1"></i>
-                                        Kết bạn từ
-                                        @if (ViewBag.NgayKetBan != null && ViewBag.NgayKetBan.ContainsKey(ban.ID))
-                                        {
-                                            @ViewBag.NgayKetBan[ban.ID].ToString("dd/MM/yyyy")
-                                        }
-                                        else
-                                        {
-                                            <span>Không xác định</span>
-                                        }
-                                    </small>
+        <!-- Tab Ảnh -->
+        <div class="tab-pane fade" id="photos" role="tabpanel">
+            <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+                <i class="fa-regular fa-images fa-4x text-secondary mb-3"></i>
+                <h4 class="fw-bold">Chưa có ảnh nào</h4>
+                <p class="text-secondary">Ảnh từ bài viết sẽ hiển thị ở đây</p>
+            </div>
+        </div>
+
+        <!-- Tab Bạn bè -->
+        <div class="tab-pane fade" id="friends" role="tabpanel">
+            @if (ViewBag.DanhSachBanBe != null && ViewBag.DanhSachBanBe.Count > 0)
+            {
+                <div class="row g-3">
+                    @foreach (var ban in ViewBag.DanhSachBanBe)
+                    {
+                        <div class="col-12 col-sm-6 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body d-flex align-items-center gap-3">
+                                    <img src="/images/default.png" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;" />
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold mb-1">@ban.Ten</h6>
+                                        <small class="text-secondary">
+                                            <i class="fa-regular fa-clock me-1"></i>
+                                            Kết bạn từ
+                                            @if (ViewBag.NgayKetBan != null && ViewBag.NgayKetBan.ContainsKey(ban.ID))
+                                            {
+                                                @ViewBag.NgayKetBan[ban.ID].ToString("dd/MM/yyyy")
+                                            }
+                                            else
+                                            {
+                                                <span>Không xác định</span>
+                                            }
+                                        </small>
+                                    </div>
+                                    <a href="/Chat/ChatVoi?userId=@ban.ID" class="btn btn-outline-primary rounded-circle">
+                                        <i class="fa-regular fa-message"></i>
+                                    </a>
                                 </div>
-
-                                <!-- Nút nhắn tin -->
-                                <a href="/Chat/ChatVoi?userId=@Model.ID" class="btn btn-outline-primary rounded-circle">
-                                    <i class="fa-regular fa-message"></i>
-                                </a>
                             </div>
                         </div>
-                    </div>
-                }
-            </div>
-        }
-        else
-        {
-            <div class="text-center py-5 bg-white rounded-4 shadow-sm">
-                <i class="fa-solid fa-user-group fa-4x text-secondary mb-3"></i>
-
-                <h4 class="fw-bold">Chưa có bạn bè</h4>
-                <p class="text-secondary">Hãy kết bạn để bắt đầu kết nối</p>
-            </div>
-        }
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+                    <i class="fa-solid fa-user-group fa-4x text-secondary mb-3"></i>
+                    <h4 class="fw-bold">Chưa có bạn bè</h4>
+                    <p class="text-secondary">Hãy kết bạn để bắt đầu kết nối</p>
+                </div>
+            }
+        </div>
     </div>
 </div>
-</div>
+
 <!-- POPUP XÁC NHẬN HUỶ KẾT BẠN -->
 <div class="modal fade" id="confirmHuyKetBanModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
             <div class="modal-body text-center p-4">
-                <!-- Icon cảnh báo -->
                 <div class="mb-3">
                     <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex p-3">
                         <i class="fa-regular fa-user-slash fa-3x text-danger"></i>
                     </div>
                 </div>
-
-                <!-- Tiêu đề -->
                 <h5 class="fw-bold mb-2">Huỷ kết bạn?</h5>
-
-                <!-- Nội dung -->
                 <p class="text-secondary mb-4" id="confirmMessage">
                     Bạn có chắc muốn huỷ kết bạn với người này?
                 </p>
-
-                <!-- Nút hành động -->
                 <div class="d-flex gap-2 justify-content-center">
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">
                         <i class="fa-regular fa-xmark me-2"></i>Không
@@ -326,6 +266,123 @@
         </div>
     </div>
 </div>
+
+<!-- CSS cho Profile Tabs và Responsive -->
+<style>
+    /* Profile Tabs - Bootstrap style */
+    .profile-tabs {
+        border-bottom: none;
+        gap: 8px;
+        background: white;
+        padding: 8px;
+        border-radius: 50px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+        .profile-tabs .nav-link {
+            border: none;
+            border-radius: 40px;
+            padding: 10px 20px;
+            color: #6B7280;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+            .profile-tabs .nav-link:hover {
+                background: #F3F4F6;
+                color: #1E2A78;
+            }
+
+            .profile-tabs .nav-link.active {
+                background: linear-gradient(135deg, #1E2A78, #6C63FF);
+                color: white;
+            }
+
+    /* Responsive cho mobile - dùng Bootstrap breakpoints */
+    @@media (max-width: 768px) {
+        .profile-tabs {
+            border-radius: 30px;
+            padding: 6px !important;
+        }
+
+            .profile-tabs .nav-link {
+                padding: 6px 10px !important;
+                font-size: 12px !important;
+            }
+
+                .profile-tabs .nav-link span {
+                    display: none;
+                }
+
+                .profile-tabs .nav-link i {
+                    margin-right: 0 !important;
+                }
+
+        .rounded-circle[style*="width: 90px"] {
+            width: 70px !important;
+            height: 70px !important;
+        }
+
+        .display-6 {
+            font-size: 1.5rem !important;
+        }
+
+        .btn.rounded-pill {
+            padding: 0.4rem 1rem !important;
+            font-size: 0.8rem !important;
+        }
+
+        .card-body .rounded-circle {
+            width: 45px !important;
+            height: 45px !important;
+        }
+
+        .card-body h6 {
+            font-size: 0.85rem !important;
+        }
+
+        .card-body small {
+            font-size: 0.7rem !important;
+        }
+
+        .btn-outline-primary.rounded-circle {
+            width: 32px !important;
+            height: 32px !important;
+        }
+    }
+
+    @@media (min-width: 768px) {
+        .rounded-circle[style*="width: 90px"] {
+            width: 120px !important;
+            height: 120px !important;
+        }
+
+        img[style*="height: 200px"] {
+            height: 280px !important;
+        }
+    }
+
+    @@media (min-width: 992px) {
+        .rounded-circle[style*="width: 90px"] {
+            width: 150px !important;
+            height: 150px !important;
+        }
+
+        img[style*="height: 200px"] {
+            height: 350px !important;
+        }
+    }
+
+    /* Card hover effect */
+    .card {
+        transition: box-shadow 0.2s;
+    }
+
+        .card:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08) !important;
+        }
+</style>
+
 <!-- JavaScript -->
 <script>
     // Kiểm tra nội dung đăng bài
@@ -366,23 +423,8 @@
         checkPostContent();
     }
 
-    // Switch tabs
-    function switchTab(tabName) {
-        // Update tab buttons
-        document.querySelectorAll('.tab-pane').forEach(tab => tab.classList.remove('active', 'show'));
-        document.getElementById(tabName + '-tab').classList.add('active', 'show');
-
-        // Update nav buttons
-        document.querySelectorAll('.btn-outline-primary').forEach(btn => {
-            btn.classList.remove('active', 'btn-primary');
-            btn.classList.add('btn-outline-primary');
-        });
-        event.target.closest('.btn').classList.remove('btn-outline-primary');
-        event.target.closest('.btn').classList.add('active', 'btn-primary');
-    }
-
-    // Like function - CẬP NHẬT CẢ 2 CHỖ
-    function thichBaiViet(id) {
+      //thichBaiViet để nhận tham số btn
+    function thichBaiViet(id, btn) {
         fetch("/Baiviet/ThichBaiViet?baiVietId=" + id, {
             method: "POST",
             headers: {
@@ -391,20 +433,18 @@
         })
         .then(response => response.json())
         .then(data => {
-            // Cập nhật số like ở nút
-            document.getElementById("like-count-" + id).innerText = data.soLuong;
+            const likeSpan = btn.querySelector('.like-count');
+            if (likeSpan) likeSpan.innerText = data.soLuong;
 
-            // Cập nhật số like ở stats trên cùng
-            document.getElementById("total-like-" + id).innerText = data.soLuong;
+            const totalLikeSpan = document.getElementById('total-like-' + id);
+            if (totalLikeSpan) totalLikeSpan.innerText = data.soLuong;
 
-            // Đổi màu nút like
-            var btn = document.getElementById("like-btn-" + id);
             if (data.daThich) {
-                btn.classList.remove("btn-light");
-                btn.classList.add("btn-primary");
+                btn.classList.remove('btn-light');
+                btn.classList.add('btn-primary', 'liked');
             } else {
-                btn.classList.remove("btn-primary");
-                btn.classList.add("btn-light");
+                btn.classList.remove('btn-primary', 'liked');
+                btn.classList.add('btn-light');
             }
         })
         .catch(error => {
@@ -532,61 +572,185 @@
             alert('Có lỗi xảy ra');
         });
     });
+        // Hiển thị menu bài viết (bên phải icon 3 chấm)
+    function showPostMenu(postId, btn) {
+        event.stopPropagation();
+
+        document.querySelectorAll('[id^="postMenu-"]').forEach(menu => {
+            if (menu.id !== 'postMenu-' + postId) {
+                menu.style.display = 'none';
+            }
+        });
+
+        var menu = document.getElementById('postMenu-' + postId);
+        if (menu.style.display === 'none') {
+            menu.style.display = 'block';
+            var rect = btn.getBoundingClientRect();
+            menu.style.position = 'fixed';
+            menu.style.top = (rect.top + 5) + 'px';
+            menu.style.right = (window.innerWidth - rect.right) + 'px';
+            menu.style.zIndex = '9999';
+        } else {
+            menu.style.display = 'none';
+        }
+    }
+
+    // Đóng menu khi click ra ngoài
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('[id^="menuBtn-"]') && !e.target.closest('[id^="postMenu-"]')) {
+            document.querySelectorAll('[id^="postMenu-"]').forEach(menu => {
+                menu.style.display = 'none';
+            });
+        }
+    });
+
+    // Hiển thị popup xoá bài viết
+    function showXoaPopup(postId) {
+        var menu = document.getElementById('postMenu-' + postId);
+        if (menu) menu.style.display = 'none';
+
+        document.getElementById('postIdToDelete').value = postId;
+        var modal = new bootstrap.Modal(document.getElementById('confirmXoaBaiVietModal'));
+        modal.show();
+    }
+
+    // Xử lý xoá bài viết
+    function xoaBaiViet() {
+        var postId = document.getElementById('postIdToDelete').value;
+
+        fetch('/Baiviet/XoaBaiViet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'id=' + postId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var postElement = document.getElementById('post-' + postId);
+                if (postElement) {
+                    postElement.remove();
+                }
+                console.log('Đã xoá bài viết');
+            } else {
+                console.error('Lỗi:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
+        var modal = bootstrap.Modal.getInstance(document.getElementById('confirmXoaBaiVietModal'));
+        modal.hide();
+    }
+
+    // Gắn sự kiện cho nút xoá trong popup
+    document.addEventListener('DOMContentLoaded', function() {
+        var confirmBtn = document.getElementById('confirmXoaBtn');
+        if (confirmBtn) {
+            confirmBtn.removeEventListener('click', xoaBaiViet);
+            confirmBtn.addEventListener('click', xoaBaiViet);
+        }
+    });
+
+    // Sửa lại hàm thichBaiViet để nhận tham số btn
+    function thichBaiViet(id, btn) {
+        fetch("/Baiviet/ThichBaiViet?baiVietId=" + id, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Cập nhật số like trên nút
+            const likeSpan = btn.querySelector('.like-count');
+            if (likeSpan) likeSpan.innerText = data.soLuong;
+
+            // Cập nhật số like ở stats
+            const totalLikeSpan = document.getElementById('total-like-' + id);
+            if (totalLikeSpan) totalLikeSpan.innerText = data.soLuong;
+
+            // Đổi màu nút
+            if (data.daThich) {
+                btn.classList.remove('btn-light');
+                btn.classList.add('btn-primary', 'liked');
+            } else {
+                btn.classList.remove('btn-primary', 'liked');
+                btn.classList.add('btn-light');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+        // Toggle bình luận (hiện/ẩn khu vực bình luận)
+    function moBinhLuan(baivietId, btn) {
+        var commentSection = document.getElementById('comment-section-' + baivietId);
+
+        if (commentSection.style.display === 'none' || commentSection.style.display === '') {
+            commentSection.style.display = 'block';
+            btn.innerHTML = '<i class="fa-regular fa-comment-dots me-2"></i><span>Ẩn bình luận</span>';
+
+            // Focus vào ô input
+            setTimeout(function() {
+                var input = document.getElementById('comment-input-' + baivietId);
+                if (input) input.focus();
+            }, 100);
+        } else {
+            commentSection.style.display = 'none';
+            btn.innerHTML = '<i class="fa-regular fa-comment me-2"></i><span>Bình luận</span>';
+        }
+    }
+
+    // Gửi bình luận
+    function guiBinhLuan(baivietId, inputId) {
+        var input = document.getElementById(inputId);
+        var noidung = input.value.trim();
+
+        if (noidung === '') {
+            // Không alert, chỉ focus lại
+            input.focus();
+            return;
+        }
+
+        fetch('/Baiviet/ThemBinhLuan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'baivietId=' + baivietId + '&noidung=' + encodeURIComponent(noidung) + '&anchor='
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Thêm bình luận mới vào đầu danh sách
+                var commentList = document.getElementById('comment-list-' + baivietId);
+                commentList.insertAdjacentHTML('afterbegin', data.html);
+
+                // Xóa input
+                input.value = '';
+
+                // Cập nhật số lượng bình luận
+                var commentCount = document.getElementById('comment-count-' + baivietId);
+                if (commentCount) commentCount.innerText = data.soLuong;
+
+                // Cập nhật số bình luận ở stats (nếu có)
+                var totalComment = document.getElementById('total-comment-' + baivietId);
+                if (totalComment) totalComment.innerText = data.soLuong;
+
+                // Hiệu ứng cho bình luận mới
+                var newComment = commentList.firstElementChild;
+                if (newComment) newComment.style.animation = 'fadeInUp 0.3s ease-out';
+            } else {
+                console.error('Lỗi:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
 </script>
 
-<!-- Style bổ sung cho ảnh bài viết -->
-<style>
-    /* Đảm bảo ảnh bài viết hiển thị đẹp và đồng nhất */
-    .card img[src^="/baiviet/"] {
-        transition: transform 0.2s;
-    }
 
-        .card img[src^="/baiviet/"]:hover {
-            transform: scale(1.02);
-            cursor: pointer;
-        }
-
-    /* Shadow nhẹ cho card */
-    .card {
-        transition: box-shadow 0.2s;
-    }
-
-    .card:hover {
-        box-shadow: 0 8px 20px rgba(0,0,0,0.08) !important;
-    }
-
-    .avatar-wrapper {
-        bottom: -40px;
-        left: 20px;
-        z-index: 10;
-    }
-
-    .avatar-img {
-        width: 90px;
-        height: 90px;
-        object-fit: cover;
-    }
-
-    @@media (min-width: 768px) {
-        .avatar-wrapper {
-            bottom: -60px;
-            left: 40px;
-        }
-
-        .avatar-img {
-            width: 150px;
-            height: 150px;
-        }
-    }
-
-    .cover-img {
-        height: 200px;
-        object-fit: cover;
-    }
-
-    @@media (min-width: 768px) {
-        .cover-img {
-            height: 350px;
-        }
-    }
-</style>

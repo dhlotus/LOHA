@@ -99,30 +99,33 @@ namespace LOHA.Controllers // nhóm chứa các class
                 return RedirectToAction("DangNhap");
 
             // nếu không có id thì xem trang cá nhân chính mình
-            if(id == 0)
+            if (id == 0)
             {
                 id = currentUser.ID;
-            }    
+            }
 
             // tìm user dc xem (có thể là mình hoặc ngkh)
             var user = _context.Users.FirstOrDefault(u => u.ID == id);
-            if(user == null)
+            if (user == null)
             {
                 return NotFound();
             }
 
             // Lấy danh sách bài viết của user này
             var baiviets = _context.Baiviets
-                .Include(b => b.Thichs)   // cần để đếm like
+                .Include(b => b.Thichs)
+                .Include(b => b.Binhluans)
+                    .ThenInclude(bl => bl.User)
                 .Where(b => b.UserId == user.ID)
                 .OrderByDescending(b => b.Ngaydang)
                 .ToList();
 
             // Lấy danh sách ID bài viết mà user hiện tại đã like
             var thichs = _context.Thichs
-                .Where(t => t.UserId == user.ID)
+                .Where(t => t.UserId == currentUser.ID)
                 .Select(t => t.BaivietId)
                 .ToList();
+
             //tính toán thông tin kết bạn
             bool daLaBanBe = false;
             bool daGuiLoiMoi = false;
@@ -151,43 +154,32 @@ namespace LOHA.Controllers // nhóm chứa các class
                 (k.NguoiGuiId == user.ID || k.NguoiNhanId == user.ID) &&
                 k.TrangThai == 1);
 
-
             // Truyền dữ liệu sang View qua ViewBag
             ViewBag.Baiviets = baiviets;
             ViewBag.Thichs = thichs;
-            ViewBag.CurrentUserId = currentUser.ID;
+            ViewBag.CurrentUserId = currentUser.ID;      // cho partial view
             ViewBag.DaLaBanBe = daLaBanBe;
             ViewBag.DaGuiLoiMoi = daGuiLoiMoi;
             ViewBag.SoBanBe = soBanBe;
 
-            // Đếm số bạn bè của user này
-            soBanBe = _context.KetBans.Count(k =>
-                (k.NguoiGuiId == user.ID || k.NguoiNhanId == user.ID) &&
-                k.TrangThai == 1);
-
-            // LẤY DANH SÁCH BẠN BÈ
+            // Lấy danh sách bạn bè
             var danhSachBanBe = new List<User>();
-
-            // Tìm tất cả các bản ghi KetBan có trạng thái 1 (bạn bè)
             var cacKetBan = await _context.KetBans
                 .Where(k => (k.NguoiGuiId == user.ID || k.NguoiNhanId == user.ID) && k.TrangThai == 1)
                 .ToListAsync();
-            // Khởi tạo Dictionary trước khi dùng
+
             ViewBag.NgayKetBan = new Dictionary<int, DateTime>();
             foreach (var ketBan in cacKetBan)
             {
-                // Nếu user là người gửi thì bạn là người nhận
                 if (ketBan.NguoiGuiId == user.ID)
                 {
                     var ban = await _context.Users.FindAsync(ketBan.NguoiNhanId);
                     if (ban != null)
                     {
-                        // Thêm thông tin ngày kết bạn
                         ViewBag.NgayKetBan[ban.ID] = ketBan.NgayPhanHoi ?? ketBan.NgayGui;
                         danhSachBanBe.Add(ban);
                     }
                 }
-                // Nếu user là người nhận thì bạn là người gửi
                 else
                 {
                     var ban = await _context.Users.FindAsync(ketBan.NguoiGuiId);
@@ -198,8 +190,6 @@ namespace LOHA.Controllers // nhóm chứa các class
                     }
                 }
             }
-
-            // Gửi danh sách bạn bè xuống View
             ViewBag.DanhSachBanBe = danhSachBanBe;
 
             return View(user);

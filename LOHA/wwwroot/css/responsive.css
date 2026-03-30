@@ -1,0 +1,273 @@
+﻿/* ===== RESPONSIVE UTILITY CLASSES ===== */
+/* BÙI ĐỨC HÀ - LOTUS */
+
+/* ===== GRID SYSTEM CƠ BẢN ===== */
+/* Mobile first - mặc định là 1 cột (100%) */
+.row-custom {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -12px;
+}
+
+.col-custom {
+    flex: 0 0 100%;
+    max-width: 100%;
+    padding: 0 12px;
+}
+
+/* Tablet (>= 768px) - 2 cột */
+@media (min-width: 768px) {
+    .col-md-6-custom {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+/* Desktop nhỏ (>= 992px) - 3 cột */
+@media (min-width: 992px) {
+    .col-lg-4-custom {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+}
+
+/* Desktop lớn (>= 1200px) - 4 cột */
+@media (min-width: 1200px) {
+    .col-xl-3-custom {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+}
+
+/* ===== TEXT RESPONSIVE ===== */
+/* Cỡ chữ tự động co giãn */
+.text-responsive {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    .text-responsive {
+        font-size: 16px;
+    }
+}
+
+@media (min-width: 992px) {
+    .text-responsive {
+        font-size: 18px;
+    }
+}
+
+/* ===== AVATAR RESPONSIVE ===== */
+.avatar-custom {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+@media (min-width: 768px) {
+    .avatar-custom {
+        width: 100px;
+        height: 100px;
+        border-width: 4px;
+    }
+}
+
+@media (min-width: 992px) {
+    .avatar-custom {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .avatar-custom {
+        width: 150px;
+        height: 150px;
+    }
+}
+
+/* ===== COVER ẢNH RESPONSIVE ===== */
+.cover-custom {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 16px;
+}
+
+@media (min-width: 768px) {
+    .cover-custom {
+        height: 200px;
+        border-radius: 20px;
+    }
+}
+
+@media (min-width: 992px) {
+    .cover-custom {
+        height: 280px;
+        border-radius: 24px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .cover-custom {
+        height: 350px;
+    }
+}
+
+/* ===== PADDING / MARGIN RESPONSIVE ===== */
+.p-responsive {
+    padding: 12px;
+}
+
+.m-responsive {
+    margin: 12px;
+}
+
+@media (min-width: 768px) {
+    .p-responsive {
+        padding: 16px;
+    }
+
+    .m-responsive {
+        margin: 16px;
+    }
+}
+
+@media (min-width: 992px) {
+    .p-responsive {
+        padding: 20px;
+    }
+
+    .m-responsive {
+        margin: 20px;
+    }
+}
+
+/* ===== GAP RESPONSIVE (khoảng cách giữa các phần tử) ===== */
+.gap-responsive {
+    gap: 8px;
+}
+
+@media (min-width: 768px) {
+    .gap-responsive {
+        gap: 12px;
+    }
+}
+
+@media (min-width: 992px) {
+    .gap-responsive {
+        gap: 16px;
+    }
+}
+
+/* ===== CARD BẠN BÈ RESPONSIVE ===== */
+.friend-card-custom {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+}
+
+    .friend-card-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+/* Trên desktop, card có thể hiển thị khác */
+@media (min-width: 768px) {
+    .friend-card-custom {
+        padding: 16px;
+        gap: 16px;
+    }
+}
+
+/* ===== CARD BÀI VIẾT RESPONSIVE ===== */
+.post-card-custom {
+    background: white;
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+}
+
+    .post-card-custom:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+@media (min-width: 768px) {
+    .post-card-custom {
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+}
+
+/* ===== FLEXBOX UTILITIES RESPONSIVE ===== */
+.flex-responsive {
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 768px) {
+    .flex-responsive {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+/* ===== HIDE/SHOW RESPONSIVE ===== */
+.hide-on-mobile {
+    display: none;
+}
+
+.show-on-mobile {
+    display: block;
+}
+
+@media (min-width: 768px) {
+    .hide-on-mobile {
+        display: block;
+    }
+
+    .show-on-mobile {
+        display: none;
+    }
+}
+
+/* ===== TEXT TRUNCATE (cắt chữ dài) ===== */
+.text-truncate-custom {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* ===== BUTTON RESPONSIVE ===== */
+.btn-responsive {
+    padding: 8px 16px;
+    font-size: 13px;
+    border-radius: 30px;
+}
+
+@media (min-width: 768px) {
+    .btn-responsive {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+}
+
+@media (min-width: 992px) {
+    .btn-responsive {
+        padding: 12px 24px;
+        font-size: 15px;
+    }
+}

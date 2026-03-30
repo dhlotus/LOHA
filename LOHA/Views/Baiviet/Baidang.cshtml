@@ -1,45 +1,45 @@
-﻿<!--BÙI ĐỨC HÀ - LOTUS->
-@model LOHA.Models.Baiviet
+﻿@model LOHA.Models.Baiviet
 
 @{
     string avatarDefault = "/images/default.png";
+
+    // Lấy CurrentUserId từ ViewBag (do Controller truyền xuống)
+    int currentUserId = ViewBag.CurrentUserId ?? 0;
+    bool laChuBaiViet = currentUserId == Model.UserId;
 }
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
 
 <div class="post-item mb-4" id="post-@Model.Id">
     <div class="card border-0 shadow-sm post-card">
         <div class="card-body">
             <!-- Header -->
-            <div class="d-flex align-items-center mb-3">
+            <div class="d-flex align-items-start mb-3">
                 <img src="@avatarDefault"
                      class="rounded-circle me-2"
                      style="width: 48px; height: 48px; object-fit: cover;" />
                 <div class="flex-grow-1">
-                    <h5 class="mb-0 fw-bold" style="color: #1E2A78;">@Model.User?.Ten</h5>
-                    <small class="text-secondary">
-                        <i class="fa-regular fa-clock me-1"></i>@Tinhthoigian(Model.Ngaydang)
-                    </small>
-                </div>
-                <!-- Thay thế phần nút menu 3 chấm -->
-                <button class="btn btn-light btn-sm rounded-circle"
-                        onclick="showPostMenu(@Model.Id, this)"
-                        id="menuBtn-@Model.Id">
-                    <i class="fa-solid fa-ellipsis-vertical"></i>
-                </button>
-
-                <!-- Menu thả xuống (ẩn mặc định) -->
-                <div class="post-menu-dropdown" id="postMenu-@Model.Id" style="display: none; position: absolute; right: 20px; top: 60px; z-index: 1000;">
-                    <div class="bg-white rounded-3 shadow-sm border-0" style="min-width: 150px;">
-                        <button class="dropdown-item text-danger w-100 text-start"
-                                onclick="xoaBaiViet(@Model.Id)"
-                                style="border: none; background: transparent; padding: 8px 16px;">
-                            <i class="fa-regular fa-trash-can me-2"></i>Xoá bài viết
-                        </button>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 fw-bold" style="color: #1E2A78;">@Model.User?.Ten</h5>
+                            <small class="text-secondary">
+                                <i class="fa-regular fa-clock me-1"></i>@Tinhthoigian(Model.Ngaydang)
+                            </small>
+                        </div>
+                        <!-- CHỈ HIỂN THỊ NẾU LÀ CHỦ BÀI VIẾT -->
+                        @if (laChuBaiViet)
+                        {
+                            <button class="btn btn-light btn-sm rounded-circle"
+                                    onclick="showPostMenu(@Model.Id, this)"
+                                    id="menuBtn-@Model.Id">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                        }
                     </div>
                 </div>
             </div>
-            
-            
-           
+
             <!-- Nội dung -->
             <p class="mb-3" style="line-height: 1.6;">@Model.Noidung</p>
 
@@ -69,7 +69,7 @@
             <div class="d-flex gap-2 mt-3 post-actions">
                 <button onclick="thichBaiViet(@Model.Id, this)"
                         class="btn flex-fill @(ViewBag.Thichs?.Contains(Model.Id) == true ? "btn-primary liked" : "btn-light") rounded-pill like-btn">
-                    <i class="fa-solid fa-heart"></i>
+                    <i class="fa-solid fa-heart me-2"></i>
                     <span>Thích</span>
                     <span class="like-count ms-1" id="like-count-@Model.Id">@Model.Thichs.Count</span>
                 </button>
@@ -79,12 +79,10 @@
                     <i class="fa-regular fa-comment me-2"></i>
                     <span>Bình luận</span>
                 </button>
-
             </div>
 
             <!-- Khu vực bình luận (ẩn mặc định) -->
             <div id="comment-section-@Model.Id" style="display: none;" class="mt-3">
-                <!-- Danh sách bình luận -->
                 <div id="comment-list-@Model.Id" class="mb-3">
                     @if (Model.Binhluans != null && Model.Binhluans.Any())
                     {
@@ -106,7 +104,6 @@
                     }
                 </div>
 
-                <!-- Form bình luận -->
                 <div class="d-flex gap-2">
                     <img src="@avatarDefault"
                          class="rounded-circle"
@@ -124,15 +121,26 @@
                     </div>
                 </div>
             </div>
+            <!-- Menu thả xuống -->
+            <div class="post-menu-dropdown" id="postMenu-@Model.Id" style="display: none;">
+                <div class="bg-white rounded-3 shadow-lg border-0 py-2" style="min-width: 150px;">
+                    <button class="dropdown-item text-danger w-100 text-start"
+                            onclick="showXoaPopup(@Model.Id)"
+                            style="border: none; background: transparent; padding: 10px 16px; cursor: pointer;">
+                        <i class="fa-regular fa-trash-can me-2"></i>Xoá bài viết
+                    </button>
+                </div>
+            </div>
         </div>
+        
     </div>
 </div>
 
-
 <script>
-        // Hiển thị menu bài viết
+    // Hiển thị menu bài viết (bên phải icon 3 chấm)
     function showPostMenu(postId, btn) {
-        // Đóng tất cả menu khác
+        event.stopPropagation();
+
         document.querySelectorAll('[id^="postMenu-"]').forEach(menu => {
             if (menu.id !== 'postMenu-' + postId) {
                 menu.style.display = 'none';
@@ -142,12 +150,11 @@
         var menu = document.getElementById('postMenu-' + postId);
         if (menu.style.display === 'none') {
             menu.style.display = 'block';
-
-            // Đặt vị trí menu dưới nút
             var rect = btn.getBoundingClientRect();
-            menu.style.position = 'absolute';
-            menu.style.top = (rect.bottom + window.scrollY) + 'px';
+            menu.style.position = 'fixed';
+            menu.style.top = (rect.top + 5) + 'px';
             menu.style.right = (window.innerWidth - rect.right) + 'px';
+            menu.style.zIndex = '9999';
         } else {
             menu.style.display = 'none';
         }
@@ -162,38 +169,60 @@
         }
     });
 
-    // Xoá bài viết
-    function xoaBaiViet(postId) {
-        if (confirm('Bạn có chắc chắn muốn xoá bài viết này?')) {
-            fetch('/Baiviet/XoaBaiViet', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'id=' + postId
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Xoá bài viết khỏi DOM
-                    var postElement = document.getElementById('post-' + postId);
-                    if (postElement) {
-                        postElement.remove();
-                    }
-                    // Thông báo thành công (không dùng alert)
-                    console.log('Đã xoá bài viết');
-                } else {
-                    alert('Lỗi: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Có lỗi xảy ra');
-            });
-        }
-    }
-</script>
+    // Hiển thị popup xoá bài viết
+    function showXoaPopup(postId) {
+        // Đóng menu trước
+        var menu = document.getElementById('postMenu-' + postId);
+        if (menu) menu.style.display = 'none';
 
+        document.getElementById('postIdToDelete').value = postId;
+        var modal = new bootstrap.Modal(document.getElementById('confirmXoaBaiVietModal'));
+        modal.show();
+    }
+
+    // Xử lý xoá bài viết
+    function xoaBaiViet() {
+        var postId = document.getElementById('postIdToDelete').value;
+
+        fetch('/Baiviet/XoaBaiViet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'id=' + postId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var postElement = document.getElementById('post-' + postId);
+                if (postElement) {
+                    postElement.remove();
+                }
+                console.log('Đã xoá bài viết');
+            } else {
+                console.error('Lỗi:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
+        // Đóng popup
+        var modal = bootstrap.Modal.getInstance(document.getElementById('confirmXoaBaiVietModal'));
+        modal.hide();
+    }
+
+    // ĐỢI DOM LOAD XONG RỒI MỚI GẮN SỰ KIỆN
+    document.addEventListener('DOMContentLoaded', function() {
+        var confirmBtn = document.getElementById('confirmXoaBtn');
+        if (confirmBtn) {
+            // Xóa sự kiện cũ nếu có
+            confirmBtn.removeEventListener('click', xoaBaiViet);
+            // Gắn sự kiện mới
+            confirmBtn.addEventListener('click', xoaBaiViet);
+        }
+    });
+</script>
 
 @functions {
     public string Tinhthoigian(DateTime ngaydang)
@@ -205,5 +234,4 @@
         if (khoangthoigian.TotalDays < 7) return $"{(int)khoangthoigian.TotalDays} ngày trước";
         return ngaydang.ToString("dd/MM/yyyy");
     }
-
 }
