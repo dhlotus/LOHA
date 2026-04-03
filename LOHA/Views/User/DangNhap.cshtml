@@ -1,7 +1,7 @@
 ﻿@model LOHA.Models.LoginViewModel
 @{
     ViewData["Title"] = "Đăng nhập";
-Layout = "_LayoutLogin";
+    Layout = "_LayoutLogin";
     var dangKyThanhCong = TempData["DangKyThanhCong"]?.ToString();
     var thongBao = TempData["ThongBao"]?.ToString() ?? "";
 }

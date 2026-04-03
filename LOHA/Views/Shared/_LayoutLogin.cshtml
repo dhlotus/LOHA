@@ -458,6 +458,28 @@
             .form-section { flex: 0 0 100%; }
             body { overflow: auto; }
         }
+        @@media (max-height: 720px) {
+            .hero-text {
+                margin-bottom: 20px;    
+            }
+            .hero-text h1{
+                    font-size: 30px;
+            }
+            .mockup-container {
+                width: 350px;
+                height: 450px;
+            }
+            .mockup-card-center {
+                width: 300px;
+                height: 470px;
+            }
+            .mockup-card-center .card-content {
+                padding: 8px 15px;
+            }
+            .mockup-card-center .card-footer {
+                padding: 12px 20px;
+            }
+        }
         .mockup-card-left,
         .mockup-card-right {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
