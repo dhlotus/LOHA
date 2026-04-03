@@ -3,101 +3,289 @@
     ViewData["Title"] = "Đăng ký";
     Layout = "_LayoutAuth";
 }
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<div class="auth-form">
-    <form asp-action="Dangky" method="post">
-        @if (!ViewData.ModelState.IsValid)
-        {
-            <div class="alert-danger mb-4">
-                <i class="fa-regular fa-circle-exclamation me-2"></i>
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<div class="register-wrapper">
+    <div class="register-card">
+        <!-- Logo -->
+        <div class="register-logo">
+            <img src="/images/logoLOHA.png" alt="LOHA" class="logo-img">
+            <span class="logo-text">LOHA</span>
+        </div>
+
+        <!-- Tiêu đề -->
+        <h1 class="register-title">Bắt đầu trên LOHA</h1>
+        <p class="register-subtitle">Đăng ký để xem ảnh và video từ bạn bè.</p>
+
+        <!-- Form -->
+        <form asp-action="Dangky" method="post">
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert-custom">
+                    <i class="fa-regular fa-circle-exclamation me-2"></i>
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                </div>
+            }
+
+            <!-- Số di động hoặc email -->
+            <div class="input-group">
+                <input asp-for="EmailorSDT" type="text" class="register-input" placeholder="Số di động hoặc email" />
+                <span asp-validation-for="EmailorSDT" class="text-danger small"></span>
+                <p class="input-note">
+                    Bạn có thể nhận được thông báo của chúng tôi.
+                    <a href="#" class="note-link">Tìm hiểu vì sao chúng tôi yêu cầu thông tin liên hệ của bạn</a>
+                </p>
             </div>
-        }
 
-        <!-- Họ tên -->
-        <div class="mb-3">
-            <label class="form-label">
-                <i class="fa-regular fa-user me-2" style="color: #6C63FF;"></i>Họ tên
-            </label>
-            <input asp-for="Ten" type="text" class="loha-input" placeholder="Nhập họ tên của bạn" />
-            <span asp-validation-for="Ten" class="text-danger small"></span>
-        </div>
-
-        <!-- Ngày sinh -->
-        <div class="mb-3">
-            <label class="form-label">
-                <i class="fa-regular fa-calendar me-2" style="color: #6C63FF;"></i>Ngày sinh
-            </label>
-            <input asp-for="Ngaysinh" type="date" class="loha-input" />
-            <span asp-validation-for="Ngaysinh" class="text-danger small"></span>
-        </div>
-
-        <!-- Giới tính -->
-        <div class="mb-3">
-            <label class="form-label d-block">
-                <i class="fa-solid fa-venus-mars me-2" style="color: #6C63FF;"></i> Giới tính
-            </label>
-            <div class="d-flex gap-4">
-                <label class="radio-option">
-                    <input type="radio" asp-for="Gioitinh" value="Nam" />
-                    <span>Nam</span>
-                </label>
-                <label class="radio-option">
-                    <input type="radio" asp-for="Gioitinh" value="Nữ" />
-                    <span>Nữ</span>
-                </label>
-                <label class="radio-option">
-                    <input type="radio" asp-for="Gioitinh" value="Khác" />
-                    <span>Khác</span>
-                </label>
+            <!-- Họ tên -->
+            <div class="input-group">
+                <input asp-for="Ten" type="text" class="register-input" placeholder="Họ tên" />
+                <span asp-validation-for="Ten" class="text-danger small"></span>
             </div>
-            <span asp-validation-for="Gioitinh" class="text-danger small"></span>
-        </div>
 
-        <!-- Email/SĐT -->
-        <div class="mb-3">
-            <label class="form-label">
-                <i class="fa-regular fa-envelope me-2" style="color: #6C63FF;"></i>Email / Số điện thoại
-            </label>
-            <input asp-for="EmailorSDT" type="text" class="loha-input" placeholder="Nhập email hoặc số điện thoại" />
-            <span asp-validation-for="EmailorSDT" class="text-danger small"></span>
-        </div>
+            <!-- Mật khẩu -->
+            <div class="input-group">
+                <input asp-for="Matkhau" type="password" class="register-input" placeholder="Mật khẩu" id="passwordInput" />
+                <span asp-validation-for="Matkhau" class="text-danger small"></span>
+            </div>
 
-        <!-- Mật khẩu -->
-        <div class="mb-4">
-            <label class="form-label">
-                <i class="fa-solid fa-key" style="color: #6c63ff;"></i> Mật khẩu
-            </label>
-            <input asp-for="Matkhau" type="password" class="loha-input" placeholder="Tối thiểu 6 ký tự" />
-            <span asp-validation-for="Matkhau" class="text-danger small"></span>
-        </div>
+            <!-- Xác nhận mật khẩu -->
+            <div class="input-group">
+                <input type="password" name="XacNhanMatKhau" class="register-input" placeholder="Xác nhận mật khẩu" id="confirmPasswordInput" />
+                <span id="xacNhanError" class="text-danger small"></span>
+            </div>
 
-        <!-- Nút đăng ký -->
-        <button type="submit" class="loha-btn-primary">
-            <i class="fa-solid fa-user-pen"></i> Đăng ký
-        </button>
+            <!-- Ngày sinh -->
+            <div class="input-group">
+                <label class="input-label">Ngày sinh</label>
+                <div class="date-group">
+                    <select id="daySelect" class="date-select">
+                        <option value="">Ngày</option>
+                        @for (int i = 1; i <= 31; i++)
+                        {
+                            <option value="@i">@i</option>
+                        }
+                    </select>
+                    <select id="monthSelect" class="date-select">
+                        <option value="">Tháng</option>
+                        @for (int i = 1; i <= 12; i++)
+                        {
+                            <option value="@i">Tháng @i</option>
+                        }
+                    </select>
+                    <select id="yearSelect" class="date-select">
+                        <option value="">Năm</option>
+                        @for (int i = DateTime.Now.Year; i >= 1900; i--)
+                        {
+                            <option value="@i">@i</option>
+                        }
+                    </select>
+                </div>
+                <input type="hidden" id="ngaysinhHidden" name="Ngaysinh" />
+                <span asp-validation-for="Ngaysinh" class="text-danger small"></span>
+            </div>
 
-        <!-- Link đăng nhập -->
-        <div class="divider">hoặc</div>
+            <!-- Giới tính -->
+            <div class="input-group">
+                <label class="input-label">Giới tính</label>
+                <div class="gender-group">
+                    <label class="radio-option">
+                        <input type="radio" asp-for="Gioitinh" value="Nam" />
+                        <span>Nam</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" asp-for="Gioitinh" value="Nữ" />
+                        <span>Nữ</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" asp-for="Gioitinh" value="Khác" />
+                        <span>Khác</span>
+                    </label>
+                </div>
+                <span asp-validation-for="Gioitinh" class="text-danger small"></span>
+            </div>
 
-        <div class="text-center">
-            <span class="text-secondary">Đã có tài khoản? </span>
-            <a href="/User/DangNhap" class="forgot-password" style="font-weight: 600;">Đăng nhập ngay</a>
-        </div>
-    </form>
+            <!-- Chính sách -->
+            <div class="policy-text">
+                <p>
+                    Bằng việc nhấn vào Đăng ký, bạn đồng ý tạo tài khoản cũng như chấp thuận
+                    <a href="#">Điều khoản</a>, <a href="#">Chính sách quyền riêng tư</a> và
+                    <a href="#">Chính sách cookie</a> của LOHA.
+                </p>
+                <p class="policy-note">
+                    <a href="#">Chính sách quyền riêng tư</a> mô tả các cách chúng tôi có thể dùng thông tin
+                    thu thập được khi bạn tạo tài khoản. Chẳng hạn, chúng tôi sử dụng thông tin này để cung cấp,
+                    cá nhân hóa và cải thiện các sản phẩm của mình, bao gồm quảng cáo.
+                </p>
+            </div>
+
+            <!-- Nút đăng ký -->
+            <button type="submit" class="register-btn">Đăng ký</button>
+
+            <!-- Link đăng nhập -->
+            <div class="login-redirect">
+                <a href="/User/DangNhap" class="login-link">Tôi có tài khoản rồi</a>
+            </div>
+        </form>
+    </div>
 </div>
 
-<!-- Style bổ sung cho radio button -->
+<!-- Style CSS -->
 <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: white !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .register-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .register-card {
+        max-width: 350px;
+        width: 100%;
+        background: white;
+        padding: 40px 32px;
+        border: 1px solid #dbdbdb;
+        border-radius: 4px;
+    }
+
+    /* Logo */
+    .register-logo {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+
+    .logo-img {
+        width: 48px;
+        height: 48px;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-bottom: 8px;
+    }
+
+    .logo-text {
+        display: block;
+        font-size: 28px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #1E2A78, #6C63FF);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Tiêu đề */
+    .register-title {
+        text-align: center;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1E2A78;
+        margin-bottom: 8px;
+    }
+
+    .register-subtitle {
+        text-align: center;
+        font-size: 14px;
+        color: #737373;
+        margin-bottom: 24px;
+    }
+
+    /* Input Group */
+    .input-group {
+        margin-bottom: 12px;
+    }
+
+    .register-input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #dbdbdb;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: all 0.2s;
+        background: #FAFAFA;
+    }
+
+        .register-input:focus {
+            outline: none;
+            border-color: #6C63FF;
+            background: white;
+            box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.1);
+        }
+
+        .register-input::placeholder {
+            color: #8e8e8e;
+        }
+
+    /* Input note */
+    .input-note {
+        font-size: 12px;
+        color: #737373;
+        margin-top: 6px;
+        line-height: 1.4;
+    }
+
+    .note-link {
+        color: #6C63FF;
+        text-decoration: none;
+    }
+
+        .note-link:hover {
+            text-decoration: underline;
+        }
+
+    /* Label */
+    .input-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #1E2A78;
+        margin-bottom: 6px;
+    }
+
+    /* Date Group */
+    .date-group {
+        display: flex;
+        gap: 8px;
+    }
+
+    .date-select {
+        flex: 1;
+        padding: 12px 8px;
+        border: 1px solid #dbdbdb;
+        border-radius: 4px;
+        font-size: 14px;
+        background: #FAFAFA;
+        cursor: pointer;
+    }
+
+        .date-select:focus {
+            outline: none;
+            border-color: #6C63FF;
+        }
+
+    /* Gender Group */
+    .gender-group {
+        display: flex;
+        gap: 24px;
+    }
+
     .radio-option {
         display: flex;
         align-items: center;
         gap: 6px;
         cursor: pointer;
-        color: #4B5563;
-        font-size: 15px;
+        font-size: 14px;
+        color: #1E2A78;
     }
 
         .radio-option input[type="radio"] {
@@ -107,10 +295,129 @@
             cursor: pointer;
         }
 
-        .radio-option span {
-            margin-left: 2px;
+    /* Policy Text */
+    .policy-text {
+        font-size: 12px;
+        color: #737373;
+        margin: 16px 0;
+        line-height: 1.5;
+    }
+
+        .policy-text a {
+            color: #6C63FF;
+            text-decoration: none;
         }
+
+            .policy-text a:hover {
+                text-decoration: underline;
+            }
+
+    .policy-note {
+        margin-top: 12px;
+        font-size: 11px;
+        color: #8e8e8e;
+    }
+
+    /* Button */
+    .register-btn {
+        width: 100%;
+        padding: 10px 0;
+        background: #0064e0;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-top: 8px;
+    }
+
+        .register-btn:hover {
+            background: #0050b3;
+        }
+
+    /* Login Redirect */
+    .login-redirect {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .login-link {
+        color: #6C63FF;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+        .login-link:hover {
+            text-decoration: underline;
+        }
+
+    /* Alert */
+    .alert-custom {
+        background: #FEF2F2;
+        border: 1px solid #FECACA;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 16px;
+        color: #DC2626;
+        font-size: 13px;
+    }
+
+    /* Responsive */
+    @@media (max-width: 450px) {
+        .register-card {
+            padding: 30px 20px;
+        }
+        
+        .date-group {
+            gap: 6px;
+        }
+        
+        .gender-group {
+            gap: 16px;
+        }
+    }
 </style>
+
+<!-- JavaScript -->
+<script>
+    // Xử lý ngày sinh từ 3 select
+    function updateDateOfBirth() {
+        var day = document.getElementById('daySelect').value;
+        var month = document.getElementById('monthSelect').value;
+        var year = document.getElementById('yearSelect').value;
+        
+        if (day && month && year) {
+            var date = new Date(year, month - 1, day);
+            var formattedDate = date.toISOString().split('T')[0];
+            document.getElementById('ngaysinhHidden').value = formattedDate;
+        }
+    }
+    
+    document.getElementById('daySelect')?.addEventListener('change', updateDateOfBirth);
+    document.getElementById('monthSelect')?.addEventListener('change', updateDateOfBirth);
+    document.getElementById('yearSelect')?.addEventListener('change', updateDateOfBirth);
+    
+    // Kiểm tra xác nhận mật khẩu
+    var passwordInput = document.getElementById('passwordInput');
+    var confirmInput = document.getElementById('confirmPasswordInput');
+    var errorSpan = document.getElementById('xacNhanError');
+    
+    function checkPasswordMatch() {
+        if (passwordInput.value !== confirmInput.value) {
+            errorSpan.innerText = 'Mật khẩu xác nhận không khớp';
+        } else {
+            errorSpan.innerText = '';
+        }
+    }
+    
+    if (passwordInput && confirmInput) {
+        passwordInput.addEventListener('input', checkPasswordMatch);
+        confirmInput.addEventListener('input', checkPasswordMatch);
+    }
+</script>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

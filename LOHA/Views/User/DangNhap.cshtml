@@ -1,103 +1,80 @@
 ﻿@model LOHA.Models.LoginViewModel
 @{
     ViewData["Title"] = "Đăng nhập";
-    Layout = "_LayoutAuth";
+Layout = "_LayoutLogin";
+    var dangKyThanhCong = TempData["DangKyThanhCong"]?.ToString();
+    var thongBao = TempData["ThongBao"]?.ToString() ?? "";
 }
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<div class="auth-form">
-    <!-- POPUP THÔNG BÁO ĐĂNG KÝ THÀNH CÔNG -->
-    @if (TempData["DangKyThanhCong"] != null && TempData["DangKyThanhCong"].ToString() == "true")
-    {
-        <div class="popup-success show" id="successPopup">
-            <div class="popup-content">
-                <div class="popup-icon">
-                    <i class="fa-regular fa-circle-check"></i>
-                </div>
-                <h5 class="popup-title">Thành công!</h5>
-                <p class="popup-message">@TempData["ThongBao"]</p>
-                <div class="popup-progress">
-                    <div class="popup-progress-bar" id="progressBar"></div>
-                </div>
+
+@if (!string.IsNullOrEmpty(dangKyThanhCong) && dangKyThanhCong == "true")
+{
+    <div class="popup-success" id="successPopup">
+        <div class="popup-content">
+            <div class="popup-icon">
+                <i class="fa-regular fa-circle-check"></i>
             </div>
+            <h5 class="popup-title">Thành công!</h5>
+            <p class="popup-message">@thongBao</p>
+            <div class="popup-progress">
+                <div class="popup-progress-bar"></div>
+            </div>
+        </div>
+    </div>
+}
+
+<form asp-action="DangNhap" method="post">
+    <div class="input-group">
+        <input asp-for="EmailorSDT" class="login-input" type="text" placeholder="Số di động, tên người dùng hoặc email" />
+        <span asp-validation-for="EmailorSDT" class="text-danger small"></span>
+    </div>
+
+    <div class="input-group">
+        <input asp-for="Matkhau" class="login-input" type="password" placeholder="Mật khẩu" id="passwordInput" />
+        <span asp-validation-for="Matkhau" class="text-danger small"></span>
+    </div>
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert-custom">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         </div>
     }
+    <button type="submit" class="login-btn" id="loginBtn">Đăng nhập</button>
 
-    <form asp-action="DangNhap" method="post">
-        @if (!ViewData.ModelState.IsValid)
-        {
-            <div class="alert-danger mb-4">
-                <i class="fa-regular fa-circle-exclamation me-2"></i>
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            </div>
-        }
+    <a href="#" class="forgot-link">Quên mật khẩu?</a>
+        
+    <a href="/User/DangKy" class="register-btn">Tạo tài khoản mới</a>
+</form>
 
-        <!-- Email/SĐT -->
-        <div class="mb-3">
-            <label class="form-label">
-                <i class="fa-regular fa-envelope me-2" style="color: #6C63FF;"></i>Email hoặc số điện thoại
-            </label>
-            <input asp-for="EmailorSDT" class="loha-input" type="text" placeholder="Nhập email hoặc số điện thoại" />
-            <span asp-validation-for="EmailorSDT" class="text-danger small"></span>
-        </div>
-
-        <!-- Mật khẩu -->
-        <div class="mb-4">
-            <label class="form-label">
-                    <i class="fa-solid fa-key" style="color: #6c63ff;"></i> Mật khẩu
-            </label>
-            <input asp-for="Matkhau" class="loha-input" type="password" placeholder="Mật khẩu của bạn..." />
-            <span asp-validation-for="Matkhau" class="text-danger small"></span>
-        </div>
-
-        <!-- Ghi nhớ đăng nhập & Quên mật khẩu -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="remember" />
-                <label class="form-check-label" for="remember" style="color: #4B5563; font-size: 14px;">
-                    Ghi nhớ đăng nhập
-                </label>
-            </div>
-            <a href="#" class="forgot-password">Quên mật khẩu?</a>
-        </div>
-
-        <!-- Nút đăng nhập -->
-        <button type="submit" class="loha-btn-primary">
-            <i class="fa-solid fa-right-to-bracket me-2"></i> Đăng nhập
-        </button>
-
-        <!-- Link đăng ký -->
-        <div class="divider">hoặc</div>
-
-        <div class="text-center">
-            <span class="text-secondary">Chưa có tài khoản? </span>
-            <a href="/User/DangKy" class="forgot-password" style="font-weight: 600;">Đăng ký ngay</a>
-        </div>
-    </form>
-</div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-
-    <script>
-        // Tự động ẩn popup sau 3 giây
-        setTimeout(function() {
-            var popup = document.getElementById('successPopup');
-            if (popup) {
-                popup.style.animation = 'slideInRight 0.3s ease reverse forwards';
-                setTimeout(function() {
-                    popup.remove();
-                }, 300);
-            }
-        }, 3000);
-
-        // Focus vào ô email/sdt sau khi đăng ký thành công
-        document.addEventListener('DOMContentLoaded', function() {
+<script>
+    // Kiểm tra input để active button
+    function checkInputs() {
         var emailInput = document.querySelector('input[name="EmailorSDT"]');
-        if (emailInput != null) {
-            emailInput.focus();
+        var passwordInput = document.getElementById('passwordInput');
+        var loginBtn = document.getElementById('loginBtn');
+        
+        if (emailInput.value.trim() !== '' && passwordInput.value.trim() !== '') {
+            loginBtn.classList.add('active');
+            loginBtn.disabled = false;
+        } else {
+            loginBtn.classList.remove('active');
+            loginBtn.disabled = true;
         }
-        });
-    </script>
-}
+    }
+
+    document.querySelector('input[name="EmailorSDT"]')?.addEventListener('input', checkInputs);
+    document.getElementById('passwordInput')?.addEventListener('input', checkInputs);
+    
+    // Khởi tạo trạng thái ban đầu
+    checkInputs();
+
+    // Tự động ẩn popup sau 3 giây
+    setTimeout(function() {
+        var popup = document.getElementById('successPopup');
+        if (popup) {
+            popup.style.animation = 'slideInRight 0.3s ease reverse forwards';
+            setTimeout(function() {
+                popup.remove();
+            }, 300);
+        }
+    }, 3000);
+</script>

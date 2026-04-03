@@ -1,14 +1,16 @@
-﻿body {
-    background: linear-gradient(135deg, #1E2A78 0%, #6C63FF 100%);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Inter', sans-serif;
-    margin: 0;
-    padding: 20px;
-}
+﻿@keyframes gradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
 
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
 .auth-container {
     width: 100%;
     max-width: 450px;
@@ -210,3 +212,135 @@
         margin-left: 15px;
     }
 
+
+/* ===== FORM ĐĂNG NHẬP - KÍCH THƯỚC CHUẨN ===== */
+
+/* Form Wrapper - Khung chứa form */
+.form-wrapper {
+    max-width: 400px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Tiêu đề Form */
+.form-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1E2A78;
+    margin-bottom: 24px;
+    text-align: left;
+}
+
+/* Input Group - khoảng cách giữa các ô */
+.input-group {
+    margin-bottom: 12px;
+}
+
+/* Ô nhập liệu */
+.login-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #dbdbdb;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background: #FFFFFF;
+    color: #1E2A78;
+}
+
+    .login-input:focus {
+        outline: none;
+        border-color: #6C63FF;
+        box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.1);
+    }
+
+    .login-input::placeholder {
+        color: #8e8e8e;
+        font-size: 14px;
+    }
+
+/* Nút Đăng nhập - Primary Button */
+.login-btn {
+    width: 100%;
+    padding: 12px 0;
+    background: #A0C3FF;
+    color: white;
+    border: none;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+}
+
+    .login-btn.active {
+        background: #0866FF;
+    }
+
+        .login-btn.active:hover {
+            background: #1877f2;
+            transform: translateY(-1px);
+        }
+
+/* Link Quên mật khẩu */
+.forgot-link {
+    display: block;
+    text-align: center;
+    color: #1E2A78;
+    font-size: 13px;
+    text-decoration: none;
+    margin: 20px 0;
+}
+
+    .forgot-link:hover {
+        text-decoration: underline;
+    }
+
+/* Nút Tạo tài khoản mới */
+.register-btn {
+    width: 100%;
+    padding: 12px 0;
+    background: transparent;
+    border: 1px solid #1877f2;
+    border-radius: 999px;
+    color: #1877f2;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: block;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+    .register-btn:hover {
+        background: rgba(24, 119, 242, 0.05);
+        transform: translateY(-1px);
+    }
+
+/* Footer lotus */
+.footer-lotus {
+    margin-top: 40px;
+    text-align: center;
+    font-size: 12px;
+    color: #8e8e8e;
+}
+
+    .footer-lotus i {
+        margin-right: 6px;
+        font-size: 14px;
+    }
+
+/* Alert lỗi */
+.alert-custom {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 20px;
+    color: #DC2626;
+    font-size: 13px;
+}

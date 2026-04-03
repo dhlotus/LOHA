@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿﻿
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -13,138 +14,15 @@
 
     <!-- LOHA CSS -->
     <link rel="stylesheet" href="~/css/loha.css" asp-append-version="true" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <link rel="stylesheet" href="~/css/auth.css" />
-    <link rel="stylesheet" href="~/css/responsive.css" />
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/responsive.css" asp-append-version="true" />
 </head>
-<body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="auth-logo">
-                <img src="/images/logoLOHA.png" alt="LOHA Logo" class="logo-img">
-                <span class="logo-text">LOHA</span>
-            </div>
-            <h4 class="auth-title">@ViewData["Title"]</h4>
-
-            @RenderBody()
-        </div>
-
-        <!-- Footer với copyright đã sửa -->
-        <div class="auth-footer">
-            © 2026 - From BĐH LOTUS<br />
-            <small style="font-size: 12px; opacity: 0.8;">Phiên bản 1.0</small>
-        </div>
+<body style="background: white !important; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px;">
+    <div class="auth-container" style="max-width: 380px; width: 100%; margin: 0 auto;">
+        @RenderBody()
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
-
-    <style>
-       
-        /* ===== RESPONSIVE CHO LAYOUT ===== */
-
-        /* Mobile nhỏ (<576px) */
-        @@media (max-width: 576px) {
-            
-            .main-content {
-                padding: 10px 0 70px 0 !important;
-            }
-
-            
-
-            .bottom-nav-item {
-                padding: 4px 8px !important;
-                font-size: 10px !important;
-            }
-
-                .bottom-nav-item i {
-                    font-size: 18px !important;
-                }
-
-                .bottom-nav-item span {
-                    font-size: 10px !important;
-                }
-
-            .mobile-header .loha-logo {
-                font-size: 20px !important;
-            }
-
-            .mobile-header .d-flex.gap-3 {
-                gap: 12px !important;
-            }
-
-            .mobile-header i {
-                font-size: 18px !important;
-            }
-        }
-
-        /* Tablet (576px - 768px) */
-        @@media (min-width: 576px) and (max-width: 768px) {
-            .main-content {
-                padding: 15px 0 70px 0 !important;
-            }
-
-            .mobile-header .loha-logo {
-                font-size: 22px !important;
-            }
-
-            .mobile-header i {
-                font-size: 20px !important;
-            }
-        }
-
-        /* Desktop nhỏ (992px - 1200px) */
-        @@media (min-width: 992px) and (max-width: 1200px) {
-            .loha-sidebar {
-                width: 220px !important;
-            }
-
-            .loha-menu-item span {
-                font-size: 14px !important;
-            }
-
-            .loha-menu-item i {
-                font-size: 18px !important;
-            }
-        }
-
-        /* Điều chỉnh cho main content không bị che */
-        .main-content {
-            min-height: calc(100vh - 70px);
-        }
-
-        /* Bottom Navigation - đảm bảo không bị che trên điện thoại */
-        .bottom-nav {
-            padding-bottom: env(safe-area-inset-bottom, 8px);
-        }
-
-        /* Đảm bảo modal hiển thị đẹp trên mobile */
-        @@media (max-width: 576px) {
-            .modal-dialog {
-                margin: 0.5rem !important;
-            }
-
-            .modal-body.p-4 {
-                padding: 1.5rem !important;
-            }
-
-            .modal-body .fa-3x {
-                font-size: 2rem !important;
-            }
-
-            .modal-body h5 {
-                font-size: 1.1rem !important;
-            }
-
-            .modal-body p {
-                font-size: 0.85rem !important;
-            }
-
-            .modal-body .btn {
-                padding: 0.4rem 1rem !important;
-                font-size: 0.85rem !important;
-            }
-        }
-    </style>
 </body>
 </html>

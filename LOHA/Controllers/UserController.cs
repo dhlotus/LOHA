@@ -22,8 +22,15 @@ namespace LOHA.Controllers // nhóm chứa các class
         }
 
         [HttpPost]
-        public IActionResult DangKy(User user)
+        public IActionResult DangKy(User user, string XacNhanMatKhau)
         {
+            // Kiểm tra xác nhận mật khẩu
+            if (user.Matkhau != XacNhanMatKhau)
+            {
+                ModelState.AddModelError("Matkhau", "Mật khẩu xác nhận không khớp");
+                return View(user);
+            }
+
             if (ModelState.IsValid)
             {
                 // Kiểm tra email/sdt đã tồn tại chưa
@@ -39,11 +46,9 @@ namespace LOHA.Controllers // nhóm chứa các class
                 _context.Users.Add(user);
                 _context.SaveChanges();
 
-                // Lưu thông báo thành công vào TempData
                 TempData["DangKyThanhCong"] = "true";
                 TempData["ThongBao"] = "Đăng ký tài khoản thành công!";
 
-                // Chuyển hướng về trang đăng nhập
                 return RedirectToAction("DangNhap");
             }
             return View(user);
@@ -76,7 +81,7 @@ namespace LOHA.Controllers // nhóm chứa các class
             {
                 HttpContext.Session.SetString("user", user.EmailorSDT);
             }
-            return RedirectToAction("Trangcanhan");
+            return RedirectToAction("Trangcanhan", "User");
         }
 
         // đăng xuất
