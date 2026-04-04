@@ -126,7 +126,8 @@
                         <input type="text"
                                class="form-control form-control-sm rounded-pill"
                                id="comment-input-@Model.Id"
-                               placeholder="Viết bình luận..." />
+                               placeholder="Viết bình luận..."
+                               onkeydown="handleEnter(event, @Model.Id, 'comment-input-@Model.Id')" />
                               
                         <button class="btn btn-primary btn-sm rounded-pill ms-2 px-3"
                                 onclick="guiBinhLuan(@Model.Id, 'comment-input-@Model.Id')">
@@ -151,3 +152,11 @@
     }
 
 }
+<script>
+    function handleEnter(event, postId, inputId) {
+        if (event.key === "Enter") {
+            event.preventDefault(); // tránh reload nếu có
+            guiBinhLuan(postId, inputId);
+        }
+    }
+</script>
