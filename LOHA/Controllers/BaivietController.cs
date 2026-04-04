@@ -1,7 +1,7 @@
 ﻿using LOHA.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Mvc.ViewEngines;     
+using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,22 +15,46 @@ namespace LOHA.Controllers
         {
             _context = context;
         }
-
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var baiviets = await _context.Baiviets // lấy tất cả bài viết
-                .Include(b => b.User) //lấy thông tin user
-                .Include(b => b.Binhluans) //ds comment
-                    .ThenInclude(bl => bl.User) // lấy thông tin user của từng comment
-                .Include(b => b.Thichs)
-                .OrderByDescending(b => b.Ngaydang) // bài viết mới lên đầu
-                .ToListAsync();//query và trả về list bài viết
-
-            // Lấy user hiện tại để kiểm tra quyền xoá
+            // 1. LẤY USER HIỆN TẠI TỪ SESSION
             var userSession = HttpContext.Session.GetString("user");
-            var currentUser = await _context.Users
-                .FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
-            ViewBag.CurrentUserId = currentUser?.ID ?? 0;
+            if (string.IsNullOrEmpty(userSession))
+            {
+                return RedirectToAction("DangNhap", "User");
+            }
+
+            var userHT = _context.Users.FirstOrDefault(u => u.EmailorSDT == userSession);
+            if (userHT == null)
+            {
+                return RedirectToAction("DangNhap", "User");
+            }
+
+            int currentUserId = userHT.ID;
+
+            // 2. LẤY DANH SÁCH ID BẠN BÈ (Chỉ những người có TrangThai == 1)
+            // Tìm trong bảng KetBans: 
+            // Nếu mình là NguoiGui thì lấy ID NguoiNhan. Nếu mình là NguoiNhan thì lấy ID NguoiGui.
+            var friendIds = _context.KetBans
+                .Where(kb => (kb.NguoiGuiId == currentUserId || kb.NguoiNhanId == currentUserId) && kb.TrangThai == 1)
+                .Select(kb => kb.NguoiGuiId == currentUserId ? kb.NguoiNhanId : kb.NguoiGuiId)
+                .ToList();
+
+            // Thêm chính mình vào danh sách để thấy cả bài mình đăng
+            friendIds.Add(currentUserId);
+
+            // 3. TRUY VẤN BÀI VIẾT (Lọc theo danh sách friendIds)
+            var baiviets = _context.Baiviets
+                .Include(b => b.User)
+                .Include(b => b.Binhluans)
+                    .ThenInclude(bl => bl.User)
+                .Include(b => b.Thichs)
+                .Where(b => friendIds.Contains(b.UserId)) // <-- CHỈ HIỆN BÀI CỦA BẠN BÈ (TRANGTHAI = 1)
+                .OrderByDescending(b => b.Ngaydang)
+                .ToList();
+
+            // ===== TRUYỀN DỮ LIỆU SANG VIEW =====
+            ViewBag.CurrentUserId = currentUserId;
 
             return View(baiviets);
         }
@@ -39,14 +63,16 @@ namespace LOHA.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult Taobaiviet(Baiviet bv, IFormFile AnhFile) // tự động mapping dữ liệu từ form
+        [HttpPost]
+        public IActionResult Taobaiviet(Baiviet bv, IFormFile AnhFile)
         {
-            var user = HttpContext.Session.GetString("user"); //lưu dữ liệu tạm của người dùng sau khi login
+            var user = HttpContext.Session.GetString("user");
 
-            if (user == null) // chưa đăng nhập chuyển tới trang đăng nhập
+            if (user == null)
             {
                 return RedirectToAction("DangNhap", "User");
             }
+
             var userDB = _context.Users.FirstOrDefault(x => x.EmailorSDT == user);
 
             if (userDB == null)
@@ -55,23 +81,26 @@ namespace LOHA.Controllers
             }
 
             bv.UserId = userDB.ID;
+
             if (AnhFile != null)
             {
-                string filename = Guid.NewGuid().ToString() + Path.GetExtension(AnhFile.FileName); // tạo tên file ngẫu nhiên
-                string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/baiviet", filename); // đường dẫn lưu file
+                string filename = Guid.NewGuid().ToString() + Path.GetExtension(AnhFile.FileName);
+                string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/baiviet", filename);
 
-                using (var stream = new FileStream(path, FileMode.Create)) // lưu file trên ổ cứn
+                using (var stream = new FileStream(path, FileMode.Create))
                 {
-                    AnhFile.CopyTo(stream); // coppy dữ liệu upload vào file
+                    AnhFile.CopyTo(stream);
                 }
-                bv.Anh = filename; // lưu tên ảnh vào db
+                bv.Anh = filename;
             }
-            bv.Ngaydang = DateTime.Now; // lưu thời gian đăng 
 
-            _context.Baiviets.Add(bv); // thêm bản ghi 
-            _context.SaveChanges(); //ghi vào db
+            bv.Ngaydang = DateTime.Now;
 
-            return RedirectToAction("Trangcanhan", "User");
+            _context.Baiviets.Add(bv);
+            _context.SaveChanges();
+
+            // --- SỬA ĐÚNG DÒNG NÀY ĐỂ Ở LẠI TRANG CHỦ ---
+            return RedirectToAction("Index", "Baiviet");
         }
 
 
@@ -194,57 +223,51 @@ namespace LOHA.Controllers
 
 
         // chi tiết bài viết
-        // chi tiết bài viết
         public IActionResult ChiTiet(int id)
         {
             // Lấy bài viết từ database kèm thông tin người đăng và like
             var baiviet = _context.Baiviets
-                .Include(b => b.User)
-                .Include(b => b.Thichs)
-                .Include(b => b.Binhluans)
-                    .ThenInclude(b => b.User)
+                .Include(b => b.User)               // lấy tên người đăng
+                .Include(b => b.Thichs)              // lấy danh sách like (để đếm)
+                .Include(b => b.Binhluans)            // lấy bình luận (sẽ dùng sau)
+                .ThenInclude(b => b.User)           // lấy tên người bình luận
                 .FirstOrDefault(b => b.Id == id);
 
+            // Nếu không tìm thấy bài viết -> báo lỗi 404
             if (baiviet == null)
             {
                 return NotFound();
             }
 
-            // Lấy email từ session, sau đó tìm user để lấy ID
-            string? userEmail = HttpContext.Session.GetString("user");
-            if (!string.IsNullOrEmpty(userEmail))
+            // Kiểm tra user hiện tại đã like bài viết này chưa (cho nút like)
+            string? userId = HttpContext.Session.GetString("user");
+            if (!string.IsNullOrEmpty(userId))
             {
-                var user = _context.Users.FirstOrDefault(u => u.EmailorSDT == userEmail);
-                if (user != null)
-                {
-                    ViewBag.DaThich = _context.Thichs
-                        .Any(t => t.BaivietId == id && t.UserId == user.ID);
-                }
-                else
-                {
-                    ViewBag.DaThich = false;
-                }
+                int currentUserId = int.Parse(userId);
+                ViewBag.DaThich = _context.Thichs
+                    .Any(t => t.BaivietId == id && t.UserId == currentUserId);
             }
             else
             {
                 ViewBag.DaThich = false;
             }
 
+            // Truyền bài viết sang view
             return View(baiviet);
         }
 
         [HttpGet]
         public async Task<IActionResult> TaiThemBaiViet(int page = 1, int pageSize = 5)
         {
-            var baiviets = await _context.Baiviets
+            var baiviets = _context.Baiviets
                 .Include(b => b.User)
                 .Include(b => b.Binhluans)
                     .ThenInclude(bl => bl.User)
                 .Include(b => b.Thichs)
                 .OrderByDescending(b => b.Ngaydang)
                 .Skip((page - 1) * pageSize)
-                .Take(pageSize + 1)
-                .ToListAsync();
+                .Take(pageSize + 1) // Lấy thêm 1 để kiểm tra còn không
+                .ToList();
 
             bool hasMore = baiviets.Count > pageSize;
             var postsToReturn = baiviets.Take(pageSize).ToList();
@@ -252,24 +275,30 @@ namespace LOHA.Controllers
             // Lấy danh sách bài viết đã like của user hiện tại
             var userSession = HttpContext.Session.GetString("user");
             List<int> thichs = new List<int>();
-            int currentUserId = 0;
 
             if (!string.IsNullOrEmpty(userSession))
             {
-                var user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
+                var user = _context.Users.FirstOrDefault(u => u.EmailorSDT == userSession);
                 if (user != null)
                 {
-                    currentUserId = user.ID;
-                    thichs = await _context.Thichs
+                    thichs = _context.Thichs
                         .Where(t => t.UserId == user.ID)
                         .Select(t => t.BaivietId)
-                        .ToListAsync();
+                        .ToList();
                 }
             }
 
             ViewBag.Thichs = thichs;
-            ViewBag.CurrentUserId = currentUserId; // 👈 THÊM DÒNG NÀY
+            int? currentUserId = null;
+
+            if (!string.IsNullOrEmpty(userSession))
+            {
+                var user = _context.Users.FirstOrDefault(u => u.EmailorSDT == userSession);
+                if (user != null)
+                    currentUserId = user.ID;
+            }
+
+            ViewBag.CurrentUserId = currentUserId;
 
             string html = "";
             foreach (var bv in postsToReturn)
@@ -281,21 +310,16 @@ namespace LOHA.Controllers
             {
                 html = html,
                 hasMore = hasMore,
-                totalPosts = await _context.Baiviets.CountAsync()
+                totalPosts = _context.Baiviets.Count()
             });
         }
 
         private async Task<string> RenderPartialViewToStringAsync(string viewName, object model)
         {
             ViewData.Model = model;
-
-            // Truyền ViewBag.CurrentUserId sang Partial View
-            ViewBag.CurrentUserId = ViewBag.CurrentUserId;
-
             using (var sw = new StringWriter())
             {
-                var viewEngine = HttpContext.RequestServices
-                    .GetService(typeof(ICompositeViewEngine)) as ICompositeViewEngine;
+                var viewEngine = HttpContext.RequestServices.GetService(typeof(ICompositeViewEngine)) as ICompositeViewEngine;
                 var viewResult = viewEngine.FindView(ControllerContext, viewName, false);
 
                 if (!viewResult.Success)
@@ -312,7 +336,7 @@ namespace LOHA.Controllers
                     new HtmlHelperOptions()
                 );
 
-                await viewResult.View.RenderAsync(viewContext);
+                await viewResult.View.RenderAsync(viewContext); // await được phép dùng
                 return sw.ToString();
             }
         }
@@ -322,6 +346,7 @@ namespace LOHA.Controllers
         {
             try
             {
+                // Lấy user hiện tại
                 var userSession = HttpContext.Session.GetString("user");
                 if (string.IsNullOrEmpty(userSession))
                 {
@@ -336,7 +361,10 @@ namespace LOHA.Controllers
                     return Json(new { success = false, message = "Không tìm thấy người dùng" });
                 }
 
+                // Tìm bài viết
                 var baiViet = await _context.Baiviets
+                    .Include(b => b.Thichs)
+                    .Include(b => b.Binhluans)
                     .FirstOrDefaultAsync(b => b.Id == id);
 
                 if (baiViet == null)
@@ -360,6 +388,7 @@ namespace LOHA.Controllers
                     }
                 }
 
+                // Xoá bài viết (EF sẽ tự xoá các Thich và BinhLuan liên quan do Cascade)
                 _context.Baiviets.Remove(baiViet);
                 await _context.SaveChangesAsync();
 
@@ -367,8 +396,47 @@ namespace LOHA.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
             }
         }
+        public IActionResult TrangCaNhan(int id)
+        {
+            var user = _context.Users
+               .Include(u => u.Baiviets)
+               .FirstOrDefault(u => u.ID == id);
+
+            if (user == null)
+                return NotFound();
+
+            return View(user);
+        }
+        [HttpPost]
+        public IActionResult KetBan(int nguoiNhanId)
+        {
+            var userSession = HttpContext.Session.GetString("user");
+            if (string.IsNullOrEmpty(userSession)) return Json(new { success = false, msg = "Chưa đăng nhập" });
+
+            var userGui = _context.Users.FirstOrDefault(u => u.EmailorSDT == userSession);
+
+            // Kiểm tra xem đã gửi lời mời chưa để tránh trùng lặp
+            var daTonTai = _context.KetBans.Any(kb =>
+                kb.NguoiGuiId == userGui.ID && kb.NguoiNhanId == nguoiNhanId);
+
+            if (daTonTai) return Json(new { success = false, msg = "Đã gửi lời mời rồi!" });
+
+            var moi = new KetBan
+            {
+                NguoiGuiId = userGui.ID,
+                NguoiNhanId = nguoiNhanId,
+                TrangThai = 0, // Trạng thái chờ
+                NgayGui = DateTime.Now
+            };
+
+            _context.KetBans.Add(moi);
+            _context.SaveChanges();
+
+            return Json(new { success = true, msg = "Đã gửi lời mời thành công" });
+        }
+
     }
 }
