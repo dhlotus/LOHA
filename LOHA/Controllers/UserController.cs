@@ -43,6 +43,9 @@ namespace LOHA.Controllers // nhóm chứa các class
 
                 // Thêm user mới
                 user.Ngaytao = DateTime.Now;
+
+                user.NgayCapNhatTen = null;
+                user.NgayCapNhatNgaySinh = null; // Đặt này cập nhật thông tin = 0
                 _context.Users.Add(user);
                 _context.SaveChanges();
 
@@ -196,6 +199,192 @@ namespace LOHA.Controllers // nhóm chứa các class
                 }
             }
             ViewBag.DanhSachBanBe = danhSachBanBe;
+
+            return View(user);
+        }
+        // ===== CHỈNH SỬA TRANG CÁ NHÂN =====
+
+        [HttpPost]
+        public async Task<IActionResult> ChinhSua(
+    string? Ten,
+    DateTime? Ngaysinh,
+    string? MatKhauCu,
+    string? MatKhauMoi,
+    string? XacNhanMatKhau,
+    string? confirm,
+    string? activeTab)
+        {
+            var userSession = HttpContext.Session.GetString("user");
+
+            if (string.IsNullOrEmpty(userSession))
+                return RedirectToAction("DangNhap");
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
+
+            if (user == null)
+                return RedirectToAction("DangNhap");
+
+            var now = DateTime.Now;
+
+            // ===== KIỂM TRA MẬT KHẨU =====
+            if (string.IsNullOrWhiteSpace(MatKhauCu))
+                ModelState.AddModelError("MatKhauCu", "Phải nhập mật khẩu hiện tại");
+            else if (MatKhauCu != user.Matkhau)
+                ModelState.AddModelError("MatKhauCu", "Mật khẩu không đúng");
+
+            // ===== VALIDATE TÊN =====
+            if (string.IsNullOrWhiteSpace(Ten))
+            {
+                ModelState.AddModelError("Ten", "Tên không được để trống");
+            }
+            else if (Ten != user.Ten)
+            {
+                // Chuẩn hóa
+                Ten = Ten?.Trim();
+                var words = Ten.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                // 1. Kiểm tra số từ (2 - 5)
+                if (words.Length < 2 || words.Length > 5)
+                {
+                    ModelState.AddModelError("Ten", "Tên phải từ 2 đến 5 từ");
+                }
+                // 2. Kiểm tra từng ký tự
+                else if (Ten.Any(c => !char.IsLetter(c) && c != ' '))
+                {
+                    ModelState.AddModelError("Ten", "Tên không được chứa số hoặc ký tự đặc biệt");
+                }
+                if (Ten.Length > 40)
+                    ModelState.AddModelError("Ten", "Tên không được quá 40 ký tự");
+
+                else if (user.NgayCapNhatTen != null &&
+                    (now - user.NgayCapNhatTen.Value).TotalDays < 60)
+                    ModelState.AddModelError("Ten", "Bạn chỉ được đổi tên sau 60 ngày");
+            }
+
+            // ===== VALIDATE NGÀY SINH =====
+            if (Ngaysinh != null && Ngaysinh != user.Ngaysinh)
+            {
+                if (Ngaysinh > now.AddYears(-10) || Ngaysinh < now.AddYears(-100))
+                    ModelState.AddModelError("Ngaysinh", "Tuổi phải từ 10 đến 100");
+
+                else if (user.NgayCapNhatNgaySinh != null &&
+                    (now - user.NgayCapNhatNgaySinh.Value).TotalDays < 60)
+                    ModelState.AddModelError("Ngaysinh", "Bạn chỉ được đổi ngày sinh sau 60 ngày");
+            }
+
+            // ===== VALIDATE MẬT KHẨU =====
+            bool coNhapMK = !string.IsNullOrWhiteSpace(MatKhauMoi) ||
+                            !string.IsNullOrWhiteSpace(XacNhanMatKhau);
+
+            if (coNhapMK)
+            {
+                if (string.IsNullOrWhiteSpace(MatKhauMoi))
+                    ModelState.AddModelError("MatKhauMoi", "Phải nhập mật khẩu mới");
+                else if (MatKhauMoi.Length < 6)
+                    ModelState.AddModelError("MatKhauMoi", "Mật khẩu phải tối thiểu 6 ký tự");
+                else if (string.IsNullOrWhiteSpace(XacNhanMatKhau))
+                    ModelState.AddModelError("XacNhanMatKhau", "Phải xác nhận mật khẩu");
+                else if (MatKhauMoi != XacNhanMatKhau)
+                    ModelState.AddModelError("XacNhanMatKhau", "Mật khẩu xác nhận không khớp");
+            }
+            // Xóa lỗi không liên quan cho từng mục
+            if (activeTab != "matkhau")
+            {
+                ModelState.Remove("MatKhauMoi");
+                ModelState.Remove("XacNhanMatKhau");
+            }
+
+            if (activeTab != "ten")
+            {
+                ModelState.Remove("Ten");
+            }
+
+            if (activeTab != "ngaysinh")
+            {
+                ModelState.Remove("Ngaysinh");
+            }
+            // ===== NẾU CÓ LỖI =====
+            if (!ModelState.IsValid)
+            {
+                ViewBag.ActiveTab = activeTab;
+                return View(user);
+            }
+
+            // ===== CHƯA CONFIRM → MỞ MODAL =====
+            if (confirm != "true")
+            {
+
+                ViewBag.ShowConfirm = true;
+                ViewBag.ActiveTab = activeTab;
+
+                ViewBag.Ten = Ten;
+                ViewBag.Ngaysinh = Ngaysinh;
+                ViewBag.MatKhauCu = MatKhauCu;
+                ViewBag.MatKhauMoi = MatKhauMoi;
+                ViewBag.XacNhanMatKhau = XacNhanMatKhau;
+
+                return View(user);
+            }
+
+            // ===== UPDATE THẬT =====
+            if (!string.IsNullOrWhiteSpace(Ten) && Ten != user.Ten)
+            {
+                user.Ten = Ten;
+                user.NgayCapNhatTen = now;
+            }
+
+            if (Ngaysinh != null && Ngaysinh != user.Ngaysinh)
+            {
+                user.Ngaysinh = Ngaysinh;
+                user.NgayCapNhatNgaySinh = now;
+            }
+
+            if (coNhapMK)
+            {
+                user.Matkhau = MatKhauMoi;
+            }
+
+            await _context.SaveChangesAsync();
+
+            ViewBag.Success = "Cập nhật thành công!";
+            ViewBag.ActiveTab = activeTab;
+
+            return View(user);
+        }
+        [HttpGet]
+        public async Task<IActionResult> ChinhSua(string? tab = null)
+        {
+            var userSession = HttpContext.Session.GetString("user");
+
+            if (string.IsNullOrEmpty(userSession))
+                return RedirectToAction("DangNhap");
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
+
+            if (user == null)
+                return RedirectToAction("DangNhap");
+
+            var now = DateTime.Now;
+
+            // ===== CHECK 60 NGÀY TÊN =====
+            if (user.NgayCapNhatTen != null &&
+                (now - user.NgayCapNhatTen.Value).TotalDays < 60)
+            {
+                ViewBag.BlockTen = true;
+                ViewBag.MsgTen = "Bạn chỉ được đổi tên sau 60 ngày";
+            }
+
+            // ===== CHECK 60 NGÀY NGÀY SINH =====
+            if (user.NgayCapNhatNgaySinh != null &&
+                (now - user.NgayCapNhatNgaySinh.Value).TotalDays < 60)
+            {
+                ViewBag.BlockNgaySinh = true;
+                ViewBag.MsgNgaySinh = "Bạn chỉ được đổi ngày sinh sau 60 ngày";
+            }
+
+            ViewBag.ActiveTab = tab;
 
             return View(user);
         }

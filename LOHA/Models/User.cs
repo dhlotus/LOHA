@@ -35,7 +35,8 @@ namespace LOHA.Models
         public string? Avatar { get; set; }
         public DateTime? Ngaytao { get; set; }
         public List<Baiviet>? Baiviets { get; set; }
-
+        public DateTime? NgayCapNhatTen { get; set; } // Thời gian cập nhật của tên
+        public DateTime? NgayCapNhatNgaySinh { get; set; } // Thời gian cập nhật của ngày sinh
         // Validation tùy chỉnh cho ngày sinh
         public static ValidationResult? ValidateNgaySinh(DateTime? ngaySinh, ValidationContext context)
         {

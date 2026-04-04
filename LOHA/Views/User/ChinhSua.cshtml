@@ -1,0 +1,230 @@
+﻿@model LOHA.Models.User
+
+@{
+    var activeTab = ViewBag.ActiveTab as string;
+    var isMain = string.IsNullOrEmpty(activeTab);
+}
+
+<div class="container py-3">
+
+    <!-- ================= TRANG CHÍNH ================= -->
+    @if (isMain)
+    {
+        <!-- SUCCESS -->
+        @if (ViewBag.Success != null)
+        {
+            <div class="alert alert-success">@ViewBag.Success</div>
+        }
+
+        <a asp-action="Trangcanhan" class="btn btn-outline-primary mb-3">
+            <i class="fa-solid fa-chevron-left me-2"></i> Quay lại
+        </a>
+        <div class="d-flex justify-content-center">
+            <div style="width:100%; max-width:500px;">
+                <h2 class="mb-3" style="color: #1E2A78;">Chỉnh sửa trang cá nhân</h2>
+
+                <ul class="nav nav-pills flex-column custom-menu">
+                    <li class="nav-item">
+                        <a class="nav-link" href="?tab=ten"><i class="fa fa-user me-2"></i> Đổi tên</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="?tab=ngaysinh"><i class="fa-solid fa-calendar"></i> Sửa ngày sinh</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="?tab=matkhau"><i class="fa fa-lock me-2"></i> Đổi mật khẩu</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    }
+
+    <!-- ================= ĐỔI TÊN ================= -->
+    @if (activeTab == "ten")
+    {
+        <div style="max-width:500px; margin:auto;">
+            <div class="d-flex gap-2">
+                <a asp-action="ChinhSua" class="btn btn-outline-primary mb-3">
+                    <i class="fa-solid fa-chevron-left me-2"></i> Quay lại
+                </a>
+            </div>
+            <h4 class="mb-3">Đổi tên</h4>
+
+            <form asp-action="ChinhSua" method="post">
+
+                <input type="hidden" name="activeTab" value="ten" />
+
+                <div class="mb-3">
+                    <label>Tên hiện tại</label>
+                    <input class="form-control" value="@Model.Ten" disabled />
+                </div>
+
+                @if (ViewBag.BlockTen == true)
+                {
+                    <div class="text-danger mb-2">@ViewBag.MsgTen</div>
+                }
+
+                <div class="mb-3">
+                    <label>Tên mới</label>
+                    <input name="Ten" class="form-control" value="@ViewBag.Ten" />
+                    <span class="text-danger">@Html.ValidationMessage("Ten")</span>
+                </div>
+
+                <div class="mb-3">
+                    <label>Mật khẩu</label>
+                    <input name="MatKhauCu" type="password" class="form-control" />
+                    <span class="text-danger">@Html.ValidationMessage("MatKhauCu")</span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Xác nhận</button>
+                </div>
+            </form>
+        </div>
+    }
+
+    <!-- ================= NGÀY SINH ================= -->
+    @if (activeTab == "ngaysinh")
+    {
+        <div style="max-width:500px; margin:auto;">
+            <div class="d-flex gap-2">
+                <a asp-action="ChinhSua" class="btn btn-outline-primary mb-3">
+                    <i class="fa-solid fa-chevron-left me-2"></i> Quay lại
+                </a>
+            </div>
+            <h4 class="mb-3">Đổi ngày sinh</h4>
+
+            <form asp-action="ChinhSua" method="post">
+                <input type="hidden" name="activeTab" value="ngaysinh" />
+
+                <div class="mb-3">
+                    <label>Ngày sinh hiện tại</label>
+                    <input class="form-control"
+                           value="@Model.Ngaysinh?.ToString("dd/MM/yyyy")" disabled />
+                </div>
+
+                @if (ViewBag.BlockNgaySinh == true)
+                {
+                    <div class="text-danger mb-2">@ViewBag.MsgNgaySinh</div>
+                }
+
+                <div class="mb-3">
+                    <label>Ngày sinh mới</label>
+                    <input name="Ngaysinh" type="date" class="form-control"
+                           value="@(ViewBag.Ngaysinh != null ? ((DateTime)ViewBag.Ngaysinh).ToString("yyyy-MM-dd") : "")" />
+                    <span class="text-danger">@Html.ValidationMessage("Ngaysinh")</span>
+                </div>
+
+                <div class="mb-3">
+                    <label>Mật khẩu</label>
+                    <input name="MatKhauCu" type="password" class="form-control" />
+                    <span class="text-danger">@Html.ValidationMessage("MatKhauCu")</span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Xác nhận</button>
+                </div>
+            </form>
+        </div>
+    }
+
+    <!-- ================= MẬT KHẨU ================= -->
+    @if (activeTab == "matkhau")
+    {
+        <div style="max-width:500px; margin:auto;">
+            <div class="d-flex gap-2">
+                <a asp-action="ChinhSua" class="btn btn-outline-primary mb-3">
+                    <i class="fa-solid fa-chevron-left me-2"></i> Quay lại
+                </a>
+            </div>
+            <h4 class="mb-3">Đổi mật khẩu</h4>
+
+            <form asp-action="ChinhSua" method="post">
+                <input type="hidden" name="activeTab" value="matkhau" />
+
+                <div class="mb-3">
+                    <label>Mật khẩu hiện tại</label>
+                    <input name="MatKhauCu" type="password" class="form-control" />
+                    <span class="text-danger">@Html.ValidationMessage("MatKhauCu")</span>
+                </div>
+
+                <div class="mb-3">
+                    <label>Mật khẩu mới</label>
+                    <input name="MatKhauMoi" type="password" class="form-control" />
+                    <span class="text-danger">@Html.ValidationMessage("MatKhauMoi")</span>
+                </div>
+
+                <div class="mb-3">
+                    <label>Xác nhận mật khẩu</label>
+                    <input name="XacNhanMatKhau" type="password" class="form-control" />
+                    <span class="text-danger">@Html.ValidationMessage("XacNhanMatKhau")</span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Xác nhận</button>
+                </div>
+            </form>
+        </div>
+    }
+
+</div>
+
+<!-- ================= MODAL CONFIRM ================= -->
+@if (ViewBag.ShowConfirm == true)
+{
+    <div class="modal fade show" style="display:block; background:rgba(0,0,0,0.5)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Xác nhận</h5>
+                </div>
+                <div class="modal-body">
+                    Bạn có chắc muốn thay đổi thông tin không?
+                </div>
+                <div class="modal-footer">
+                    <a asp-action="ChinhSua" class="btn btn-secondary">Hủy</a>
+
+                    <form asp-action="ChinhSua" method="post">
+                        <input type="hidden" name="confirm" value="true" />
+                        <input type="hidden" name="activeTab" value="@activeTab" />
+
+                        <input type="hidden" name="Ten" value="@ViewBag.Ten" />
+                        <input type="hidden" name="Ngaysinh" value="@(ViewBag.Ngaysinh != null ? ((DateTime)ViewBag.Ngaysinh).ToString("yyyy-MM-dd") : "")" />
+                        <input type="hidden" name="MatKhauCu" value="@ViewBag.MatKhauCu" />
+                        <input type="hidden" name="MatKhauMoi" value="@ViewBag.MatKhauMoi" />
+                        <input type="hidden" name="XacNhanMatKhau" value="@ViewBag.XacNhanMatKhau" />
+
+                        <button type="submit" class="btn btn-primary">OK</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+<style>
+    .custom-menu .nav-link {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        color: #0d6efd;
+        padding: 12px 16px;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+
+        .custom-menu .nav-link:hover {
+            background: #0d6efd;
+            color: #fff;
+            transform: translateX(5px);
+        }
+
+        .custom-menu .nav-link.active {
+            background: #0d6efd;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+</style>

@@ -23,7 +23,7 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate(); // chạy các migration chưa được áp dụng
 }
 
-// ===== CẤU HÌNH PIPELINE XỬ LÝ REQUEST =====
+// ===== CẤU HÌNH PIPELINE XỬ LÝ REQUEST =====  
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error"); // xử lý lỗi khi chạy production
