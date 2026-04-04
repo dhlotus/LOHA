@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LOHA.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260403085913_InitialCreate")]
+    [Migration("20260403095735_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
