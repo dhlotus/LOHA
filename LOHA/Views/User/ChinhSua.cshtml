@@ -16,153 +16,298 @@
             <div class="alert alert-success">@ViewBag.Success</div>
         }
 
-        <a asp-action="Trangcanhan" class="btn btn-outline-primary mb-3">
-            <i class="fa-solid fa-chevron-left me-2"></i> Quay lại
-        </a>
-        <div class="d-flex justify-content-center">
-            <div style="width:100%; max-width:500px;">
-                <h2 class="mb-3" style="color: #1E2A78;">Chỉnh sửa trang cá nhân</h2>
-
-                <ul class="nav nav-pills flex-column custom-menu">
-                    <li class="nav-item">
-                        <a class="nav-link" href="?tab=ten"><i class="fa fa-user me-2"></i> Đổi tên</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="?tab=ngaysinh"><i class="fa-solid fa-calendar"></i> Sửa ngày sinh</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="?tab=matkhau"><i class="fa fa-lock me-2"></i> Đổi mật khẩu</a>
-                    </li>
-                </ul>
+        <div class="profile-settings">
+            <!-- Header với nút back -->
+            <div class="settings-nav">
+                <a asp-action="Trangcanhan" class="nav-back">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Quay lại</span>
+                </a>
+                <div class="nav-title">
+                    <span>Cài đặt</span>
+                    <h1>Thông tin cá nhân</h1>
+                </div>
+                <div class="nav-placeholder"></div>
             </div>
+
+            <!-- Avatar Section -->
+            <div class="avatar-section">
+                <div class="avatar-wrapper">
+                    <img src="/images/default.png" alt="Avatar" class="avatar-img">
+                </div>
+                <h3 class="avatar-name">@Model.Ten</h3>
+                <p class="avatar-email">@Model.EmailorSDT</p>
+            </div>
+
+            <!-- Settings List -->
+            <div class="settings-list">
+                <!-- Đổi tên -->
+                <a href="?tab=ten" class="setting-item">
+                    <div class="setting-icon">
+                        <i class="fa-regular fa-user"></i>
+                    </div>
+                    <div class="setting-info">
+                        <h4>Đổi tên</h4>
+                        <p>Cập nhật tên hiển thị của bạn</p>
+                    </div>
+                    <div class="setting-value">
+                        <span class="current-value">@Model.Ten</span>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+                </a>
+
+                <!-- Sửa ngày sinh -->
+                <a href="?tab=ngaysinh" class="setting-item">
+                    <div class="setting-icon">
+                        <i class="fa-regular fa-calendar"></i>
+                    </div>
+                    <div class="setting-info">
+                        <h4>Ngày sinh</h4>
+                        <p>Thay đổi ngày tháng năm sinh</p>
+                    </div>
+                    <div class="setting-value">
+                        <span class="current-value">@(Model.Ngaysinh?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</span>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+                </a>
+
+                <!-- Đổi mật khẩu -->
+                <a href="?tab=matkhau" class="setting-item">
+                    <div class="setting-icon">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <div class="setting-info">
+                        <h4>Mật khẩu</h4>
+                        <p>Tăng cường bảo mật tài khoản</p>
+                    </div>
+                    <div class="setting-value">
+                        <span class="current-value">••••••••</span>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Divider -->
+            <div class="settings-divider"></div>
+
         </div>
     }
 
     <!-- ================= ĐỔI TÊN ================= -->
     @if (activeTab == "ten")
     {
-        <div style="max-width:500px; margin:auto;">
-            <div class="d-flex gap-2">
-                <a asp-action="ChinhSua" class="btn btn-outline-primary mb-3">
-                    <i class="fa-solid fa-chevron-left me-2"></i> Quay lại
-                </a>
+        <div class="form-page-wrapper">
+            <!-- Nút quay lại -->
+            <div class="form-header">
+                <div class="text-start mb-3">
+                    <a asp-action="ChinhSua" class="btn-back-form">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Quay lại</span>
+                    </a>
+                </div>
+                <h2 class="form-title">Đổi tên</h2>
+                <p class="form-subtitle">Cập nhật tên hiển thị của bạn</p>
             </div>
-            <h4 class="mb-3">Đổi tên</h4>
 
-            <form asp-action="ChinhSua" method="post">
+            <!-- Form -->
+            <div class="form-card">
+                <form asp-action="ChinhSua" method="post">
+                    <input type="hidden" name="activeTab" value="ten" />
 
-                <input type="hidden" name="activeTab" value="ten" />
+                    <!-- Tên hiện tại -->
+                    <div class="form-group">
+                        <label class="form-label">Tên hiện tại</label>
+                        <div class="form-value-display">
+                            <i class="fa-regular fa-user"></i>
+                            <span>@Model.Ten</span>
+                        </div>
+                    </div>
 
-                <div class="mb-3">
-                    <label>Tên hiện tại</label>
-                    <input class="form-control" value="@Model.Ten" disabled />
-                </div>
+                    <!-- Cảnh báo block -->
+                    @if (ViewBag.BlockTen == true)
+                    {
+                        <div class="alert-warning">
+                            <i class="fa-regular fa-clock"></i>
+                            <span>@ViewBag.MsgTen</span>
+                        </div>
+                    }
 
-                @if (ViewBag.BlockTen == true)
-                {
-                    <div class="text-danger mb-2">@ViewBag.MsgTen</div>
-                }
+                   <!-- Tên mới -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold" style="color: #1E2A78;">Tên mới</label>
+                        <div class="input-group">
+                            <span class="input-group-text border rounded-start-3" style="background: #F8FAFF; border-color: #E5E7EB;">
+                                <i class="fa-regular fa-pen-to-square" style="color: #6C63FF;"></i>
+                            </span>
+                            <input name="Ten" class="form-control border rounded-end-3" 
+                                   style="background: #F8FAFF; border-color: #E5E7EB; padding: 12px;"
+                                   value="@ViewBag.Ten" placeholder="Nhập tên mới" />
+                        </div>
+                        <span class="text-danger small mt-1">@Html.ValidationMessage("Ten")</span>
+                    </div>
 
-                <div class="mb-3">
-                    <label>Tên mới</label>
-                    <input name="Ten" class="form-control" value="@ViewBag.Ten" />
-                    <span class="text-danger">@Html.ValidationMessage("Ten")</span>
-                </div>
+                    <!-- Mật khẩu xác nhận -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold" style="color: #1E2A78;">Mật khẩu xác nhận</label>
+                        <div class="input-group">
+                            <span class="input-group-text border rounded-start-3" style="background: #F8FAFF; border-color: #E5E7EB;">
+                                <i class="fa-solid fa-lock" style="color: #6C63FF;"></i>
+                            </span>
+                            <input name="MatKhauCu" type="password" class="form-control border rounded-end-3" 
+                                   style="background: #F8FAFF; border-color: #E5E7EB; padding: 12px;"
+                                   placeholder="Nhập mật khẩu để xác nhận" />
+                        </div>
+                        <span class="text-danger small mt-1">@Html.ValidationMessage("MatKhauCu")</span>
+                    </div>
 
-                <div class="mb-3">
-                    <label>Mật khẩu</label>
-                    <input name="MatKhauCu" type="password" class="form-control" />
-                    <span class="text-danger">@Html.ValidationMessage("MatKhauCu")</span>
-                </div>
-
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">Xác nhận</button>
-                </div>
-            </form>
+                    <!-- Nút submit -->
+                    <button type="submit" class="btn-submit-form">
+                        <i class="fa-solid fa-check"></i>
+                        <span>Xác nhận thay đổi</span>
+                    </button>
+                </form>
+            </div>
         </div>
     }
-
     <!-- ================= NGÀY SINH ================= -->
     @if (activeTab == "ngaysinh")
     {
-        <div style="max-width:500px; margin:auto;">
-            <div class="d-flex gap-2">
-                <a asp-action="ChinhSua" class="btn btn-outline-primary mb-3">
-                    <i class="fa-solid fa-chevron-left me-2"></i> Quay lại
-                </a>
+        <div class="form-page-wrapper">
+            <div class="form-header">
+                <div class="text-start mb-3">
+                    <a asp-action="ChinhSua" class="btn-back-form">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Quay lại</span>
+                    </a>
+                </div>
+                <h2 class="form-title">Đổi ngày sinh</h2>
+                <p class="form-subtitle">Cập nhật ngày tháng năm sinh</p>
             </div>
-            <h4 class="mb-3">Đổi ngày sinh</h4>
 
-            <form asp-action="ChinhSua" method="post">
-                <input type="hidden" name="activeTab" value="ngaysinh" />
+            <div class="form-card">
+                <form asp-action="ChinhSua" method="post">
+                    <input type="hidden" name="activeTab" value="ngaysinh" />
 
-                <div class="mb-3">
-                    <label>Ngày sinh hiện tại</label>
-                    <input class="form-control"
-                           value="@Model.Ngaysinh?.ToString("dd/MM/yyyy")" disabled />
-                </div>
+                    <div class="form-group">
+                        <label class="form-label">Ngày sinh hiện tại</label>
+                        <div class="form-value-display">
+                            <i class="fa-regular fa-calendar"></i>
+                            <span>@Model.Ngaysinh?.ToString("dd/MM/yyyy")</span>
+                        </div>
+                    </div>
 
-                @if (ViewBag.BlockNgaySinh == true)
-                {
-                    <div class="text-danger mb-2">@ViewBag.MsgNgaySinh</div>
-                }
+                    @if (ViewBag.BlockNgaySinh == true)
+                    {
+                        <div class="alert-warning">
+                            <i class="fa-regular fa-clock"></i>
+                            <span>@ViewBag.MsgNgaySinh</span>
+                        </div>
+                    }
 
-                <div class="mb-3">
-                    <label>Ngày sinh mới</label>
-                    <input name="Ngaysinh" type="date" class="form-control"
-                           value="@(ViewBag.Ngaysinh != null ? ((DateTime)ViewBag.Ngaysinh).ToString("yyyy-MM-dd") : "")" />
-                    <span class="text-danger">@Html.ValidationMessage("Ngaysinh")</span>
-                </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold" style="color: #1E2A78;">Ngày sinh mới</label>
+                        <div class="input-group">
+                            <span class="input-group-text border rounded-start-3" style="background: #F8FAFF; border-color: #E5E7EB;">
+                                <i class="fa-regular fa-calendar" style="color: #6C63FF;"></i>
+                            </span>
+                            <input name="Ngaysinh" type="date" class="form-control border rounded-end-3" 
+                                   style="background: #F8FAFF; border-color: #E5E7EB; padding: 12px;"
+                                   value="@(ViewBag.Ngaysinh != null ? ((DateTime)ViewBag.Ngaysinh).ToString("yyyy-MM-dd") : "")" />
+                        </div>
+                        <span class="text-danger small mt-1">@Html.ValidationMessage("Ngaysinh")</span>
+                    </div>
 
-                <div class="mb-3">
-                    <label>Mật khẩu</label>
-                    <input name="MatKhauCu" type="password" class="form-control" />
-                    <span class="text-danger">@Html.ValidationMessage("MatKhauCu")</span>
-                </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold" style="color: #1E2A78;">Mật khẩu xác nhận</label>
+                        <div class="input-group">
+                            <span class="input-group-text border rounded-start-3" style="background: #F8FAFF; border-color: #E5E7EB;">
+                                <i class="fa-solid fa-lock" style="color: #6C63FF;"></i>
+                            </span>
+                            <input name="MatKhauCu" type="password" class="form-control border rounded-end-3" 
+                                   style="background: #F8FAFF; border-color: #E5E7EB; padding: 12px;"
+                                   placeholder="Nhập mật khẩu để xác nhận" />
+                        </div>
+                        <span class="text-danger small mt-1">@Html.ValidationMessage("MatKhauCu")</span>
+                    </div>
 
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">Xác nhận</button>
-                </div>
-            </form>
+                    <button type="submit" class="btn-submit-form">
+                        <i class="fa-solid fa-check"></i>
+                        <span>Xác nhận thay đổi</span>
+                    </button>
+                </form>
+            </div>
         </div>
     }
+    
 
     <!-- ================= MẬT KHẨU ================= -->
     @if (activeTab == "matkhau")
     {
-        <div style="max-width:500px; margin:auto;">
-            <div class="d-flex gap-2">
-                <a asp-action="ChinhSua" class="btn btn-outline-primary mb-3">
-                    <i class="fa-solid fa-chevron-left me-2"></i> Quay lại
-                </a>
+        <div class="form-page-wrapper">
+            <div class="form-header">
+                <div class="text-start mb-3">
+                    <a asp-action="ChinhSua" class="btn-back-form">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Quay lại</span>
+                    </a>
+                </div>
+                <h2 class="form-title">Đổi mật khẩu</h2>
+                <p class="form-subtitle">Tăng cường bảo mật tài khoản của bạn</p>
             </div>
-            <h4 class="mb-3">Đổi mật khẩu</h4>
 
-            <form asp-action="ChinhSua" method="post">
-                <input type="hidden" name="activeTab" value="matkhau" />
+            <div class="form-card">
+                <form asp-action="ChinhSua" method="post">
+                    <input type="hidden" name="activeTab" value="matkhau" />
 
-                <div class="mb-3">
-                    <label>Mật khẩu hiện tại</label>
-                    <input name="MatKhauCu" type="password" class="form-control" />
-                    <span class="text-danger">@Html.ValidationMessage("MatKhauCu")</span>
-                </div>
+                    <!-- Mật khẩu hiện tại -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold" style="color: #1E2A78;">Mật khẩu hiện tại</label>
+                        <div class="input-group">
+                            <span class="input-group-text border rounded-start-3" style="background: #F8FAFF; border-color: #E5E7EB;">
+                                <i class="fa-solid fa-lock" style="color: #6C63FF;"></i>
+                            </span>
+                            <input name="MatKhauCu" type="password" class="form-control border rounded-end-3" 
+                                   style="background: #F8FAFF; border-color: #E5E7EB; padding: 12px;"
+                                   placeholder="Nhập mật khẩu hiện tại" />
+                        </div>
+                        <span class="text-danger small mt-1">@Html.ValidationMessage("MatKhauCu")</span>
+                    </div>
 
-                <div class="mb-3">
-                    <label>Mật khẩu mới</label>
-                    <input name="MatKhauMoi" type="password" class="form-control" />
-                    <span class="text-danger">@Html.ValidationMessage("MatKhauMoi")</span>
-                </div>
+                    <!-- Mật khẩu mới -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold" style="color: #1E2A78;">Mật khẩu mới</label>
+                        <div class="input-group">
+                            <span class="input-group-text border rounded-start-3" style="background: #F8FAFF; border-color: #E5E7EB;">
+                                <i class="fa-solid fa-key" style="color: #6C63FF;"></i>
+                            </span>
+                            <input name="MatKhauMoi" type="password" class="form-control border rounded-end-3" 
+                                   style="background: #F8FAFF; border-color: #E5E7EB; padding: 12px;"
+                                   placeholder="Tối thiểu 6 ký tự, có cả chữ và số" />
+                        </div>
+                        <span class="text-danger small mt-1">@Html.ValidationMessage("MatKhauMoi")</span>
+                    </div>
 
-                <div class="mb-3">
-                    <label>Xác nhận mật khẩu</label>
-                    <input name="XacNhanMatKhau" type="password" class="form-control" />
-                    <span class="text-danger">@Html.ValidationMessage("XacNhanMatKhau")</span>
-                </div>
+                    <!-- Xác nhận mật khẩu mới -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold" style="color: #1E2A78;">Xác nhận mật khẩu mới</label>
+                        <div class="input-group">
+                            <span class="input-group-text border rounded-start-3" style="background: #F8FAFF; border-color: #E5E7EB;">
+                                <i class="fa-solid fa-check" style="color: #6C63FF;"></i>
+                            </span>
+                            <input name="XacNhanMatKhau" type="password" class="form-control border rounded-end-3" 
+                                   style="background: #F8FAFF; border-color: #E5E7EB; padding: 12px;"
+                                   placeholder="Nhập lại mật khẩu mới" />
+                        </div>
+                        <span class="text-danger small mt-1" id="xacNhanMatKhauError">@Html.ValidationMessage("XacNhanMatKhau")</span>
+                    </div>
 
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">Xác nhận</button>
-                </div>
-            </form>
+                    <!-- Nút submit -->
+                    <button type="submit" class="btn-submit-form">
+                        <i class="fa-solid fa-check"></i>
+                        <span>Xác nhận thay đổi</span>
+                    </button>
+                </form>
+            </div>
         </div>
     }
 
@@ -171,30 +316,46 @@
 <!-- ================= MODAL CONFIRM ================= -->
 @if (ViewBag.ShowConfirm == true)
 {
-    <div class="modal fade show" style="display:block; background:rgba(0,0,0,0.5)">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5>Xác nhận</h5>
-                </div>
-                <div class="modal-body">
-                    Bạn có chắc muốn thay đổi thông tin không?
-                </div>
-                <div class="modal-footer">
-                    <a asp-action="ChinhSua" class="btn btn-secondary">Hủy</a>
-
-                    <form asp-action="ChinhSua" method="post">
-                        <input type="hidden" name="confirm" value="true" />
-                        <input type="hidden" name="activeTab" value="@activeTab" />
-
-                        <input type="hidden" name="Ten" value="@ViewBag.Ten" />
-                        <input type="hidden" name="Ngaysinh" value="@(ViewBag.Ngaysinh != null ? ((DateTime)ViewBag.Ngaysinh).ToString("yyyy-MM-dd") : "")" />
-                        <input type="hidden" name="MatKhauCu" value="@ViewBag.MatKhauCu" />
-                        <input type="hidden" name="MatKhauMoi" value="@ViewBag.MatKhauMoi" />
-                        <input type="hidden" name="XacNhanMatKhau" value="@ViewBag.XacNhanMatKhau" />
-
-                        <button type="submit" class="btn btn-primary">OK</button>
-                    </form>
+    <div class="modal fade show confirm-modal" id="confirmModal" tabindex="-1" style="display:block; background:rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-body text-center p-4">
+                    <!-- Icon -->
+                    <div class="mb-3">
+                        <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex p-3">
+                            <i class="fa-regular fa-circle-question fa-3x" style="color: #F59E0B;"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Tiêu đề -->
+                    <h5 class="fw-bold mb-2" style="color: #1E2A78;">Xác nhận thay đổi</h5>
+                    
+                    <!-- Nội dung -->
+                    <p class="text-secondary mb-4" style="font-size: 14px;">
+                        Bạn có chắc chắn muốn thay đổi thông tin này không?
+                    </p>
+                    
+                    <!-- Nút hành động -->
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="button" class="btn btn-light rounded-pill px-4" onclick="dongModalVaGiuDuLieu()">
+                            <i class="fa-regular fa-xmark me-2"></i>Hủy
+                        </button>
+                        
+                        <form asp-action="ChinhSua" method="post" id="confirmForm" style="display: inline;">
+                            <input type="hidden" name="confirm" value="true" />
+                            <input type="hidden" name="activeTab" value="@activeTab" />
+                            
+                            <input type="hidden" name="Ten" value="@ViewBag.Ten" />
+                            <input type="hidden" name="Ngaysinh" value="@(ViewBag.Ngaysinh != null ? ((DateTime)ViewBag.Ngaysinh).ToString("yyyy-MM-dd") : "")" />
+                            <input type="hidden" name="MatKhauCu" value="@ViewBag.MatKhauCu" />
+                            <input type="hidden" name="MatKhauMoi" value="@ViewBag.MatKhauMoi" />
+                            <input type="hidden" name="XacNhanMatKhau" value="@ViewBag.XacNhanMatKhau" />
+                            
+                            <button type="submit" class="btn btn-primary rounded-pill px-4" form="confirmForm">
+                                <i class="fa-regular fa-check me-2"></i>Xác nhận
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -203,6 +364,72 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        // ===== ĐẶT CÁC HÀM Ở ĐÂY (TRƯỚC KHI MODAL ĐƯỢC GỌI) =====
+        
+        // Hàm đóng modal và giữ dữ liệu
+        function dongModalVaGiuDuLieu() {
+            // Chỉ ẩn modal, không xóa
+            var modal = document.getElementById('confirmModal');
+            if (modal) {
+                modal.style.display = 'none';
+                // Không dùng modal.remove() - chỉ ẩn đi
+            }
+            // Dữ liệu trong input tự động giữ nguyên vì không reload
+        }
+        
+        // Kiểm tra xác nhận mật khẩu realtime
+        var matKhauMoi = document.querySelector('input[name="MatKhauMoi"]');
+        var xacNhanMatKhau = document.querySelector('input[name="XacNhanMatKhau"]');
+        var xacNhanError = document.createElement('span');
+
+        if (matKhauMoi && xacNhanMatKhau) {
+            xacNhanError.className = 'text-danger small mt-1';
+            xacNhanMatKhau.parentNode.appendChild(xacNhanError);
+        
+            function checkPasswordMatch() {
+                if (matKhauMoi.value !== xacNhanMatKhau.value) {
+                    xacNhanError.innerText = 'Mật khẩu xác nhận không khớp';
+                } else {
+                    xacNhanError.innerText = '';
+                }
+            }
+        
+            matKhauMoi.addEventListener('input', checkPasswordMatch);
+            xacNhanMatKhau.addEventListener('input', checkPasswordMatch);
+        }
+        
+        // Đóng modal khi click ra ngoài
+        document.addEventListener('DOMContentLoaded', function() {
+            var modal = document.getElementById('confirmModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        dongModalVaGiuDuLieu();
+                    }
+                });
+            }
+        });
+        // Kiểm tra xác nhận mật khẩu realtime cho form đổi mật khẩu
+        var matKhauMoiInput = document.querySelector('input[name="MatKhauMoi"]');
+        var xacNhanMatKhauInput = document.querySelector('input[name="XacNhanMatKhau"]');
+        var xacNhanErrorSpan = document.getElementById('xacNhanMatKhauError');
+
+        if (matKhauMoiInput && xacNhanMatKhauInput && xacNhanErrorSpan) {
+            function checkPasswordMatch() {
+                if (matKhauMoiInput.value !== xacNhanMatKhauInput.value) {
+                    xacNhanErrorSpan.innerText = 'Mật khẩu xác nhận không khớp';
+                    xacNhanErrorSpan.style.color = '#DC2626';
+                } else {
+                    xacNhanErrorSpan.innerText = '';
+                }
+            }
+    
+            matKhauMoiInput.addEventListener('input', checkPasswordMatch);
+            xacNhanMatKhauInput.addEventListener('input', checkPasswordMatch);
+        }
+    </script>
 }
 <style>
     .custom-menu .nav-link {
@@ -216,15 +443,493 @@
         font-weight: 500;
     }
 
-        .custom-menu .nav-link:hover {
-            background: #0d6efd;
-            color: #fff;
-            transform: translateX(5px);
-        }
+    .custom-menu .nav-link:hover {
+        background: #0d6efd;
+        color: #fff;
+        transform: translateX(5px);
+    }
 
-        .custom-menu .nav-link.active {
-            background: #0d6efd;
-            color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    .custom-menu .nav-link.active {
+        background: #0d6efd;
+        color: white;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    /* ===== PROFILE SETTINGS ===== */
+.profile-settings {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 24px 20px 40px;
+}
+
+/* ===== NAVIGATION ===== */
+.settings-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+}
+
+.nav-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #F8FAFF;
+    border-radius: 40px;
+    color: #1E2A78;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    border: 1px solid #E5E7EB;
+}
+
+.nav-back:hover {
+    background: #6C63FF;
+    color: white;
+    border-color: #6C63FF;
+    transform: translateX(-3px);
+}
+.nav-back i {
+    font-size: 14px;
+}
+.nav-title {
+    text-align: center;
+}
+
+.nav-title span {
+    font-size: 13px;
+    color: #6C63FF;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.nav-title h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1E2A78;
+    margin: 4px 0 0;
+}
+
+.nav-placeholder {
+    width: 40px;
+}
+
+/* ===== AVATAR SECTION ===== */
+.avatar-section {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.avatar-wrapper {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 16px;
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.avatar-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1E2A78;
+    margin-bottom: 4px;
+}
+
+.avatar-email {
+    font-size: 13px;
+    color: #6B7280;
+}
+
+/* ===== SETTINGS LIST ===== */
+.settings-list {
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid #E5E7EB;
+    margin-bottom: 24px;
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    text-decoration: none;
+    transition: all 0.2s;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.setting-item:hover {
+    background: #F8FAFF;
+}
+
+.setting-icon {
+    width: 48px;
+    height: 48px;
+    background: #F0F2FF;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6C63FF;
+    font-size: 20px;
+}
+
+.setting-info {
+    flex: 1;
+}
+
+.setting-info h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1E2A78;
+    margin-bottom: 4px;
+}
+
+.setting-info p {
+    font-size: 13px;
+    color: #6B7280;
+    margin: 0;
+}
+
+.setting-value {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #9CA3AF;
+}
+
+.current-value {
+    font-size: 14px;
+    color: #6B7280;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.setting-value i {
+    font-size: 12px;
+    transition: transform 0.2s;
+}
+
+.setting-item:hover .setting-value i {
+    transform: translateX(3px);
+    color: #6C63FF;
+}
+
+/* ===== DIVIDER ===== */
+.settings-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #E5E7EB, transparent);
+    margin: 24px 0;
+}
+/* ===== FORM PAGE WRAPPER ===== */
+.form-page-wrapper {
+    max-width: 680px;  
+    margin: 0 auto;
+    padding: 24px 20px 40px;
+}
+
+/* ===== FORM HEADER ===== */
+.form-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.btn-back-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    background: #F8FAFF;
+    border-radius: 40px;
+    color: #1E2A78;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    border: 1px solid #E5E7EB;
+    margin-bottom: 20px;
+}
+
+.btn-back-form:hover {
+    background: #6C63FF;
+    color: white;
+    border-color: #6C63FF;
+    transform: translateX(-3px);
+}
+
+.form-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1E2A78;
+    margin-bottom: 8px;
+}
+
+.form-subtitle {
+    font-size: 14px;
+    color: #6B7280;
+}
+
+/* ===== FORM CARD ===== */
+.form-card {
+    background: white;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid #E5E7EB;
+}
+
+/* ===== FORM GROUP ===== */
+.form-group {
+    margin-bottom: 24px;
+}
+/* Đồng bộ style input với LOHA */
+.form-control:focus {
+    border-color: #6C63FF !important;
+    box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1) !important;
+    background: white !important;
+}
+
+.input-group-text {
+    transition: all 0.2s;
+}
+
+.input-group:focus-within .input-group-text {
+    border-color: #6C63FF !important;
+    background: white !important;
+}
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: #1E2A78;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+/* Value display */
+.form-value-display {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #F8FAFF;
+    border-radius: 12px;
+    color: #1E2A78;
+    font-size: 15px;
+    border: 1px solid #E5E7EB;
+}
+
+.form-value-display i {
+    color: #6C63FF;
+    font-size: 16px;
+}
+
+/* Input wrapper */
+.input-wrapper {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9CA3AF;
+    font-size: 16px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 14px 16px 14px 48px;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    font-size: 15px;
+    transition: all 0.2s;
+    background: #FFFFFF;
+    color: #1E2A78;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #6C63FF;
+    box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+}
+
+.form-input::placeholder {
+    color: #9CA3AF;
+}
+
+/* Alert warning */
+.alert-warning {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-radius: 12px;
+    color: #D97706;
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+
+.alert-warning i {
+    font-size: 16px;
+}
+
+/* Submit button */
+.btn-submit-form {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 0;
+    background: linear-gradient(135deg, #1E2A78, #6C63FF);
+    color: white;
+    border: none;
+    border-radius: 40px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-submit-form:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(108, 99, 255, 0.3);
+}
+.confirm-modal {
+        animation: fadeIn 0.2s ease-out;
+    }
+    
+    .confirm-modal .modal-dialog {
+        animation: slideInUp 0.3s ease-out;
+    }
+    
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
         }
+        to {
+            opacity: 1;
+        }
+    }
+    
+    @@keyframes slideInUp {
+        from {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    /* Responsive */
+    @@media (max-width: 576px) {
+        .confirm-modal .modal-dialog {
+            margin: 16px;
+        }
+        
+        .confirm-modal .modal-body {
+            padding: 24px !important;
+        }
+        
+        .confirm-modal .fa-3x {
+            font-size: 2rem !important;
+        }
+        
+        .confirm-modal h5 {
+            font-size: 1.1rem !important;
+        }
+        
+        .confirm-modal .btn {
+            padding: 8px 16px !important;
+            font-size: 13px !important;
+        }
+    }
+/* Responsive */
+@@media (max-width: 560px) {
+    .form-page-wrapper {
+        padding: 16px;
+    }
+
+    .form-card {
+        padding: 24px 20px;
+    }
+
+    .form-title {
+        font-size: 24px;
+    }
+
+    .btn-back-form {
+        padding: 6px 16px;
+        font-size: 13px;
+    }
+}
+
+/* ===== RESPONSIVE ===== */
+@@media (max-width: 640px) {
+    .profile-settings {
+        padding: 16px;
+    }
+
+    .setting-item {
+        padding: 14px 16px;
+    }
+
+    .setting-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+
+    .setting-info h4 {
+        font-size: 15px;
+    }
+
+    .setting-info p {
+        font-size: 12px;
+    }
+
+    .current-value {
+        max-width: 100px;
+        font-size: 13px;
+    }
+}
+
+/* Animation */
+@@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.profile-settings {
+    animation: fadeInUp 0.3s ease-out;
+}
+
 </style>
