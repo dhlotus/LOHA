@@ -39,5 +39,10 @@ namespace LOHA.Models
 
         [ForeignKey("NguoiNhanId")]
         public virtual User? NguoiNhan { get; set; }
+        [MaxLength(50)]
+        public string? NhomNguoiGui { get; set; } // Nhóm mà người gửi chọn
+
+        [MaxLength(50)]
+        public string? NhomNguoiNhan { get; set; } // Nhóm mà người nhận chọn
     }
 }

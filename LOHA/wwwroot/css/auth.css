@@ -280,7 +280,7 @@
     }
 
         .login-btn.active:hover {
-            background: #1877f2;
+            background: #5A4FDB;
             transform: translateY(-1px);
         }
 

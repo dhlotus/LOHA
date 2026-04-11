@@ -1,0 +1,74 @@
+﻿@{
+    ViewData["Title"] = "Tổng quan";
+    Layout = "_LayoutLotus";
+}
+
+<div class="lotus-dashboard">
+    <!-- Welcome -->
+    <div class="lotus-welcome mb-4">
+        <h2>Xin chào, @ViewBag.TenAdmin!</h2>
+        <p class="text-white-50">Chào mừng trở lại bảng điều khiển LOTUS</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="lotus-stat-card">
+                <div class="lotus-stat-icon bg-primary">
+                    <span class="material-icons-outlined">people</span>
+                </div>
+                <div class="lotus-stat-info">
+                    <h3>@ViewBag.TongNguoiDung</h3>
+                    <p>Người dùng</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="lotus-stat-card">
+                <div class="lotus-stat-icon bg-success">
+                    <span class="material-icons-outlined">article</span>
+                </div>
+                <div class="lotus-stat-info">
+                    <h3>@ViewBag.TongBaiViet</h3>
+                    <p>Bài viết</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="lotus-stat-card">
+                <div class="lotus-stat-icon bg-warning">
+                    <span class="material-icons-outlined">comment</span>
+                </div>
+                <div class="lotus-stat-info">
+                    <h3>@ViewBag.TongBinhLuan</h3>
+                    <p>Bình luận</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="lotus-stat-card">
+                <div class="lotus-stat-icon bg-danger">
+                    <span class="material-icons-outlined">flag</span>
+                </div>
+                <div class="lotus-stat-info">
+                    <h3>0</h3>
+                    <p>Báo cáo mới</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="lotus-card">
+                <div class="lotus-card-header">
+                    <h5><span class="material-icons-outlined me-2">history</span>Hoạt động gần đây</h5>
+                </div>
+                <div class="lotus-card-body">
+                    <p class="text-white-50 text-center py-4">Đang phát triển...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

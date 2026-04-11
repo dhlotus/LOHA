@@ -1,0 +1,110 @@
+﻿@{
+    ViewData["Title"] = "Xác nhận mã OTP";
+    Layout = "_LayoutAuth";
+    string email = ViewBag.Email ?? "";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 p-md-5">
+
+                    <!-- Logo -->
+                    <div class="text-center mb-4">
+                        <img src="/images/logoLOHA.png" alt="LOHA" style="width: 60px; height: 60px; object-fit: cover; border-radius: 14px;" />
+                        <h3 class="fw-bold mt-3" style="color: #1E2A78;">Xác nhận mã OTP</h3>
+                        <p class="text-secondary">
+                            Mã xác nhận đã được gửi đến <strong>@email</strong>
+                        </p>
+                    </div>
+
+                    <!-- Hiển thị thông báo lỗi -->
+                    @if (TempData["Loi"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fa-regular fa-circle-exclamation me-2"></i>
+                            @TempData["Loi"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <!-- Form nhập OTP và mật khẩu mới -->
+                    <form asp-action="DatLaiMatKhau" method="post">
+                        <!-- Ẩn email để gửi về server -->
+                        <input type="hidden" name="email" value="@email" />
+
+                        <!-- Nhập mã OTP -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="color: #1E2A78;">
+                                <i class="fa-regular fa-key me-2"></i>Mã OTP (6 số)
+                            </label>
+                            <input type="text"
+                                   name="maOTP"
+                                   class="form-control rounded-pill py-2 px-3 text-center fs-4"
+                                   placeholder="000000"
+                                   maxlength="6"
+                                   required
+                                   style="border-color: #E5E7EB; background: #F8FAFF; letter-spacing: 8px;" />
+                        </div>
+
+                        <!-- Nhập mật khẩu mới -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="color: #1E2A78;">
+                                <i class="fa-regular fa-lock me-2"></i>Mật khẩu mới
+                            </label>
+                            <input type="password"
+                                   name="matKhauMoi"
+                                   id="matKhauMoi"
+                                   class="form-control rounded-pill py-2 px-3"
+                                   placeholder="Ít nhất 6 ký tự, có chữ và số"
+                                   required
+                                   style="border-color: #E5E7EB; background: #F8FAFF;" />
+                        </div>
+
+                        <!-- Xác nhận mật khẩu mới -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold" style="color: #1E2A78;">
+                                <i class="fa-regular fa-circle-check me-2"></i>Xác nhận mật khẩu
+                            </label>
+                            <input type="password"
+                                   name="xacNhanMatKhau"
+                                   id="xacNhanMatKhau"
+                                   class="form-control rounded-pill py-2 px-3"
+                                   placeholder="Nhập lại mật khẩu mới"
+                                   required
+                                   style="border-color: #E5E7EB; background: #F8FAFF;" />
+                            <span id="loiXacNhan" class="text-danger small"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-semibold">
+                            <i class="fa-regular fa-check me-2"></i>Đặt lại mật khẩu
+                        </button>
+                    </form>
+
+                    <!-- Link quay lại -->
+                    <div class="text-center mt-4">
+                        <a asp-action="QuenMatKhau" class="text-decoration-none" style="color: #6C63FF;">
+                            <i class="fa-regular fa-arrow-left me-1"></i>Gửi lại mã OTP
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Kiểm tra mật khẩu xác nhận có khớp không
+    document.getElementById('xacNhanMatKhau').addEventListener('input', function() {
+        var matKhau = document.getElementById('matKhauMoi').value;
+        var xacNhan = this.value;
+        var loiSpan = document.getElementById('loiXacNhan');
+
+        if (matKhau !== xacNhan) {
+            loiSpan.innerText = 'Mật khẩu xác nhận không khớp';
+        } else {
+            loiSpan.innerText = '';
+        }
+    });
+</script>

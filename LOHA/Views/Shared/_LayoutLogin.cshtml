@@ -11,7 +11,10 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link href="~/css/auth.css" rel="stylesheet" />
-
+    <!-- Google Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <style>
         /* Toàn bộ CSS của giao diện 2 cột (hero + form) - copy từ _LayoutAuth cũ vào đây */
         * {
@@ -454,9 +457,67 @@
         }
 
         @@media (max-width: 992px) {
-            .hero-section { display: none; }
-            .form-section { flex: 0 0 100%; }
-            body { overflow: auto; }
+            .hero-section { 
+                display: none; 
+            }
+    
+            .form-section { 
+                flex: 0 0 100% !important;
+                width: 100% !important;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                padding: 0;
+            }
+    
+            .form-wrapper {
+                max-width: 400px !important;
+                width: 100%;
+                margin: 0 auto;
+            }
+    
+            .form-title {
+                font-size: 20px;
+                margin-bottom: 24px;
+            }
+    
+            .form-title::before,
+            .form-title::after {
+                display: none;
+            }
+    
+            .login-input {
+                height: 48px;
+                font-size: 14px;
+                border-radius: 20px;
+            }
+    
+            .login-btn, .register-btn {
+                padding: 12px 0;
+                font-size: 14px;
+            }
+    
+            .forgot-link {
+                font-size: 12px;
+                margin: 16px 0;
+            }
+    
+            .footer-lotus {
+                margin-top: 30px;
+                font-size: 11px;
+            }
+    
+            body {
+                overflow: auto;
+                height: auto;
+                min-height: 100vh;
+            }
+    
+            .login-container {
+                height: auto;
+                min-height: 100vh;
+            }
         }
         @@media (max-height: 720px) {
             .hero-text {
@@ -539,141 +600,191 @@
             font-size: 10px;
         }
         /* ===== FORM SECTION - CĂN GIỮA ===== */
-.form-section {
-    flex: 0 0 35%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: white;
-}
+        .form-section {
+            flex: 0 0 35%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: white;
+        }
 
-.form-wrapper {
-    max-width: 90%;
-    width: 100%;
-    margin: 0 auto;
-    padding: 0 20px;
-}
+        .form-wrapper {
+            max-width: 90%;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
 
-/* Tiêu đề Form */
-.form-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: #1E2A78;
-    text-align: center;
-    margin-bottom: 32px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-}
+        /* Tiêu đề Form */
+        .form-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1E2A78;
+            text-align: center;
+            margin-bottom: 32px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
 
-.form-title::before,
-.form-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #6C63FF, transparent);
-}
+        .form-title::before,
+        .form-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #6C63FF, transparent);
+        }
 
-.form-title::before {
-    background: linear-gradient(90deg, transparent, #6C63FF);
-}
+        .form-title::before {
+            background: linear-gradient(90deg, transparent, #6C63FF);
+        }
 
-.form-title::after {
-    background: linear-gradient(90deg, #6C63FF, transparent);
-}
+        .form-title::after {
+            background: linear-gradient(90deg, #6C63FF, transparent);
+        }
 
-/* Input Group */
-.input-group {
-    margin-bottom: 12px;
-}
+        /* Input Group */
+        .input-group {
+            margin-bottom: 12px;
+        }
 
-/* Ô nhập liệu */
-.login-input {
-    height: 54px;
-    width: 100%;
-    padding: 14px 16px;
-    border: 1px solid #dbdbdb;
-    border-radius: 22px;
-    font-size: 14px;
-    transition: all 0.2s ease;
-    background: #FFFFFF;
-    color: #1E2A78;
-}
+        /* Ô nhập liệu */
+        .login-input {
+            height: 54px;
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #dbdbdb;
+            border-radius: 22px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: #FFFFFF;
+            color: #1E2A78;
+        }
 
-.login-input:focus {
-    outline: none;
-    border-color: #6C63FF;
-    box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.1);
-}
+        .login-input:focus {
+            outline: none;
+            border-color: #6C63FF;
+            box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.1);
+        }
 
-/* Nút Đăng nhập */
-.login-btn {
-    width: 100%;
-    padding: 14px 0;
-    background: #6C63FF;
-    color: white;
-    border: none;
-    border-radius: 999px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 8px;
-    transition: all 0.3s ease;
-}
+        /* Nút Đăng nhập */
+        .login-btn {
+            width: 100%;
+            padding: 14px 0;
+            background: #6C63FF;
+            color: white;
+            border: none;
+            border-radius: 999px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all 0.3s ease;
+        }
 
-.login-btn:hover {
-    background: #7D76FF;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(108, 99, 255, 0.3);
-}
+        .login-btn:hover {
+            background: #7D76FF;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(108, 99, 255, 0.3);
+        }
 
-.login-btn.active {
-    background: #5A4FDB;
-}
+        .login-btn.active {
+            background: #5A4FDB;
+        }
 
-/* Link Quên mật khẩu */
-.forgot-link {
-    display: block;
-    text-align: center;
-    color: #1E2A78;
-    font-size: 13px;
-    text-decoration: none;
-    margin: 20px 0;
-}
+        /* Link Quên mật khẩu */
+        .forgot-link {
+            display: block;
+            text-align: center;
+            color: #1E2A78;
+            font-size: 13px;
+            text-decoration: none;
+            margin: 20px 0;
+        }
 
-/* Nút Đăng ký */
-.register-btn {
-    width: 100%;
-    padding: 14px 0;
-    background: transparent;
-    border: 1.5px solid #6C63FF;
-    border-radius: 999px;
-    color: #6C63FF;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    display: block;
-    text-align: center;
-    transition: all 0.3s ease;
-}
+        /* Nút Đăng ký */
+        .register-btn {
+            width: 100%;
+            padding: 14px 0;
+            background: transparent;
+            border: 1.5px solid #6C63FF;
+            border-radius: 999px;
+            color: #6C63FF;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
 
-.register-btn:hover {
-    background: #e1e1e147;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgb(108 99 255 / 18%);
-}
+        .register-btn:hover {
+            background: #e1e1e147;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgb(108 99 255 / 18%);
+        }
 
-/* Footer Meta */
-.footer-lotus {
-    margin-top: 40px;
-    text-align: center;
-    font-size: 12px;
-    color: #8e8e8e;
-}
+        /* Footer Meta */
+        .footer-lotus {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #8e8e8e;
+        }
+                /* Mobile Logo - chỉ hiện trên điện thoại */
+        .mobile-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
 
+        .mobile-logo-img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .mobile-logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1E2A78, #6C63FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Điều chỉnh title khi có logo */
+        @@media (max-width: 992px) {
+            .form-title {
+                margin-top: 0;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .mobile-logo-img {
+                width: 32px;
+                height: 32px;
+            }
+    
+            .mobile-logo-text {
+                font-size: 20px;
+            }
+        }
+        .mobile-logo {
+            display: none;
+        }
+
+        @@media (max-width: 768px) {
+            .mobile-logo {
+                display: flex;
+            }
+        }
     </style>
 </head>
 <body>
@@ -777,6 +888,11 @@
         <!-- Cột phải - Form -->
         <div class="form-section">
             <div class="form-wrapper">
+                <!-- Logo hiển thị trên mobile (ẩn trên desktop) -->
+                <div class="mobile-logo d-md-none">
+                    <img src="/images/logoLOHA.png" alt="LOHA" class="mobile-logo-img">
+                </div>
+        
                 <h2 class="form-title">Đăng nhập vào LOHA</h2>
                 @RenderBody()
                 <div class="footer-lotus">

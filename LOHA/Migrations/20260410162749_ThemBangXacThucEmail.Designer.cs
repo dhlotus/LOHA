@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LOHA.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260404083918_InitClean")]
-    partial class InitClean
+    [Migration("20260410162749_ThemBangXacThucEmail")]
+    partial class ThemBangXacThucEmail
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -81,6 +81,38 @@ namespace LOHA.Migrations
                     b.ToTable("Binhluans");
                 });
 
+            modelBuilder.Entity("LOHA.Models.DatLaiMatKhau", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("DaSuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("MaOTP")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("nvarchar(6)");
+
+                    b.Property<DateTime>("ThoiGianHetHan")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ThoiGianTao")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DatLaiMatKhau");
+                });
+
             modelBuilder.Entity("LOHA.Models.KetBan", b =>
                 {
                     b.Property<int>("Id")
@@ -100,6 +132,14 @@ namespace LOHA.Migrations
 
                     b.Property<int>("NguoiNhanId")
                         .HasColumnType("int");
+
+                    b.Property<string>("NhomNguoiGui")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("NhomNguoiNhan")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("TrangThai")
                         .HasColumnType("int");
@@ -212,6 +252,52 @@ namespace LOHA.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("LOHA.Models.XacThucEmail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("DaSuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Gioitinh")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MaOTP")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("nvarchar(6)");
+
+                    b.Property<string>("Matkhau")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("Ngaysinh")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ThoiGianHetHan")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ThoiGianTao")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("XacThucEmail");
                 });
 
             modelBuilder.Entity("LOHA.Models.Baiviet", b =>

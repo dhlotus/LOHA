@@ -1,6 +1,7 @@
 ﻿// BÙI ĐỨC HÀ - LOTUS
 using LOHA.Models; // dùng các class trong thư mục model
 using Microsoft.AspNetCore.Identity; // mã hoá mật khẩu
+using LOHA.Services;
 using Microsoft.AspNetCore.Mvc; // dùng các chức năng của asp
 using Microsoft.EntityFrameworkCore; // dùng các chức năng của entity framework
 namespace LOHA.Controllers // nhóm chứa các class
@@ -22,9 +23,9 @@ namespace LOHA.Controllers // nhóm chứa các class
         }
 
         [HttpPost]
-        public IActionResult DangKy(User user, string XacNhanMatKhau)
+        public async Task<IActionResult> DangKy(User user, string XacNhanMatKhau)
         {
-            // Kiểm tra xác nhận mật khẩu
+            // 1. Kiểm tra xác nhận mật khẩu
             if (user.Matkhau != XacNhanMatKhau)
             {
                 ModelState.AddModelError("Matkhau", "Mật khẩu xác nhận không khớp");
@@ -33,7 +34,7 @@ namespace LOHA.Controllers // nhóm chứa các class
 
             if (ModelState.IsValid)
             {
-                // Kiểm tra email/sdt đã tồn tại chưa
+                // 2. Kiểm tra email/sdt đã tồn tại chưa
                 var existingUser = _context.Users.FirstOrDefault(u => u.EmailorSDT == user.EmailorSDT);
                 if (existingUser != null)
                 {
@@ -41,22 +42,223 @@ namespace LOHA.Controllers // nhóm chứa các class
                     return View(user);
                 }
 
-                // Thêm user mới
-                user.Ngaytao = DateTime.Now;
+                // 3. Tạo mã OTP 6 số ngẫu nhiên
+                Random random = new Random();
+                string maOTP = random.Next(100000, 999999).ToString();
 
-                user.NgayCapNhatTen = null;
-                user.NgayCapNhatNgaySinh = null; // Đặt này cập nhật thông tin = 0
-                _context.Users.Add(user);
-                _context.SaveChanges();
+                // 4. Lưu thông tin đăng ký tạm thời vào bảng XacThucEmail
+                var xacThuc = new XacThucEmail
+                {
+                    Email = user.EmailorSDT,
+                    MaOTP = maOTP,
+                    Ten = user.Ten,
+                    Matkhau = user.Matkhau,
+                    Ngaysinh = user.Ngaysinh,
+                    Gioitinh = user.Gioitinh,
+                    ThoiGianTao = DateTime.Now,
+                    ThoiGianHetHan = DateTime.Now.AddMinutes(5), // Hết hạn sau 5 phút
+                    DaSuDung = false
+                };
 
-                TempData["DangKyThanhCong"] = "true";
-                TempData["ThongBao"] = "Đăng ký tài khoản thành công!";
+                _context.XacThucEmails.Add(xacThuc);
+                await _context.SaveChangesAsync();
 
-                return RedirectToAction("DangNhap");
+                // 5. Gửi email chứa mã OTP
+                string subject = "LOHA - Xác thực tài khoản";
+                string body = $@"
+        <div style='font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;'>
+            <div style='text-align: center; padding: 20px;'>
+                <h2 style='color: #1E2A78;'>LOHA - Xác thực tài khoản</h2>
+            </div>
+            <div style='background: #F8FAFF; padding: 20px; border-radius: 10px;'>
+                <p>Xin chào <strong>{user.Ten}</strong>,</p>
+                <p>Cảm ơn bạn đã đăng ký tài khoản LOHA!</p>
+                <p>Mã xác thực của bạn là:</p>
+                <div style='text-align: center; margin: 30px 0;'>
+                    <span style='background: linear-gradient(135deg, #1E2A78, #6C63FF); 
+                                 color: white; 
+                                 padding: 15px 40px; 
+                                 font-size: 32px; 
+                                 font-weight: bold; 
+                                 letter-spacing: 10px;
+                                 border-radius: 10px;'>
+                        {maOTP}
+                    </span>
+                </div>
+                <p style='color: #6B7280; font-size: 14px;'>
+                    <i class='fa-regular fa-clock'></i> 
+                    Mã này sẽ hết hạn sau 5 phút.
+                </p>
+                <p style='color: #6B7280; font-size: 14px;'>
+                    Nếu bạn không đăng ký tài khoản LOHA, vui lòng bỏ qua email này.
+                </p>
+            </div>
+            <div style='text-align: center; padding: 20px; color: #9CA3AF; font-size: 12px;'>
+                © 2024 LOHA - BĐH LOTUS
+            </div>
+        </div>";
+
+                var emailService = HttpContext.RequestServices.GetService<LOHA.Services.EmailService>();
+                if (emailService != null)
+                {
+                    await emailService.SendEmailAsync(user.EmailorSDT, subject, body);
+                }
+
+                // 6. Chuyển đến trang xác thực OTP
+                return RedirectToAction("XacThucDangKy", new { email = user.EmailorSDT });
             }
+
             return View(user);
         }
+        // ===== TRANG XÁC THỰC OTP KHI ĐĂNG KÝ =====
+        [HttpGet]
+        public IActionResult XacThucDangKy(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("DangKy");
+            }
 
+            ViewBag.Email = email;
+            return View();
+        }
+        // ===== XÁC NHẬN OTP VÀ TẠO TÀI KHOẢN =====
+        [HttpPost]
+        public async Task<IActionResult> XacNhanDangKy(string email, string maOTP)
+        {
+            // 1. Kiểm tra đầu vào
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(maOTP))
+            {
+                TempData["Loi"] = "Vui lòng nhập mã OTP";
+                return RedirectToAction("XacThucDangKy", new { email = email });
+            }
+
+            // 2. Tìm bản ghi xác thực trong database
+            var xacThuc = await _context.XacThucEmails
+                .Where(x => x.Email == email && x.MaOTP == maOTP && !x.DaSuDung)
+                .OrderByDescending(x => x.ThoiGianTao)
+                .FirstOrDefaultAsync();
+
+            // 3. Kiểm tra OTP có tồn tại không
+            if (xacThuc == null)
+            {
+                TempData["Loi"] = "Mã OTP không đúng hoặc đã được sử dụng";
+                return RedirectToAction("XacThucDangKy", new { email = email });
+            }
+
+            // 4. Kiểm tra OTP còn hạn không (5 phút)
+            if (xacThuc.ThoiGianHetHan < DateTime.Now)
+            {
+                TempData["Loi"] = "Mã OTP đã hết hạn. Vui lòng đăng ký lại";
+                return RedirectToAction("DangKy");
+            }
+
+            // 5. Kiểm tra email đã tồn tại chưa (phòng trường hợp đăng ký trùng khi chờ xác thực)
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.EmailorSDT == email);
+            if (existingUser != null)
+            {
+                TempData["Loi"] = "Email này đã được đăng ký";
+                return RedirectToAction("DangKy");
+            }
+
+            // 6. Tạo user mới từ thông tin đã lưu
+            var user = new User
+            {
+                EmailorSDT = xacThuc.Email,
+                Ten = xacThuc.Ten,
+                Matkhau = xacThuc.Matkhau,
+                Ngaysinh = xacThuc.Ngaysinh,
+                Gioitinh = xacThuc.Gioitinh,
+                Ngaytao = DateTime.Now,
+                NgayCapNhatTen = null,
+                NgayCapNhatNgaySinh = null
+            };
+
+            _context.Users.Add(user);
+
+            // 7. Đánh dấu OTP đã sử dụng
+            xacThuc.DaSuDung = true;
+
+            await _context.SaveChangesAsync();
+
+            // 8. Thông báo thành công và chuyển về trang đăng nhập
+            TempData["DangKyThanhCong"] = "true";
+            TempData["ThongBao"] = "Đăng ký tài khoản thành công! Vui lòng đăng nhập.";
+
+            return RedirectToAction("DangNhap");
+        }
+        // ===== GỬI LẠI MÃ XÁC THỰC =====
+        [HttpGet]
+        public async Task<IActionResult> GuiLaiMaXacThuc(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("DangKy");
+            }
+
+            // Tìm bản ghi xác thực chưa sử dụng
+            var xacThuc = await _context.XacThucEmails
+                .Where(x => x.Email == email && !x.DaSuDung)
+                .OrderByDescending(x => x.ThoiGianTao)
+                .FirstOrDefaultAsync();
+
+            if (xacThuc == null)
+            {
+                TempData["Loi"] = "Không tìm thấy yêu cầu xác thực. Vui lòng đăng ký lại";
+                return RedirectToAction("DangKy");
+            }
+
+            // Tạo mã OTP mới
+            Random random = new Random();
+            string maOTPMoi = random.Next(100000, 999999).ToString();
+
+            // Cập nhật mã OTP và thời gian hết hạn
+            xacThuc.MaOTP = maOTPMoi;
+            xacThuc.ThoiGianTao = DateTime.Now;
+            xacThuc.ThoiGianHetHan = DateTime.Now.AddMinutes(5);
+            await _context.SaveChangesAsync();
+
+            // Gửi lại email
+            string subject = "LOHA - Mã xác thực mới";
+            string body = $@"
+    <div style='font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;'>
+        <div style='text-align: center; padding: 20px;'>
+            <h2 style='color: #1E2A78;'>LOHA - Mã xác thực mới</h2>
+        </div>
+        <div style='background: #F8FAFF; padding: 20px; border-radius: 10px;'>
+            <p>Xin chào <strong>{xacThuc.Ten}</strong>,</p>
+            <p>Bạn đã yêu cầu gửi lại mã xác thực cho tài khoản LOHA.</p>
+            <p>Mã xác thực mới của bạn là:</p>
+            <div style='text-align: center; margin: 30px 0;'>
+                <span style='background: linear-gradient(135deg, #1E2A78, #6C63FF); 
+                             color: white; 
+                             padding: 15px 40px; 
+                             font-size: 32px; 
+                             font-weight: bold; 
+                             letter-spacing: 10px;
+                             border-radius: 10px;'>
+                    {maOTPMoi}
+                </span>
+            </div>
+            <p style='color: #6B7280; font-size: 14px;'>
+                <i class='fa-regular fa-clock'></i> 
+                Mã này sẽ hết hạn sau 5 phút.
+            </p>
+        </div>
+        <div style='text-align: center; padding: 20px; color: #9CA3AF; font-size: 12px;'>
+            © 2024 LOHA - BĐH LOTUS
+        </div>
+    </div>";
+
+            var emailService = HttpContext.RequestServices.GetService<LOHA.Services.EmailService>();
+            if (emailService != null)
+            {
+                await emailService.SendEmailAsync(email, subject, body);
+            }
+
+            TempData["ThongBao"] = "Mã xác thực mới đã được gửi đến email của bạn";
+            return RedirectToAction("XacThucDangKy", new { email = email });
+        }
         // trang đăng nhập
         public IActionResult DangNhap()
         {
@@ -148,7 +350,7 @@ namespace LOHA.Controllers // nhóm chứa các class
                      (k.NguoiGuiId == user.ID && k.NguoiNhanId == currentUser.ID)) &&
                     k.TrangThai == 1);
 
-                // Kiểm tra đã gửi lời mời chưa (trạng thái 0: đang chờ)
+                // Kiểm tra đã gửi lời mời chưa (CHỈ KHI CHƯA LÀ BẠN BÈ)
                 if (!daLaBanBe)
                 {
                     daGuiLoiMoi = _context.KetBans.Any(k =>
@@ -156,7 +358,30 @@ namespace LOHA.Controllers // nhóm chứa các class
                         k.NguoiNhanId == user.ID &&
                         k.TrangThai == 0);
                 }
+
+                // Nếu đã là bạn bè, lấy nhóm mà currentUser đã xếp cho user này
+                if (daLaBanBe)
+                {
+                    var ketBan = _context.KetBans.FirstOrDefault(k =>
+                        ((k.NguoiGuiId == currentUser.ID && k.NguoiNhanId == user.ID) ||
+                         (k.NguoiGuiId == user.ID && k.NguoiNhanId == currentUser.ID)) &&
+                        k.TrangThai == 1);
+
+                    if (ketBan != null)
+                    {
+                        // Xác định nhóm dựa vào việc currentUser là người gửi hay người nhận
+                        if (ketBan.NguoiGuiId == currentUser.ID)
+                            ViewBag.NhomCuaToi = ketBan.NhomNguoiGui ?? "Bạn bè";
+                        else
+                            ViewBag.NhomCuaToi = ketBan.NhomNguoiNhan ?? "Bạn bè";
+                    }
+                    else
+                    {
+                        ViewBag.NhomCuaToi = "Bạn bè";
+                    }
+                }
             }
+
             // Đếm số bạn bè của user này
             soBanBe = _context.KetBans.Count(k =>
                 (k.NguoiGuiId == user.ID || k.NguoiNhanId == user.ID) &&
@@ -165,39 +390,61 @@ namespace LOHA.Controllers // nhóm chứa các class
             // Truyền dữ liệu sang View qua ViewBag
             ViewBag.Baiviets = baiviets;
             ViewBag.Thichs = thichs;
-            ViewBag.CurrentUserId = currentUser.ID;      // cho partial view
+            ViewBag.CurrentUserId = currentUser.ID;
             ViewBag.DaLaBanBe = daLaBanBe;
             ViewBag.DaGuiLoiMoi = daGuiLoiMoi;
             ViewBag.SoBanBe = soBanBe;
 
+            // ===== LẤY THAM SỐ LỌC NHÓM TỪ QUERY STRING =====
+            string nhomLoc = HttpContext.Request.Query["nhom"].ToString();
+            ViewBag.NhomDangChon = nhomLoc; // Để view biết đang lọc nhóm nào
+
             // Lấy danh sách bạn bè
             var danhSachBanBe = new List<User>();
+            var danhSachNhom = new List<string>(); // Lưu nhóm tương ứng với từng bạn
+
+            // Lấy tất cả quan hệ bạn bè của user này
             var cacKetBan = await _context.KetBans
                 .Where(k => (k.NguoiGuiId == user.ID || k.NguoiNhanId == user.ID) && k.TrangThai == 1)
+                .OrderByDescending(k => k.NgayPhanHoi ?? k.NgayGui) // Mới nhất lên đầu
                 .ToListAsync();
 
             ViewBag.NgayKetBan = new Dictionary<int, DateTime>();
+            ViewBag.NhomCuaBan = new Dictionary<int, string>(); // Lưu nhóm của từng bạn
+
             foreach (var ketBan in cacKetBan)
             {
+                User? ban = null;
+                string nhomCuaBanBe = "Bạn bè";
+
                 if (ketBan.NguoiGuiId == user.ID)
                 {
-                    var ban = await _context.Users.FindAsync(ketBan.NguoiNhanId);
-                    if (ban != null)
-                    {
-                        ViewBag.NgayKetBan[ban.ID] = ketBan.NgayPhanHoi ?? ketBan.NgayGui;
-                        danhSachBanBe.Add(ban);
-                    }
+                    ban = await _context.Users.FindAsync(ketBan.NguoiNhanId);
+                    // Nhóm mà user xếp cho người này
+                    nhomCuaBanBe = ketBan.NhomNguoiGui ?? "Bạn bè";
                 }
                 else
                 {
-                    var ban = await _context.Users.FindAsync(ketBan.NguoiGuiId);
-                    if (ban != null)
+                    ban = await _context.Users.FindAsync(ketBan.NguoiGuiId);
+                    // Nhóm mà user xếp cho người này
+                    nhomCuaBanBe = ketBan.NhomNguoiNhan ?? "Bạn bè";
+                }
+
+                if (ban != null)
+                {
+                    // Lọc theo nhóm nếu có tham số
+                    if (!string.IsNullOrEmpty(nhomLoc) && nhomLoc != "TatCa")
                     {
-                        ViewBag.NgayKetBan[ban.ID] = ketBan.NgayPhanHoi ?? ketBan.NgayGui;
-                        danhSachBanBe.Add(ban);
+                        if (nhomCuaBanBe != nhomLoc)
+                            continue; // Bỏ qua nếu không đúng nhóm
                     }
+
+                    ViewBag.NgayKetBan[ban.ID] = ketBan.NgayPhanHoi ?? ketBan.NgayGui;
+                    ViewBag.NhomCuaBan[ban.ID] = nhomCuaBanBe;
+                    danhSachBanBe.Add(ban);
                 }
             }
+
             ViewBag.DanhSachBanBe = danhSachBanBe;
 
             return View(user);
@@ -389,15 +636,15 @@ namespace LOHA.Controllers // nhóm chứa các class
             return View(user);
         }
 
-        // ===== GỬI LỜI MỜI KẾT BẠN =====
+        // ===== GỬI LỜI MỜI KẾT BẠN (CÓ CHỌN NHÓM) =====
         [HttpPost]
-        public async Task<IActionResult> GuiLoiMoiKetBan(int nguoiNhanId) // cho phép chạy bất đồng bộ
+        public async Task<IActionResult> GuiLoiMoiKetBan(int nguoiNhanId, string nhom = "Bạn bè")
         {
-            try // bắt mọi lỗi sảy ra
+            try
             {
-                // Lấy thông tin user đang đăng nhập
+                // 1. Lấy thông tin user đang đăng nhập
                 var userSession = HttpContext.Session.GetString("user");
-                if (string.IsNullOrEmpty(userSession)) // nếu k có session thì trả về lỗi
+                if (string.IsNullOrEmpty(userSession))
                 {
                     return Json(new { success = false, message = "Vui lòng đăng nhập" });
                 }
@@ -405,56 +652,60 @@ namespace LOHA.Controllers // nhóm chứa các class
                 var nguoiGui = await _context.Users
                     .FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
 
-                if (nguoiGui == null) // k tìm thấy user cũng báo lỗi
+                if (nguoiGui == null)
                 {
                     return Json(new { success = false, message = "Không tìm thấy thông tin người dùng" });
                 }
 
-                //Kiểm tra không được kết bạn với chính mình
+                // 2. Kiểm tra không được kết bạn với chính mình
                 if (nguoiGui.ID == nguoiNhanId)
                 {
                     return Json(new { success = false, message = "Không thể kết bạn với chính mình" });
                 }
 
-                //Kiểm tra người nhận có tồn tại không
+                // 3. Kiểm tra người nhận có tồn tại không
                 var nguoiNhan = await _context.Users
-                    .FirstOrDefaultAsync(u => u.ID == nguoiNhanId); // tìm trog db theo id
+                    .FirstOrDefaultAsync(u => u.ID == nguoiNhanId);
 
-                if (nguoiNhan == null) // không có báo lỗi
+                if (nguoiNhan == null)
                 {
                     return Json(new { success = false, message = "Người dùng không tồn tại" });
                 }
 
-                // Kiểm tra đã gửi lời mời chưa
-                var loiMoiDaTonTai = await _context.KetBans
-                    .AnyAsync(k => // ktr xem có bất kỳ bản ghi nào thoả mãn đk không
-                        (k.NguoiGuiId == nguoiGui.ID && k.NguoiNhanId == nguoiNhanId) || // nếu user a đã gửi cho user b
-                        (k.NguoiGuiId == nguoiNhanId && k.NguoiNhanId == nguoiGui.ID));  //user b đã gửi cho user a
+                // 4. Kiểm tra đã gửi lời mời chưa hoặc đã là bạn bè chưa
+                var ketBanCu = await _context.KetBans
+                    .FirstOrDefaultAsync(k =>
+                        (k.NguoiGuiId == nguoiGui.ID && k.NguoiNhanId == nguoiNhanId) ||
+                        (k.NguoiGuiId == nguoiNhanId && k.NguoiNhanId == nguoiGui.ID));
 
-                if (loiMoiDaTonTai) // nếu tồm tại không gửi thêm
+                if (ketBanCu != null)
                 {
-                    return Json(new { success = false, message = "Đã tồn tại lời mời kết bạn" });
+                    if (ketBanCu.TrangThai == 0)
+                        return Json(new { success = false, message = "Đã gửi lời mời trước đó" });
+                    if (ketBanCu.TrangThai == 1)
+                        return Json(new { success = false, message = "Đã là bạn bè" });
                 }
 
-                //Tạo lời mời kết bạn mới
+                // 5. Tạo lời mời kết bạn mới (CÓ THÊM NHÓM)
                 var ketBan = new KetBan
                 {
                     NguoiGuiId = nguoiGui.ID,
                     NguoiNhanId = nguoiNhanId,
                     TrangThai = 0, // 0: Đang chờ xác nhận
                     NgayGui = DateTime.Now,
-                    NgayPhanHoi = null
+                    NgayPhanHoi = null,
+                    NhomNguoiGui = nhom // ← THÊM NHÓM NGƯỜI GỬI CHỌN
                 };
 
-                _context.KetBans.Add(ketBan); //thêm vào ds theo dõi của ef
-                await _context.SaveChangesAsync(); // lưu thay đổi vào db
+                _context.KetBans.Add(ketBan);
+                await _context.SaveChangesAsync();
 
-                // Trả về kết quả thành công
+                // 6. Trả về kết quả thành công
                 return Json(new
                 {
-                    success = true, // thành công
-                    message = "Đã gửi lời mời kết bạn", // thông báo
-                    id = ketBan.Id // id bản ghi vừa tạo
+                    success = true,
+                    message = "Đã gửi lời mời kết bạn",
+                    nhom = nhom
                 });
             }
             catch (Exception ex)
@@ -487,9 +738,9 @@ namespace LOHA.Controllers // nhóm chứa các class
             return View(loiMois);
         }
 
-        // ===== CHẤP NHẬN LỜI MỜI KẾT BẠN =====
+        // ===== CHẤP NHẬN LỜI MỜI KẾT BẠN (CÓ CHỌN NHÓM) =====
         [HttpPost]
-        public async Task<IActionResult> ChapNhanLoiMoi(int loiMoiId)
+        public async Task<IActionResult> ChapNhanLoiMoi(int loiMoiId, string nhom = "Bạn bè")
         {
             try
             {
@@ -504,9 +755,12 @@ namespace LOHA.Controllers // nhóm chứa các class
                 loiMoi.TrangThai = 1;
                 loiMoi.NgayPhanHoi = DateTime.Now;
 
+                // Lưu nhóm mà người nhận (người chấp nhận) chọn
+                loiMoi.NhomNguoiNhan = nhom;
+
                 await _context.SaveChangesAsync();
 
-                return Json(new { success = true, message = "Đã chấp nhận lời mời kết bạn" });
+                return Json(new { success = true, message = "Đã chấp nhận lời mời kết bạn", nhom = nhom });
             }
             catch (Exception ex)
             {
@@ -515,7 +769,7 @@ namespace LOHA.Controllers // nhóm chứa các class
         }
 
         // ===== TỪ CHỐI LỜI MỜI KẾT BẠN =====
-     
+
         [HttpPost]
         public async Task<IActionResult> TuChoiLoiMoi(int loiMoiId)
         {
@@ -697,13 +951,13 @@ namespace LOHA.Controllers // nhóm chứa các class
                         k.TrangThai == 1);
 
                 bool daGuiLoiMoi = false;
+                // Kiểm tra đã gửi lời mời chưa (trạng thái 0: đang chờ)
                 if (!daLaBanBe)
                 {
-                    daGuiLoiMoi = await _context.KetBans
-                        .AnyAsync(k =>
-                            k.NguoiGuiId == currentUser.ID &&
-                            k.NguoiNhanId == user.ID &&
-                            k.TrangThai == 0);
+                    daGuiLoiMoi = _context.KetBans.Any(k =>
+                        k.NguoiGuiId == currentUser.ID &&
+                        k.NguoiNhanId == user.ID &&
+                        k.TrangThai == 0);
                 }
 
                 ketQuaVoiTrangThai.Add(new
@@ -713,13 +967,209 @@ namespace LOHA.Controllers // nhóm chứa các class
                     DaGuiLoiMoi = daGuiLoiMoi
                 });
             }
-
             ViewBag.KetQua = ketQuaVoiTrangThai;
             ViewBag.TuKhoa = tuKhoa;
             ViewBag.CurrentUserId = currentUser.ID;
 
             return View();
         }
+        // ===== TRANG QUÊN MẬT KHẨU =====
+        [HttpGet]
+        public IActionResult QuenMatKhau()
+        {
+            return View();
+        }
+        // ===== GỬI EMAIL ĐẶT LẠI MẬT KHẨU =====
+        [HttpPost]
+        public async Task<IActionResult> GuiEmailDatLaiMatKhau(string email)
+        {
+            // 1. Kiểm tra email có được nhập không
+            if (string.IsNullOrEmpty(email))
+            {
+                TempData["Loi"] = "Vui lòng nhập email";
+                return RedirectToAction("QuenMatKhau");
+            }
 
+            // 2. Kiểm tra email có tồn tại trong database không
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.EmailorSDT == email);
+            if (user == null)
+            {
+                TempData["Loi"] = "Email không tồn tại trong hệ thống";
+                return RedirectToAction("QuenMatKhau");
+            }
+
+            // 3. Tạo mã OTP 6 số ngẫu nhiên
+            Random random = new Random();
+            string maOTP = random.Next(100000, 999999).ToString(); // Sinh số từ 100000 đến 999999
+
+            // 4. Lưu thông tin vào bảng DatLaiMatKhau
+            var datLai = new DatLaiMatKhau
+            {
+                Email = email,
+                MaOTP = maOTP, // ← ĐÚNG: Dùng MaOTP thay vì Token
+                ThoiGianTao = DateTime.Now,
+                ThoiGianHetHan = DateTime.Now.AddMinutes(5), // Hết hạn sau 5 phút (phù hợp với OTP)
+                DaSuDung = false
+            };
+
+            _context.DatLaiMatKhau.Add(datLai);
+            await _context.SaveChangesAsync();
+
+            // 5. Tạo link đặt lại mật khẩu
+            // Lấy domain hiện tại (http://localhost:xxxx)
+            var request = HttpContext.Request;
+            var domain = $"{request.Scheme}://{request.Host}";
+
+            // 6. Tạo nội dung email
+            // 6. Tạo nội dung email (hiển thị mã OTP 6 số)
+            string subject = "LOHA - Mã xác nhận đặt lại mật khẩu";
+            string body = $@"
+            <div style='font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;'>
+                <div style='text-align: center; padding: 20px;'>
+                    <h2 style='color: #1E2A78;'>LOHA - Đặt lại mật khẩu</h2>
+                </div>
+                <div style='background: #F8FAFF; padding: 20px; border-radius: 10px;'>
+                    <p>Xin chào <strong>{user.Ten}</strong>,</p>
+                    <p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản LOHA của mình.</p>
+                    <p>Mã xác nhận của bạn là:</p>
+                    <div style='text-align: center; margin: 30px 0;'>
+                        <span style='background: linear-gradient(135deg, #1E2A78, #6C63FF); 
+                                     color: white; 
+                                     padding: 15px 40px; 
+                                     font-size: 32px; 
+                                     font-weight: bold; 
+                                     letter-spacing: 10px;
+                                     border-radius: 10px;'>
+                            {maOTP}
+                        </span>
+                    </div>
+                    <p style='color: #6B7280; font-size: 14px;'>
+                        <i class='fa-regular fa-clock'></i> 
+                        Mã này sẽ hết hạn sau 5 phút.
+                    </p>
+                    <p style='color: #6B7280; font-size: 14px;'>
+                        Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.
+                    </p>
+                </div>
+                <div style='text-align: center; padding: 20px; color: #9CA3AF; font-size: 12px;'>
+                    © 2024 LOHA - BĐH LOTUS
+                </div>
+            </div>";
+
+            // 7. Gửi email
+            // Lấy EmailService từ HttpContext (đã đăng ký trong Program.cs)
+            var emailService = HttpContext.RequestServices.GetService<LOHA.Services.EmailService>();
+
+            if (emailService != null)
+            {
+                bool ketQua = await emailService.SendEmailAsync(email, subject, body);
+
+                if (ketQua)
+                {
+                    TempData["ThongBao"] = "Link đặt lại mật khẩu đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư!";
+                }
+                else
+                {
+                    TempData["Loi"] = "Không thể gửi email. Vui lòng thử lại sau.";
+                }
+            }
+            else
+            {
+                TempData["Loi"] = "Lỗi hệ thống. Vui lòng thử lại sau.";
+            }
+
+            return RedirectToAction("XacNhanOTP", new { email = email });
+        }
+        // ===== TRANG NHẬP MÃ OTP =====
+        [HttpGet]
+        public IActionResult XacNhanOTP(string email)
+        {
+            // Kiểm tra email có được truyền vào không
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("QuenMatKhau");
+            }
+
+            // Truyền email sang View để dùng trong form
+            ViewBag.Email = email;
+
+            return View();
+        }
+        // ===== XỬ LÝ ĐẶT LẠI MẬT KHẨU =====
+        [HttpPost]
+        public async Task<IActionResult> DatLaiMatKhau(string email, string maOTP, string matKhauMoi, string xacNhanMatKhau)
+        {
+            // 1. Kiểm tra các trường có được nhập không
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(maOTP) ||
+                string.IsNullOrEmpty(matKhauMoi) || string.IsNullOrEmpty(xacNhanMatKhau))
+            {
+                TempData["Loi"] = "Vui lòng nhập đầy đủ thông tin";
+                return RedirectToAction("XacNhanOTP", new { email = email });
+            }
+
+            // 2. Kiểm tra mật khẩu mới và xác nhận có khớp không
+            if (matKhauMoi != xacNhanMatKhau)
+            {
+                TempData["Loi"] = "Mật khẩu xác nhận không khớp";
+                return RedirectToAction("XacNhanOTP", new { email = email });
+            }
+
+            // 3. Kiểm tra độ dài mật khẩu (tối thiểu 6 ký tự)
+            if (matKhauMoi.Length < 6)
+            {
+                TempData["Loi"] = "Mật khẩu phải có ít nhất 6 ký tự";
+                return RedirectToAction("XacNhanOTP", new { email = email });
+            }
+
+            // 4. Kiểm tra mật khẩu có cả chữ và số không
+            bool coChu = matKhauMoi.Any(char.IsLetter);
+            bool coSo = matKhauMoi.Any(char.IsDigit);
+            if (!coChu || !coSo)
+            {
+                TempData["Loi"] = "Mật khẩu phải bao gồm cả chữ và số";
+                return RedirectToAction("XacNhanOTP", new { email = email });
+            }
+
+            // 5. Tìm bản ghi OTP trong database
+            var datLai = await _context.DatLaiMatKhau
+                .Where(d => d.Email == email && d.MaOTP == maOTP && !d.DaSuDung)
+                .OrderByDescending(d => d.ThoiGianTao) // Lấy bản ghi mới nhất
+                .FirstOrDefaultAsync();
+
+            // 6. Kiểm tra OTP có tồn tại không
+            if (datLai == null)
+            {
+                TempData["Loi"] = "Mã OTP không đúng hoặc đã được sử dụng";
+                return RedirectToAction("XacNhanOTP", new { email = email });
+            }
+
+            // 7. Kiểm tra OTP còn hạn không (5 phút)
+            if (datLai.ThoiGianHetHan < DateTime.Now)
+            {
+                TempData["Loi"] = "Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới";
+                return RedirectToAction("QuenMatKhau");
+            }
+
+            // 8. Tìm user theo email
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.EmailorSDT == email);
+            if (user == null)
+            {
+                TempData["Loi"] = "Không tìm thấy tài khoản";
+                return RedirectToAction("QuenMatKhau");
+            }
+
+            // 9. Cập nhật mật khẩu mới
+            user.Matkhau = matKhauMoi;
+
+            // 10. Đánh dấu OTP đã sử dụng
+            datLai.DaSuDung = true;
+
+            await _context.SaveChangesAsync();
+
+            // 11. Thông báo thành công và chuyển về trang đăng nhập
+            TempData["ThongBao"] = "Đặt lại mật khẩu thành công! Vui lòng đăng nhập.";
+
+            return RedirectToAction("DangNhap");
+        }
     }
 }

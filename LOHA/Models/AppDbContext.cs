@@ -14,6 +14,9 @@ namespace LOHA.Models
         public DbSet<Thich> Thichs { get; set; } // tạo bảng Thiches trong db
         public DbSet<KetBan> KetBans { get; set; } // tạo bảng KetBans trong db
         public DbSet<TinNhan> TinNhans { get; set; } // tạo bảng TinNhans trong db
+        public DbSet<DatLaiMatKhau> DatLaiMatKhau { get; set; }
+        public DbSet<XacThucEmail> XacThucEmails { get; set; }
+        public DbSet<Lotus> Lotuss { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder); // ❗ bắt buộc

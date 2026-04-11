@@ -23,6 +23,14 @@
 }
 
 <form asp-action="DangNhap" method="post">
+    @if (TempData["ThongBao"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fa-regular fa-circle-check me-2"></i>
+            @TempData["ThongBao"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
     <div class="input-group">
         <input asp-for="EmailorSDT" class="login-input" type="text" placeholder="Số di động, tên người dùng hoặc email" />
         <span asp-validation-for="EmailorSDT" class="text-danger small"></span>
@@ -40,7 +48,7 @@
     }
     <button type="submit" class="login-btn" id="loginBtn">Đăng nhập</button>
 
-    <a href="#" class="forgot-link">Quên mật khẩu?</a>
+    <a asp-action="QuenMatKhau" class="forgot-link">Quên mật khẩu?</a>
         
     <a href="/User/DangKy" class="register-btn">Tạo tài khoản mới</a>
 </form>

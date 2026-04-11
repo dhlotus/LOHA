@@ -1,18 +1,25 @@
-﻿using LOHA.Hubs;
-using LOHA.Models; // sử dụng các class trong thư viện models
+﻿using LOHA.Data;
+using LOHA.Hubs;
+using LOHA.Models;
+using LOHA.Services; 
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args); // khởi tạo ứng dụng ASP
+
+var builder = WebApplication.CreateBuilder(args);
 
 // ===== THÊM CÁC DỊCH VỤ (SERVICES) =====
-builder.Services.AddControllersWithViews(); // bật mô hình MVC cho project
-builder.Services.AddSession(); // bật chức năng session (lưu trạng thái đăng nhập)
+builder.Services.AddControllersWithViews();
+builder.Services.AddSession();
 
-// Kết nối database SQL Server
+// Kết nối database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddSignalR(); // bật chức năng realtime với SignalR (chat)
+builder.Services.AddSignalR();
+
+// Cấu hình Email
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddScoped<EmailService>();
 
 var app = builder.Build(); // xây dựng ứng dụng
 
@@ -22,7 +29,12 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate(); // chạy các migration chưa được áp dụng
 }
-
+// Gọi Seeder để tạo dữ liệu mẫu
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    DbInitializer.Initialize(dbContext);
+}
 // ===== CẤU HÌNH PIPELINE XỬ LÝ REQUEST =====  
 if (!app.Environment.IsDevelopment())
 {

@@ -6,11 +6,28 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace LOHA.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class KhoiTaoDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "DatLaiMatKhau",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    MaOTP = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false),
+                    ThoiGianTao = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ThoiGianHetHan = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DaSuDung = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DatLaiMatKhau", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -23,7 +40,9 @@ namespace LOHA.Migrations
                     EmailorSDT = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Matkhau = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Avatar = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Ngaytao = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Ngaytao = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    NgayCapNhatTen = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    NgayCapNhatNgaySinh = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -49,7 +68,7 @@ namespace LOHA.Migrations
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(
@@ -72,7 +91,7 @@ namespace LOHA.Migrations
                         column: x => x.NguoiGuiId,
                         principalTable: "Users",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_KetBans_Users_NguoiNhanId",
                         column: x => x.NguoiNhanId,
@@ -101,7 +120,7 @@ namespace LOHA.Migrations
                         column: x => x.NguoiGuiID,
                         principalTable: "Users",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_TinNhan_Users_NguoiNhanID",
                         column: x => x.NguoiNhanID,
@@ -129,7 +148,7 @@ namespace LOHA.Migrations
                         column: x => x.BaivietId,
                         principalTable: "Baiviets",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_Binhluans_Users_UserId",
                         column: x => x.UserId,
@@ -154,7 +173,7 @@ namespace LOHA.Migrations
                         column: x => x.BaivietId,
                         principalTable: "Baiviets",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_Thichs_Users_UserId",
                         column: x => x.UserId,
@@ -213,6 +232,9 @@ namespace LOHA.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Binhluans");
+
+            migrationBuilder.DropTable(
+                name: "DatLaiMatKhau");
 
             migrationBuilder.DropTable(
                 name: "KetBans");

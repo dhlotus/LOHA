@@ -20,8 +20,7 @@
             <!-- Header với nút back -->
             <div class="settings-nav">
                 <a asp-action="Trangcanhan" class="nav-back">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>Quay lại</span>
+                    <span class="material-icons">arrow_back</span> Quay lại
                 </a>
                 <div class="nav-title">
                     <span>Cài đặt</span>
@@ -100,9 +99,8 @@
             <!-- Nút quay lại -->
             <div class="form-header">
                 <div class="text-start mb-3">
-                    <a asp-action="ChinhSua" class="btn-back-form">
-                        <i class="fa-solid fa-arrow-left"></i>
-                        <span>Quay lại</span>
+                     <a asp-action="ChinhSua" class="btn-back-form">
+                        <span class="material-icons">arrow_back</span> Quay lại
                     </a>
                 </div>
                 <h2 class="form-title">Đổi tên</h2>
@@ -118,7 +116,7 @@
                     <div class="form-group">
                         <label class="form-label">Tên hiện tại</label>
                         <div class="form-value-display">
-                            <i class="fa-regular fa-user"></i>
+                            <span class="material-icons-outlined">person</span>
                             <span>@Model.Ten</span>
                         </div>
                     </div>
@@ -162,7 +160,7 @@
 
                     <!-- Nút submit -->
                     <button type="submit" class="btn-submit-form">
-                        <i class="fa-solid fa-check"></i>
+                        <span class="material-icons" style="font-size: 20px;">check</span>
                         <span>Xác nhận thay đổi</span>
                     </button>
                 </form>
@@ -176,8 +174,7 @@
             <div class="form-header">
                 <div class="text-start mb-3">
                     <a asp-action="ChinhSua" class="btn-back-form">
-                        <i class="fa-solid fa-arrow-left"></i>
-                        <span>Quay lại</span>
+                        <span class="material-icons">arrow_back</span> Quay lại
                     </a>
                 </div>
                 <h2 class="form-title">Đổi ngày sinh</h2>
@@ -247,8 +244,7 @@
             <div class="form-header">
                 <div class="text-start mb-3">
                     <a asp-action="ChinhSua" class="btn-back-form">
-                        <i class="fa-solid fa-arrow-left"></i>
-                        <span>Quay lại</span>
+                         <span class="material-icons">arrow_back</span> Quay lại
                     </a>
                 </div>
                 <h2 class="form-title">Đổi mật khẩu</h2>
@@ -336,26 +332,30 @@
                     </p>
                     
                     <!-- Nút hành động -->
-                    <div class="d-flex gap-2 justify-content-center">
-                        <button type="button" class="btn btn-light rounded-pill px-4" onclick="dongModalVaGiuDuLieu()">
-                            <i class="fa-regular fa-xmark me-2"></i>Hủy
+                    <div class="d-flex gap-3 justify-content-center">
+                        <!-- Nút Hủy -->
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4 py-2" onclick="dongModalVaGiuDuLieu()">
+                            <span class="material-icons me-2" style="font-size: 18px;">close</span>
+                            Hủy
                         </button>
-                        
-                        <form asp-action="ChinhSua" method="post" id="confirmForm" style="display: inline;">
-                            <input type="hidden" name="confirm" value="true" />
-                            <input type="hidden" name="activeTab" value="@activeTab" />
-                            
-                            <input type="hidden" name="Ten" value="@ViewBag.Ten" />
-                            <input type="hidden" name="Ngaysinh" value="@(ViewBag.Ngaysinh != null ? ((DateTime)ViewBag.Ngaysinh).ToString("yyyy-MM-dd") : "")" />
-                            <input type="hidden" name="MatKhauCu" value="@ViewBag.MatKhauCu" />
-                            <input type="hidden" name="MatKhauMoi" value="@ViewBag.MatKhauMoi" />
-                            <input type="hidden" name="XacNhanMatKhau" value="@ViewBag.XacNhanMatKhau" />
-                            
-                            <button type="submit" class="btn btn-primary rounded-pill px-4" form="confirmForm">
-                                <i class="fa-regular fa-check me-2"></i>Xác nhận
-                            </button>
-                        </form>
+    
+                        <!-- Nút Xác nhận -->
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 py-2" form="confirmForm">
+                            <span class="material-icons me-2" style="font-size: 18px;">check_circle</span>
+                            Ok
+                        </button>
                     </div>
+
+                    <!-- Form giữ nguyên -->
+                    <form asp-action="ChinhSua" method="post" id="confirmForm">
+                        <input type="hidden" name="confirm" value="true" />
+                        <input type="hidden" name="activeTab" value="@activeTab" />
+                        <input type="hidden" name="Ten" value="@ViewBag.Ten" />
+                        <input type="hidden" name="Ngaysinh" value="@(ViewBag.Ngaysinh != null ? ((DateTime)ViewBag.Ngaysinh).ToString("yyyy-MM-dd") : "")" />
+                        <input type="hidden" name="MatKhauCu" value="@ViewBag.MatKhauCu" />
+                        <input type="hidden" name="MatKhauMoi" value="@ViewBag.MatKhauMoi" />
+                        <input type="hidden" name="XacNhanMatKhau" value="@ViewBag.XacNhanMatKhau" />
+                    </form>
                 </div>
             </div>
         </div>
@@ -383,22 +383,6 @@
         var matKhauMoi = document.querySelector('input[name="MatKhauMoi"]');
         var xacNhanMatKhau = document.querySelector('input[name="XacNhanMatKhau"]');
         var xacNhanError = document.createElement('span');
-
-        if (matKhauMoi && xacNhanMatKhau) {
-            xacNhanError.className = 'text-danger small mt-1';
-            xacNhanMatKhau.parentNode.appendChild(xacNhanError);
-        
-            function checkPasswordMatch() {
-                if (matKhauMoi.value !== xacNhanMatKhau.value) {
-                    xacNhanError.innerText = 'Mật khẩu xác nhận không khớp';
-                } else {
-                    xacNhanError.innerText = '';
-                }
-            }
-        
-            matKhauMoi.addEventListener('input', checkPasswordMatch);
-            xacNhanMatKhau.addEventListener('input', checkPasswordMatch);
-        }
         
         // Đóng modal khi click ra ngoài
         document.addEventListener('DOMContentLoaded', function() {
@@ -686,6 +670,19 @@
     color: #6B7280;
 }
 
+.btn-outline-secondary,
+.btn-primary {
+    min-width: 120px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Icon trong nút */
+.btn .material-icons {
+    font-size: 18px;
+    vertical-align: middle;
+}
 /* ===== FORM CARD ===== */
 .form-card {
     background: white;

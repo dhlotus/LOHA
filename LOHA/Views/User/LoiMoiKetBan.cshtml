@@ -53,9 +53,10 @@
 
                             <!-- Nút hành động -->
                             <div class="d-flex gap-2 mt-3">
-                                <button onclick="chapNhanLoiMoi(@loiMoi.Id)"
+                                <button onclick="moPopupChonNhomChapNhan(@loiMoi.Id, '@loiMoi.NguoiGui?.Ten')"
                                         class="btn btn-success flex-fill rounded-pill">
-                                    <i class="fa-solid fa-user-check"></i> Chấp nhận
+                                    <span class="material-icons-outlined me-1" style="vertical-align: middle;">check</span>
+                                    Chấp nhận
                                 </button>
                                 <button onclick="tuChoiLoiMoi(@loiMoi.Id)"
                                         class="btn btn-outline-danger flex-fill rounded-pill">
@@ -68,6 +69,57 @@
             }
         </div>
     }
+    <!-- ===== POPUP CHỌN NHÓM KHI CHẤP NHẬN LỜI MỜI ===== -->
+    <div class="modal fade" id="chonNhomChapNhanModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" style="color: #1E2A78;">
+                        <span class="material-icons-outlined me-2" style="vertical-align: middle;">person_add</span>
+                        Chấp nhận lời mời
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body pt-2">
+                    <p class="text-secondary mb-3" id="tenNguoiGuiPopup">Thêm <strong></strong> vào nhóm:</p>
+                
+                    <div class="d-flex flex-column gap-2">
+                        <label class="form-check-label p-3 border rounded-3" style="cursor: pointer;">
+                            <input type="radio" name="nhomChapNhan" value="Bạn bè" class="form-check-input me-2" checked>
+                            <span class="material-icons-outlined me-2" style="vertical-align: middle; color: #6C63FF;">people</span>
+                            <strong>Bạn bè</strong>
+                        </label>
+                    
+                        <label class="form-check-label p-3 border rounded-3" style="cursor: pointer;">
+                            <input type="radio" name="nhomChapNhan" value="Gia đình" class="form-check-input me-2">
+                            <span class="material-icons-outlined me-2" style="vertical-align: middle; color: #FF6B6B;">family_restroom</span>
+                            <strong>Gia đình</strong>
+                        </label>
+                    
+                        <label class="form-check-label p-3 border rounded-3" style="cursor: pointer;">
+                            <input type="radio" name="nhomChapNhan" value="Đồng nghiệp" class="form-check-input me-2">
+                            <span class="material-icons-outlined me-2" style="vertical-align: middle; color: #4ECDC4;">work</span>
+                            <strong>Đồng nghiệp</strong>
+                        </label>
+                    
+                        <label class="form-check-label p-3 border rounded-3" style="cursor: pointer;">
+                            <input type="radio" name="nhomChapNhan" value="Khác" class="form-check-input me-2">
+                            <span class="material-icons-outlined me-2" style="vertical-align: middle; color: #9CA3AF;">more_horiz</span>
+                            <strong>Khác</strong>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4" id="xacNhanChapNhanLoiMoi"
+                            style="background: linear-gradient(135deg, #1E2A78, #6C63FF); border: none;">
+                        <span class="material-icons-outlined me-1" style="vertical-align: middle; font-size: 18px;">check</span>
+                        Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -158,5 +210,66 @@
                 console.error('Lỗi kết nối:', error);
             });
         }
+                // Biến lưu ID lời mời tạm thời
+        var loiMoiHienTai = 0;
+        var tenNguoiGuiHienTai = "";
+
+        // Hàm mở popup chọn nhóm khi chấp nhận
+        function moPopupChonNhomChapNhan(loiMoiId, tenNguoiGui) {
+            loiMoiHienTai = loiMoiId;
+            tenNguoiGuiHienTai = tenNguoiGui;
+    
+            // Hiển thị tên người gửi trong popup
+            document.querySelector('#tenNguoiGuiPopup strong').innerText = tenNguoiGui;
+    
+            // Reset radio về "Bạn bè"
+            document.querySelector('input[name="nhomChapNhan"][value="Bạn bè"]').checked = true;
+    
+            // Hiện modal
+            var modal = new bootstrap.Modal(document.getElementById('chonNhomChapNhanModal'));
+            modal.show();
+        }
+
+        // Xử lý khi click nút "Xác nhận" trong popup
+        document.getElementById('xacNhanChapNhanLoiMoi').addEventListener('click', function() {
+            // Lấy nhóm được chọn
+            var nhomDuocChon = document.querySelector('input[name="nhomChapNhan"]:checked').value;
+    
+            // Gửi request chấp nhận lời mời
+            fetch('/User/ChapNhanLoiMoi', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'loiMoiId=' + loiMoiHienTai + '&nhom=' + encodeURIComponent(nhomDuocChon)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Đóng modal
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('chonNhomChapNhanModal'));
+                    modal.hide();
+            
+                    // Xóa lời mời khỏi danh sách
+                    document.getElementById('loiMoi-' + loiMoiHienTai).remove();
+            
+                    // Cập nhật số thông báo
+                    if (typeof capNhatThongBao === 'function') {
+                        capNhatThongBao();
+                    }
+            
+                    // Nếu hết lời mời, reload trang
+                    if (document.querySelectorAll('[id^="loiMoi-"]').length === 0) {
+                        location.reload();
+                    }
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra');
+            });
+        });
     </script>
 }

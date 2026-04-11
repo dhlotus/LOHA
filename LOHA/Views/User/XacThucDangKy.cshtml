@@ -1,0 +1,79 @@
+﻿@{
+    ViewData["Title"] = "Xác thực tài khoản";
+    Layout = "_LayoutAuth";
+    string email = ViewBag.Email ?? "";
+    <!-- Google Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 col-xl-5" style="width:100%;padding:0;">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 p-md-5">
+                    
+                    <!-- Logo -->
+                    <div class="text-center mb-4">
+                        <img src="/images/logoLOHA.png" alt="LOHA" style="width: 60px; height: 60px; object-fit: cover; border-radius: 14px;" />
+                        <h3 class="fw-bold mt-3" style="color: #1E2A78;">Xác thực tài khoản</h3>
+                        <p class="text-secondary">
+                            Mã xác thực đã được gửi đến <strong>@email</strong>
+                        </p>
+                    </div>
+
+                    <!-- Hiển thị lỗi -->
+                    @if (TempData["Loi"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <span class="material-icons-outlined me-2" style="vertical-align: middle;">error_outline</span>
+                            @TempData["Loi"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <!-- Form nhập OTP -->
+                    <form asp-action="XacNhanDangKy" method="post">
+                        <input type="hidden" name="email" value="@email" />
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold" style="color: #1E2A78;">
+                                <span class="material-icons-outlined me-2" style="vertical-align: middle;">pin</span>
+                                Nhập mã OTP 6 số
+                            </label>
+                            <input type="text"
+                                   name="maOTP"
+                                   class="form-control rounded-pill py-3 px-4 text-center fs-4"
+                                   placeholder="000000"
+                                   maxlength="6"
+                                   required
+                                   style="border-color: #E5E7EB; background: #F8FAFF; letter-spacing: 8px;" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-semibold"
+                                style="background: linear-gradient(135deg, #1E2A78, #6C63FF); border: none;">
+                            <span class="material-icons-outlined me-2" style="vertical-align: middle;">verified</span>
+                            Xác nhận
+                        </button>
+                    </form>
+
+                    <!-- Link gửi lại mã -->
+                    <div class="text-center mt-4">
+                        <a asp-action="GuiLaiMaXacThuc" asp-route-email="@email" class="text-decoration-none" style="color: #6C63FF;">
+                            <span class="material-icons-outlined me-1" style="vertical-align: middle; font-size: 16px;">refresh</span>
+                            Gửi lại mã xác thực
+                        </a>
+                    </div>
+
+                    <!-- Link quay lại đăng ký -->
+                    <div class="text-center mt-3">
+                        <a asp-action="DangKy" class="text-decoration-none" style="color: #9CA3AF;">
+                            <span class="material-icons-outlined me-1" style="vertical-align: middle; font-size: 16px;">arrow_back</span>
+                            Quay lại đăng ký
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,99 @@
+﻿@{
+    ViewData["Title"] = "Quên mật khẩu";
+    Layout = "_LayoutAuth"; // Dùng layout đăng nhập/đăng ký
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8 col-xl-7" style="width:100%; padding: 0;">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 p-md-5">
+                    
+                    <!-- Logo -->
+                    <div class="text-center mb-4">
+                        <img src="/images/logoLOHA.png" alt="LOHA" style="width: 60px; height: 60px; object-fit: cover; border-radius: 14px;" />
+                        <h3 class="fw-bold mt-3" style="color: #1E2A78;">Quên mật khẩu</h3>
+                        <p class="text-secondary">Nhập email để nhận link đặt lại mật khẩu</p>
+                    </div>
+
+                    <!-- Hiển thị thông báo -->
+                    @if (TempData["ThongBao"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <span class="material-icons-outlined me-2">check_circle</span>
+                            @TempData["ThongBao"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["Loi"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <span class="material-icons-outlined me-2">error_outline</span>
+                            @TempData["Loi"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <!-- Form nhập email -->
+                    <form asp-action="GuiEmailDatLaiMatKhau" method="post">
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold" style="color: #1E2A78;">
+                                <span class="material-icons-outlined me-2">mail</span>Email
+                            </label>
+                            <input type="email"
+                                   name="email"
+                                   class="form-control rounded-pill py-2 px-3"
+                                   placeholder="Nhập email đã đăng ký"
+                                   required
+                                   style="border-color: #E5E7EB; background: #F8FAFF;" />
+                        </div>
+
+                        <button type="submit" class="btn w-100 rounded-pill py-2 fw-semibold" 
+                                style="background: linear-gradient(135deg, #1E2A78, #6C63FF); 
+                                       color: white; 
+                                       border: none;
+                                       transition: all 0.3s ease;">
+                            Gửi mã xác nhận <span class="material-icons-outlined ms-2" style="vertical-align: middle;">send</span>
+                        </button>
+                    </form>
+
+                    <!-- Link quay lại đăng nhập -->
+                    <div class="text-center mt-4">
+                        <a asp-action="DangNhap" class="text-decoration-none" style="color: #6C63FF;">
+                            <span class="material-icons-outlined me-1">arrow_back</span>Quay lại đăng nhập
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    /* Desktop: tăng kích thước */
+    @@media (min-width: 992px) {
+        .card-body {
+            padding: 40px 50px !important;
+        }
+        
+        h3 {
+            font-size: 28px !important;
+        }
+        
+        .form-control {
+            padding: 14px 20px !important;
+            font-size: 16px !important;
+        }
+        
+        .btn {
+            padding: 14px 0 !important;
+            font-size: 16px !important;
+        }
+    }
+    .material-icons-outlined {
+        vertical-align: middle;
+        font-size: 20px;
+    }
+</style>

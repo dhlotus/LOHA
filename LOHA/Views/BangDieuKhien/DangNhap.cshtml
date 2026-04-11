@@ -1,0 +1,234 @@
+﻿@{
+    ViewData["Title"] = "Đăng nhập";
+    Layout = null; // Không dùng layout, trang login riêng
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LOTUS - Đăng nhập</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    
+    <!-- Google Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: 'Inter', sans-serif;
+                padding: 20px;
+            }
+
+            .lotus-login-container {
+                width: 100%;
+                max-width: 420px;
+            }
+
+            .lotus-login-card {
+                background: rgba(255, 255, 255, 0.03);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 32px;
+                padding: 48px 40px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            }
+
+            .lotus-logo {
+                text-align: center;
+                margin-bottom: 40px;
+            }
+
+            .lotus-logo-icon {
+                width: 80px;
+                height: 80px;
+                background: linear-gradient(135deg, #F59E0B, #EA580C);
+                border-radius: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 16px;
+                box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+            }
+
+                .lotus-logo-icon span {
+                    font-size: 48px;
+                    color: white;
+                }
+
+            .lotus-logo h1 {
+                color: white;
+                font-size: 32px;
+                font-weight: 700;
+                letter-spacing: 3px;
+                margin-bottom: 8px;
+            }
+
+            .lotus-logo p {
+                color: rgba(255, 255, 255, 0.4);
+                font-size: 14px;
+                font-weight: 400;
+            }
+
+            .lotus-input-group {
+                margin-bottom: 24px;
+            }
+
+            .lotus-input-label {
+                display: block;
+                color: rgba(255, 255, 255, 0.6);
+                font-size: 14px;
+                font-weight: 500;
+                margin-bottom: 8px;
+            }
+
+            .lotus-input-wrapper {
+                position: relative;
+            }
+
+            .lotus-input-icon {
+                position: absolute;
+                left: 16px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: rgba(255, 255, 255, 0.3);
+                font-size: 20px;
+            }
+
+            .lotus-input {
+                width: 100%;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 16px;
+                padding: 16px 16px 16px 52px;
+                color: white;
+                font-size: 15px;
+                transition: all 0.2s ease;
+            }
+
+                .lotus-input:focus {
+                    outline: none;
+                    border-color: #F59E0B;
+                    background: rgba(255, 255, 255, 0.08);
+                    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15);
+                }
+
+                .lotus-input::placeholder {
+                    color: rgba(255, 255, 255, 0.25);
+                }
+
+            .lotus-btn {
+                width: 100%;
+                background: linear-gradient(135deg, #F59E0B, #EA580C);
+                border: none;
+                border-radius: 16px;
+                padding: 16px;
+                color: white;
+                font-weight: 600;
+                font-size: 16px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                transition: all 0.2s ease;
+                margin-top: 32px;
+            }
+
+                .lotus-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+                }
+
+            .lotus-error {
+                background: rgba(220, 38, 38, 0.15);
+                border: 1px solid rgba(220, 38, 38, 0.3);
+                border-radius: 16px;
+                padding: 14px 18px;
+                margin-bottom: 24px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                color: #FCA5A5;
+                font-size: 14px;
+            }
+
+            .lotus-footer {
+                text-align: center;
+                margin-top: 32px;
+                color: rgba(255, 255, 255, 0.3);
+                font-size: 13px;
+            }
+    </style>
+</head>
+<body>
+    <div class="lotus-login-container">
+        <div class="lotus-login-card">
+            <!-- Logo -->
+            <div class="lotus-logo">
+                <div class="lotus-logo-icon">
+                    <span class="material-icons-outlined">local_florist</span>
+                </div>
+                <h1>LOTUS</h1>
+                <p>Bảng điều khiển quản trị</p>
+            </div>
+
+            <!-- Hiển thị lỗi -->
+            @if (ViewBag.Loi != null)
+            {
+                <div class="lotus-error">
+                    <span class="material-icons-outlined">error_outline</span>
+                    <span>@ViewBag.Loi</span>
+                </div>
+            }
+
+            <!-- Form đăng nhập -->
+            <form method="post" asp-action="DangNhap" asp-controller="BangDieuKhien">
+                <div class="lotus-input-group">
+                    <label class="lotus-input-label">Tên đăng nhập</label>
+                    <div class="lotus-input-wrapper">
+                        <span class="material-icons-outlined lotus-input-icon">person</span>
+                        <input type="text" name="tenDangNhap" class="lotus-input" placeholder="Nhập tên đăng nhập" required autofocus />
+                    </div>
+                </div>
+
+                <div class="lotus-input-group">
+                    <label class="lotus-input-label">Mật khẩu</label>
+                    <div class="lotus-input-wrapper">
+                        <span class="material-icons-outlined lotus-input-icon">lock</span>
+                        <input type="password" name="matKhau" class="lotus-input" placeholder="Nhập mật khẩu" required />
+                    </div>
+                </div>
+
+                <button type="submit" class="lotus-btn">
+                    <span class="material-icons-outlined">login</span>
+                    <span>Đăng nhập vào bảng điều khiển</span>
+                </button>
+            </form>
+
+            <!-- Footer -->
+            <div class="lotus-footer">
+                LOTUS Admin • Bảo mật nội bộ
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
