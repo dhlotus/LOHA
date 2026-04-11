@@ -1171,5 +1171,77 @@ namespace LOHA.Controllers // nhóm chứa các class
 
             return RedirectToAction("DangNhap");
         }
+
+
+        // Ngày 10/04/2026 - Chức năng Thay đổi Avatar và Ảnh nền vĩnh viễn 
+
+        [HttpPost]
+        public async Task<IActionResult> UploadAvatar(IFormFile file)
+        {
+            if (file != null && file.Length > 0)
+            {
+                var userId = HttpContext.Session.GetInt32("UserId");
+                var user = _context.Users.Find(userId);
+
+                // ❌ XÓA ẢNH CŨ
+                if (!string.IsNullOrEmpty(user.Avatar))
+                {
+                    var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", user.Avatar.TrimStart('/'));
+                    if (System.IO.File.Exists(oldPath))
+                    {
+                        System.IO.File.Delete(oldPath);
+                    }
+                }
+
+                // ✅ LƯU ẢNH MỚI
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/avatar", fileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                user.Avatar = "/images/avatar/" + fileName;
+                _context.SaveChanges();
+            }
+
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadCover(IFormFile file)
+        {
+            if (file != null && file.Length > 0)
+            {
+                var userId = HttpContext.Session.GetInt32("UserId");
+                var user = _context.Users.Find(userId);
+
+                // ❌ XÓA ẢNH CŨ
+                if (!string.IsNullOrEmpty(user.AnhNen))
+                {
+                    var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", user.AnhNen.TrimStart('/'));
+                    if (System.IO.File.Exists(oldPath))
+                    {
+                        System.IO.File.Delete(oldPath);
+                    }
+                }
+
+                // ✅ LƯU ẢNH MỚI
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/cover", fileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                user.AnhNen = "/images/cover/" + fileName;
+                _context.SaveChanges();
+            }
+
+            return Json(new { success = true });
+        }
+
     }
 }
