@@ -14,66 +14,52 @@
         : "/images/default.png";
 
 }
-//
 
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<div class="container-fluid mt-4 px-2 px-md-4">
-    <!-- ===== COVER & AVATAR ===== -->
+<!-- ===== COVER & AVATAR ===== -->
+<div class="position-relative">
+    
+    <!-- ẢNH BÌA + ICON CAMERA -->
     <div class="position-relative">
-
-        <!-- ẢNH BÌA -->
-        <div class="position-relative">
-            <img id="coverImg" src="@coverImage"
-                 class="img-fluid w-100 rounded-4"
-                 style="height: 200px; object-fit: cover;" />
-
-            <!-- ICON CAMERA COVER -->
+        <img id="coverImg" src="@coverImage"
+             class="img-fluid w-100 rounded-4"
+             style="height: 200px; object-fit: cover;" />
+        
+        <!-- Icon camera cho ảnh bìa (chỉ hiện khi là chủ trang) -->
+        @if (ViewBag.CurrentUserId == Model.ID)
+        {
             <label for="uploadCover"
                    class="shadow"
-                   style="position: absolute; bottom: 10px; right: 10px; background: white; border-radius: 50%; padding: 8px; cursor: pointer;">
+                   style="position: absolute; bottom: 10px; right: 10px; background: white; border-radius: 50%; padding: 8px; cursor: pointer; z-index: 5;">
                 <i class="fa-solid fa-camera"></i>
             </label>
-
             <input type="file" id="uploadCover" class="d-none" accept="image/*" />
-        </div>
-
-        <!-- AVATAR -->
-        <div class="position-absolute" style="bottom: -50px; left: 20px; z-index: 10;">
-            <div class="position-relative">
-                <img id="avatarImg" src="@avatarImage"
-                     class="rounded-circle border border-4 border-white shadow"
-                     style="width: 110px; height: 110px; object-fit: cover;" />
-
-                <!-- ICON CAMERA AVATAR -->
-                <label for="uploadAvatar"
-                       class="shadow"
-                       style="position: absolute; bottom: 5px; right: 5px; background: white; border-radius: 50%; padding: 6px; cursor: pointer;">
-                    <i class="fa-solid fa-camera"></i>
-                </label>
-
-                <input type="file" id="uploadAvatar" class="d-none" accept="image/*" />
-            </div>
-        </div>
-
+        }
     </div>
-</div>
-    <!-- ===== COVER & AVATAR ===== -->
-    <div class="position-relative">
-        <!-- Ảnh bìa - responsive với Bootstrap -->
-        <img src="@coverImage"
-             class="img-fluid w-100 rounded-4"
-             style="height: 200px; object-fit: cover;"
-             class="cover-img" />
 
-        <!-- Avatar - responsive với Bootstrap -->
-        <div class="position-absolute" style="bottom: -40px; left: 20px; z-index: 10;">
-            <img src="@avatarImage"
+    <!-- AVATAR + ICON CAMERA -->
+    <div class="position-absolute" style="bottom: -40px; left: 20px; z-index: 10;">
+        <div class="position-relative">
+            <img id="avatarImg" src="@avatarImage"
                  class="rounded-circle border border-4 border-white shadow"
                  style="width: 90px; height: 90px; object-fit: cover;" />
+            
+            <!-- Icon camera cho avatar (chỉ hiện khi là chủ trang) -->
+            @if (ViewBag.CurrentUserId == Model.ID)
+            {
+                <label for="uploadAvatar"
+                       class="shadow"
+                       style="position: absolute; bottom: 0; right: 0; background: white; border-radius: 50%; padding: 5px; cursor: pointer; z-index: 5;">
+                    <i class="fa-solid fa-camera" style="font-size: 12px;"></i>
+                </label>
+                <input type="file" id="uploadAvatar" class="d-none" accept="image/*" />
+            }
         </div>
     </div>
+
+</div>
 
     <!-- ===== PROFILE INFO ===== -->
     <div class="mt-5 pt-4">

@@ -17,6 +17,7 @@
 
 	<ItemGroup>
 		<Folder Include="wwwroot\baiviet\" />
+		<Folder Include="wwwroot\images\avatar\" />
 	</ItemGroup>
 
 </Project>

@@ -1173,15 +1173,22 @@ namespace LOHA.Controllers // nhóm chứa các class
         }
 
 
-        // Ngày 10/04/2026 - Chức năng Thay đổi Avatar và Ảnh nền vĩnh viễn 
+        // Chức năng Thay đổi Avatar và Ảnh nền
 
         [HttpPost]
         public async Task<IActionResult> UploadAvatar(IFormFile file)
         {
             if (file != null && file.Length > 0)
             {
-                var userId = HttpContext.Session.GetInt32("UserId");
-                var user = _context.Users.Find(userId);
+                // Lấy email/sdt từ session
+                var userEmail = HttpContext.Session.GetString("user");
+                if (string.IsNullOrEmpty(userEmail))
+                    return Json(new { success = false, message = "Chưa đăng nhập" });
+
+                // Tìm user bằng email
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.EmailorSDT == userEmail);
+                if (user == null)
+                    return Json(new { success = false, message = "Không tìm thấy user" });
 
                 // ❌ XÓA ẢNH CŨ
                 if (!string.IsNullOrEmpty(user.Avatar))
@@ -1195,7 +1202,15 @@ namespace LOHA.Controllers // nhóm chứa các class
 
                 // ✅ LƯU ẢNH MỚI
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/avatar", fileName);
+                var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/avatar");
+
+                // 👉 THÊM 3 DÒNG NÀY: Tạo thư mục nếu chưa tồn tại
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+
+                var path = Path.Combine(uploadPath, fileName);
 
                 using (var stream = new FileStream(path, FileMode.Create))
                 {
@@ -1203,7 +1218,7 @@ namespace LOHA.Controllers // nhóm chứa các class
                 }
 
                 user.Avatar = "/images/avatar/" + fileName;
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
 
             return Json(new { success = true });
@@ -1214,8 +1229,15 @@ namespace LOHA.Controllers // nhóm chứa các class
         {
             if (file != null && file.Length > 0)
             {
-                var userId = HttpContext.Session.GetInt32("UserId");
-                var user = _context.Users.Find(userId);
+                // Lấy email/sdt từ session
+                var userEmail = HttpContext.Session.GetString("user");
+                if (string.IsNullOrEmpty(userEmail))
+                    return Json(new { success = false, message = "Chưa đăng nhập" });
+
+                // Tìm user bằng email
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.EmailorSDT == userEmail);
+                if (user == null)
+                    return Json(new { success = false, message = "Không tìm thấy user" });
 
                 // ❌ XÓA ẢNH CŨ
                 if (!string.IsNullOrEmpty(user.AnhNen))
@@ -1229,7 +1251,15 @@ namespace LOHA.Controllers // nhóm chứa các class
 
                 // ✅ LƯU ẢNH MỚI
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/cover", fileName);
+                var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/cover");
+
+                // Tạo thư mục nếu chưa tồn tại
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+
+                var path = Path.Combine(uploadPath, fileName);
 
                 using (var stream = new FileStream(path, FileMode.Create))
                 {
@@ -1237,7 +1267,7 @@ namespace LOHA.Controllers // nhóm chứa các class
                 }
 
                 user.AnhNen = "/images/cover/" + fileName;
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
 
             return Json(new { success = true });
