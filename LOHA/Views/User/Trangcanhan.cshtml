@@ -2,15 +2,63 @@
 @model LOHA.Models.User
 
 @{
+
     Layout = "_Layout";
     // Kiểm tra ảnh bìa mặc định
-    string coverImage = "/images/cover.jpg";
-    string avatarImage = "/images/default.png";
+    string coverImage = !string.IsNullOrEmpty(Model.AnhNen)
+     ? Model.AnhNen
+     : "/images/cover.jpg";
+
+    string avatarImage = !string.IsNullOrEmpty(Model.Avatar)
+        ? Model.Avatar
+        : "/images/default.png";
+
 }
+//
+
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <div class="container-fluid mt-4 px-2 px-md-4">
+    <!-- ===== COVER & AVATAR ===== -->
+    <div class="position-relative">
+
+        <!-- ẢNH BÌA -->
+        <div class="position-relative">
+            <img id="coverImg" src="@coverImage"
+                 class="img-fluid w-100 rounded-4"
+                 style="height: 200px; object-fit: cover;" />
+
+            <!-- ICON CAMERA COVER -->
+            <label for="uploadCover"
+                   class="shadow"
+                   style="position: absolute; bottom: 10px; right: 10px; background: white; border-radius: 50%; padding: 8px; cursor: pointer;">
+                <i class="fa-solid fa-camera"></i>
+            </label>
+
+            <input type="file" id="uploadCover" class="d-none" accept="image/*" />
+        </div>
+
+        <!-- AVATAR -->
+        <div class="position-absolute" style="bottom: -50px; left: 20px; z-index: 10;">
+            <div class="position-relative">
+                <img id="avatarImg" src="@avatarImage"
+                     class="rounded-circle border border-4 border-white shadow"
+                     style="width: 110px; height: 110px; object-fit: cover;" />
+
+                <!-- ICON CAMERA AVATAR -->
+                <label for="uploadAvatar"
+                       class="shadow"
+                       style="position: absolute; bottom: 5px; right: 5px; background: white; border-radius: 50%; padding: 6px; cursor: pointer;">
+                    <i class="fa-solid fa-camera"></i>
+                </label>
+
+                <input type="file" id="uploadAvatar" class="d-none" accept="image/*" />
+            </div>
+        </div>
+
+    </div>
+</div>
     <!-- ===== COVER & AVATAR ===== -->
     <div class="position-relative">
         <!-- Ảnh bìa - responsive với Bootstrap -->
@@ -1012,5 +1060,57 @@
             tab.show();
         }
     }
+
+
+
+
+    // JS ẢNH NỀN + AVATAR 
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // ===== ẢNH BÌA =====
+        document.getElementById('uploadCover').addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            // preview
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('coverImg').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // upload
+            let formData = new FormData();
+            formData.append("file", file);
+
+            fetch('/User/UploadCover', {
+                method: 'POST',
+                body: formData
+            });
+        });
+
+        // ===== AVATAR =====
+        document.getElementById('uploadAvatar').addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            // preview
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('avatarImg').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // upload
+            let formData = new FormData();
+            formData.append("file", file);
+
+            fetch('/User/UploadAvatar', {
+                method: 'POST',
+                body: formData
+            });
+        });
+
+    });
 </script>
 
