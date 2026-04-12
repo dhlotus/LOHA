@@ -34,8 +34,8 @@
                         <span>Tổng quan</span>
                     </a>
                 </li>
-                <li class="lotus-menu-item">
-                    <a href="#">
+                <li class="lotus-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "QuanLyNguoiDung" ? "active" : "")">
+                    <a href="/Admin/QuanLyNguoiDung">
                         <span class="material-icons-outlined">people</span>
                         <span>Người dùng</span>
                     </a>

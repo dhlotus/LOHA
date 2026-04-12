@@ -223,7 +223,7 @@ namespace LOHA.Controllers
 
 
         // chi tiết bài viết
-        public IActionResult ChiTiet(int id)
+        public async Task<IActionResult> ChiTiet(int id)
         {
             // Lấy bài viết từ database kèm thông tin người đăng và like
             var baiviet = _context.Baiviets
@@ -240,12 +240,24 @@ namespace LOHA.Controllers
             }
 
             // Kiểm tra user hiện tại đã like bài viết này chưa (cho nút like)
-            string? userId = HttpContext.Session.GetString("user");
-            if (!string.IsNullOrEmpty(userId))
+            // Lấy email từ session
+            string? userEmail = HttpContext.Session.GetString("user");
+            if (!string.IsNullOrEmpty(userEmail))
             {
-                int currentUserId = int.Parse(userId);
-                ViewBag.DaThich = _context.Thichs
-                    .Any(t => t.BaivietId == id && t.UserId == currentUserId);
+                // Tìm user bằng email để lấy ID
+                var currentUser = await _context.Users
+                    .FirstOrDefaultAsync(u => u.EmailorSDT == userEmail);
+
+                if (currentUser != null)
+                {
+                    // Kiểm tra user này đã like bài viết chưa
+                    ViewBag.DaThich = await _context.Thichs
+                        .AnyAsync(t => t.BaivietId == id && t.UserId == currentUser.ID);
+                }
+                else
+                {
+                    ViewBag.DaThich = false;
+                }
             }
             else
             {

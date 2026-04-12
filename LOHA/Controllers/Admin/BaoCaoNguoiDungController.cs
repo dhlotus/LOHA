@@ -113,11 +113,19 @@ namespace LOHA.Controllers.Admin
                 if (check != null) return Json(new { success = false, message = "Chưa đăng nhập" });
 
                 // Tìm báo cáo
-                var baoCao = await _context.BaoCaoNguoiDungs.FindAsync(baoCaoId);
+                var baoCao = await _context.BaoCaoNguoiDungs
+                    .Include(b => b.NguoiBaoCao)
+                    .Include(b => b.NguoiBiBaoCao)
+                    .FirstOrDefaultAsync(b => b.Id == baoCaoId);
+
                 if (baoCao == null)
                 {
                     return Json(new { success = false, message = "Không tìm thấy báo cáo" });
                 }
+
+                // Lưu thông tin để ghi log
+                string tenNguoiBaoCao = baoCao.NguoiBaoCao?.Ten ?? "Unknown";
+                string tenNguoiBiBaoCao = baoCao.NguoiBiBaoCao?.Ten ?? "Unknown";
 
                 // Tìm user và khóa tài khoản
                 var user = await _context.Users.FindAsync(userId);
@@ -129,6 +137,14 @@ namespace LOHA.Controllers.Admin
                 // Cập nhật trạng thái báo cáo thành "Đã xử lý"
                 baoCao.TrangThai = 1;
                 await _context.SaveChangesAsync();
+
+                // ===== GHI NHẬT KÝ =====
+                await GhiNhatKy(
+                    "DONG_Y_BAO_CAO_USER",
+                    $"Đồng ý báo cáo - Khóa tài khoản {tenNguoiBiBaoCao} (User #{userId}) - Người báo cáo: {tenNguoiBaoCao}",
+                    $"Báo cáo #{baoCaoId}",
+                    "BaoCao"
+                );
 
                 return Json(new { success = true, message = "Đã khóa tài khoản và xử lý báo cáo" });
             }
@@ -148,15 +164,33 @@ namespace LOHA.Controllers.Admin
                 var check = KiemTraDangNhap();
                 if (check != null) return Json(new { success = false, message = "Chưa đăng nhập" });
 
-                var baoCao = await _context.BaoCaoNguoiDungs.FindAsync(baoCaoId);
+                // Tìm báo cáo
+                var baoCao = await _context.BaoCaoNguoiDungs
+                    .Include(b => b.NguoiBaoCao)
+                    .Include(b => b.NguoiBiBaoCao)
+                    .FirstOrDefaultAsync(b => b.Id == baoCaoId);
+
                 if (baoCao == null)
                 {
                     return Json(new { success = false, message = "Không tìm thấy báo cáo" });
                 }
 
+                // Lưu thông tin để ghi log
+                string tenNguoiBaoCao = baoCao.NguoiBaoCao?.Ten ?? "Unknown";
+                string tenNguoiBiBaoCao = baoCao.NguoiBiBaoCao?.Ten ?? "Unknown";
+                int nguoiBiBaoCaoId = baoCao.NguoiBiBaoCaoId;
+
                 // Đánh dấu từ chối (TrangThai = 2)
                 baoCao.TrangThai = 2;
                 await _context.SaveChangesAsync();
+
+                // ===== GHI NHẬT KÝ =====
+                await GhiNhatKy(
+                    "TU_CHOI_BAO_CAO_USER",
+                    $"Từ chối báo cáo người dùng {tenNguoiBiBaoCao} (User #{nguoiBiBaoCaoId}) - Người báo cáo: {tenNguoiBaoCao}",
+                    $"Báo cáo #{baoCaoId}",
+                    "BaoCao"
+                );
 
                 return Json(new { success = true, message = "Đã từ chối báo cáo" });
             }
@@ -164,6 +198,41 @@ namespace LOHA.Controllers.Admin
             {
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
+        }
+        // Helper ghi nhật ký hoạt động
+        private async Task GhiNhatKy(string hanhDong, string moTa, string doiTuong, string loaiDoiTuong)
+        {
+            var lotusSession = HttpContext.Session.GetString("lotus");
+
+            var nhatKy = new NhatKyHoatDongAdmin
+            {
+                HanhDong = hanhDong,
+                MoTa = moTa,
+                DoiTuong = doiTuong,
+                AdminThucHien = lotusSession ?? "Unknown",
+                LoaiDoiTuong = loaiDoiTuong,
+                ThoiGian = DateTime.Now
+            };
+
+            _context.NhatKyHoatDongAdmins.Add(nhatKy);
+            await _context.SaveChangesAsync();
+        }
+        // ===== XEM CHI TIẾT NGƯỜI DÙNG (GIAO DIỆN ADMIN) =====
+        [HttpGet]
+        [Route("XemChiTiet/{id}")]
+        public async Task<IActionResult> XemChiTiet(int id)
+        {
+            var check = KiemTraDangNhap();
+            if (check != null) return check;
+
+            var user = await _context.Users
+                .Include(u => u.Baiviets)
+                .FirstOrDefaultAsync(u => u.ID == id);
+
+            if (user == null) return NotFound();
+
+            ViewBag.TenAdmin = HttpContext.Session.GetString("lotus");
+            return View(user);
         }
     }
 }

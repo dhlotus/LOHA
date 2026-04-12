@@ -19,6 +19,7 @@ namespace LOHA.Models
         public DbSet<Lotus> Lotuss { get; set; }
         public DbSet<BaoCaoBaiViet> BaoCaoBaiViets { get; set; }
         public DbSet<BaoCaoNguoiDung> BaoCaoNguoiDungs { get; set; }
+        public DbSet<NhatKyHoatDongAdmin> NhatKyHoatDongAdmins { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder); 

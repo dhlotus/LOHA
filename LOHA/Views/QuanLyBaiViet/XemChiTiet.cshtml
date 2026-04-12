@@ -1,0 +1,40 @@
+﻿@model LOHA.Models.Baiviet
+@{
+    ViewData["Title"] = $"Bài viết #{Model.Id}";
+    Layout = "_LayoutLotus";
+    string avatar = string.IsNullOrEmpty(Model.User?.Avatar) ? "/images/default.png" : Model.User.Avatar;
+}
+
+<div class="lotus-dashboard">
+    <div class="mb-3">
+        <a href="javascript:history.back()" class="btn btn-outline-light">
+            <span class="material-icons-outlined me-1">arrow_back</span>Quay lại
+        </a>
+    </div>
+
+    <div class="lotus-card">
+        <div class="lotus-card-body">
+            <div class="d-flex align-items-start gap-3 mb-3">
+                <img src="@avatar" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;" />
+                <div>
+                    <h5 class="text-white mb-1">@Model.User?.Ten</h5>
+                    <small class="text-white-50">@Model.Ngaydang.ToString("dd/MM/yyyy HH:mm")</small>
+                </div>
+            </div>
+            
+            <p class="text-white mb-3">@Model.Noidung</p>
+            
+            @if (!string.IsNullOrEmpty(Model.Anh))
+            {
+                <div class="text-center mb-3">
+                    <img src="/baiviet/@Model.Anh" class="img-fluid rounded" style="max-height: 400px;" />
+                </div>
+            }
+            
+            <div class="d-flex gap-4 text-white-50">
+                <span><span class="material-icons-outlined" style="font-size: 16px;">favorite</span> @Model.Thichs?.Count thích</span>
+                <span><span class="material-icons-outlined" style="font-size: 16px;">comment</span> @Model.Binhluans?.Count bình luận</span>
+            </div>
+        </div>
+    </div>
+</div>

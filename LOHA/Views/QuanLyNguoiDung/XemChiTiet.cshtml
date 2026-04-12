@@ -1,0 +1,47 @@
+﻿@model LOHA.Models.User
+@{
+    ViewData["Title"] = $"Người dùng #{Model.ID}";
+    Layout = "_LayoutLotus";
+    string avatar = string.IsNullOrEmpty(Model.Avatar) ? "/images/default.png" : Model.Avatar;
+}
+
+<div class="lotus-dashboard">
+    <div class="mb-3">
+        <a href="javascript:history.back()" class="btn btn-outline-light">
+            <span class="material-icons-outlined me-1">arrow_back</span>Quay lại
+        </a>
+    </div>
+
+    <div class="lotus-card">
+        <div class="lotus-card-body">
+            <div class="text-center mb-3">
+                <img src="@avatar" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;" />
+                <h4 class="text-white mt-3 mb-1">@Model.Ten</h4>
+                <p class="text-white-50">@Model.EmailorSDT</p>
+                <span class="badge @(Model.TrangThai ? "bg-success" : "bg-danger")">
+                    @(Model.TrangThai ? "Hoạt động" : "Đã khóa")
+                </span>
+            </div>
+            
+            <hr class="border-secondary" />
+            
+            <div class="row text-center">
+                <div class="col-6">
+                    <h5 class="text-white mb-0">@(Model.Baiviets?.Count ?? 0)</h5>
+                    <small class="text-white-50">Bài viết</small>
+                </div>
+                <div class="col-6">
+                    <h5 class="text-white mb-0">@(Model.Ngaytao?.ToString("dd/MM/yyyy") ?? "N/A")</h5>
+                    <small class="text-white-50">Ngày tham gia</small>
+                </div>
+            </div>
+            
+            <hr class="border-secondary" />
+            
+            <div class="text-white-50">
+                <p class="mb-2"><span class="material-icons-outlined" style="font-size: 14px;">cake</span> Ngày sinh: @(Model.Ngaysinh?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</p>
+                <p class="mb-0"><span class="material-icons-outlined" style="font-size: 14px;">wc</span> Giới tính: @(Model.Gioitinh ?? "Chưa cập nhật")</p>
+            </div>
+        </div>
+    </div>
+</div>

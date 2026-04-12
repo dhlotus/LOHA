@@ -79,8 +79,7 @@ namespace LOHA.Controllers.Admin
             ViewBag.TongBaiViet = _context.Baiviets.Count();
             ViewBag.TongBinhLuan = _context.Binhluans.Count();
             ViewBag.TenAdmin = HttpContext.Session.GetString("lotusHoTen") ?? lotusSession;
-
-            return View();
+            return RedirectToAction("Index", "Dashboard"); return View();
         }
 
         // ===== ĐĂNG XUẤT =====

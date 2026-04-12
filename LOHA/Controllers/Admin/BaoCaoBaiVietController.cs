@@ -105,7 +105,10 @@ namespace LOHA.Controllers.Admin
                 if (check != null) return Json(new { success = false, message = "Chưa đăng nhập" });
 
                 // Tìm báo cáo
-                var baoCao = await _context.BaoCaoBaiViets.FindAsync(baoCaoId);
+                var baoCao = await _context.BaoCaoBaiViets
+                    .Include(b => b.NguoiBaoCao)
+                    .FirstOrDefaultAsync(b => b.Id == baoCaoId);
+
                 if (baoCao == null)
                 {
                     return Json(new { success = false, message = "Không tìm thấy báo cáo" });
@@ -113,29 +116,39 @@ namespace LOHA.Controllers.Admin
 
                 // Tìm bài viết
                 var baiViet = await _context.Baiviets
+                    .Include(b => b.User)
                     .Include(b => b.Binhluans)
                     .Include(b => b.Thichs)
                     .FirstOrDefaultAsync(b => b.Id == baiVietId);
+
+                string tenNguoiDang = baiViet?.User?.Ten ?? "Unknown";
+                int userId = baiViet?.UserId ?? 0;
 
                 if (baiViet != null)
                 {
                     // Xóa ảnh nếu có
                     if (!string.IsNullOrEmpty(baiViet.Anh))
                     {
-                        var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/baiviet", baiViet.Anh);
-                        if (System.IO.File.Exists(imagePath))
+                        var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/baiviet", baiViet.Anh); //lấy đường dẫn ảnh của bài viết
+                        if (System.IO.File.Exists(imagePath)) // sử lý trong ổ cứng, nếu tồn tại ảnh thì xóa
                         {
-                            System.IO.File.Delete(imagePath);
+                            System.IO.File.Delete(imagePath); // xóa ảnh khỏi ổ cứng
                         }
                     }
 
-                    // Xóa bài viết
                     _context.Baiviets.Remove(baiViet);
                 }
 
-                // Cập nhật trạng thái báo cáo thành "Đã xử lý"
-                baoCao.TrangThai = 1;
+                baoCao.TrangThai = 1; // Đánh dấu đã xử lý (TrangThai = 1)
                 await _context.SaveChangesAsync();
+
+                // ===== GHI NHẬT KÝ =====
+                await GhiNhatKy(
+                    "DONG_Y_BAO_CAO",
+                    $"Đồng ý báo cáo - Xóa bài viết #{baiVietId} của {tenNguoiDang} (User #{userId})",
+                    $"Báo cáo #{baoCaoId}",
+                    "BaoCao"
+                );
 
                 return Json(new { success = true, message = "Đã xóa bài viết và xử lý báo cáo" });
             }
@@ -155,15 +168,33 @@ namespace LOHA.Controllers.Admin
                 var check = KiemTraDangNhap();
                 if (check != null) return Json(new { success = false, message = "Chưa đăng nhập" });
 
-                var baoCao = await _context.BaoCaoBaiViets.FindAsync(baoCaoId);
+                var baoCao = await _context.BaoCaoBaiViets
+                    .Include(b => b.NguoiBaoCao)
+                    .Include(b => b.BaiViet)
+                        .ThenInclude(bv => bv.User)
+                    .FirstOrDefaultAsync(b => b.Id == baoCaoId);
+
                 if (baoCao == null)
                 {
                     return Json(new { success = false, message = "Không tìm thấy báo cáo" });
                 }
 
+                // Lưu thông tin để ghi log
+                string tenNguoiBaoCao = baoCao.NguoiBaoCao?.Ten ?? "Unknown";
+                string tenNguoiBiBaoCao = baoCao.BaiViet?.User?.Ten ?? "Unknown";
+                int baiVietId = baoCao.BaiVietId;
+
                 // Đánh dấu từ chối (TrangThai = 2)
                 baoCao.TrangThai = 2;
                 await _context.SaveChangesAsync();
+
+                // ===== GHI NHẬT KÝ =====
+                await GhiNhatKy(
+                    "TU_CHOI_BAO_CAO",
+                    $"Từ chối báo cáo bài viết #{baiVietId} của {tenNguoiBiBaoCao} (Người báo cáo: {tenNguoiBaoCao})",
+                    $"Báo cáo #{baoCaoId}",
+                    "BaoCao"
+                );
 
                 return Json(new { success = true, message = "Đã từ chối báo cáo" });
             }
@@ -171,6 +202,24 @@ namespace LOHA.Controllers.Admin
             {
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
+        }
+        // Helper ghi nhật ký hoạt động
+        private async Task GhiNhatKy(string hanhDong, string moTa, string doiTuong, string loaiDoiTuong)
+        {
+            var lotusSession = HttpContext.Session.GetString("lotus");
+
+            var nhatKy = new NhatKyHoatDongAdmin
+            {
+                HanhDong = hanhDong,
+                MoTa = moTa,
+                DoiTuong = doiTuong,
+                AdminThucHien = lotusSession ?? "Unknown",
+                LoaiDoiTuong = loaiDoiTuong,
+                ThoiGian = DateTime.Now
+            };
+
+            _context.NhatKyHoatDongAdmins.Add(nhatKy);
+            await _context.SaveChangesAsync();
         }
     }
 }

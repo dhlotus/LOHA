@@ -1,0 +1,171 @@
+﻿@model List<LOHA.Models.User>
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+    Layout = "_LayoutLotus";
+    string searchTerm = ViewBag.SearchTerm ?? "";
+}
+
+<div class="lotus-dashboard">
+    <div class="lotus-welcome mb-4">
+        <h2><span class="material-icons-outlined me-2" style="vertical-align: middle;">people</span>Quản lý người dùng</h2>
+        <p class="text-white-50">Xem và quản lý tất cả người dùng trên hệ thống</p>
+    </div>
+
+    <!-- Thống kê nhanh -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="lotus-stat-card">
+                <div class="lotus-stat-icon bg-primary">
+                    <span class="material-icons-outlined">people</span>
+                </div>
+                <div class="lotus-stat-info">
+                    <h3>@Model.Count</h3>
+                    <p>Tổng người dùng</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="lotus-stat-card">
+                <div class="lotus-stat-icon bg-success">
+                    <span class="material-icons-outlined">check_circle</span>
+                </div>
+                <div class="lotus-stat-info">
+                    <h3>@Model.Count(u => u.TrangThai)</h3>
+                    <p>Đang hoạt động</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="lotus-stat-card">
+                <div class="lotus-stat-icon bg-danger">
+                    <span class="material-icons-outlined">block</span>
+                </div>
+                <div class="lotus-stat-info">
+                    <h3>@Model.Count(u => !u.TrangThai)</h3>
+                    <p>Đã khóa</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tìm kiếm -->
+    <div class="lotus-card mb-4">
+        <div class="lotus-card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-8">
+                    <input type="text" name="searchTerm" class="form-control lotus-input"
+                           placeholder="Tìm theo tên hoặc email..." value="@searchTerm" />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <span class="material-icons-outlined me-1">search</span>Tìm
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <a href="/Admin/QuanLyNguoiDung" class="btn btn-secondary w-100">
+                        <span class="material-icons-outlined me-1">refresh</span>Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Danh sách người dùng -->
+    <div class="lotus-card">
+        <div class="lotus-card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">ID</th>
+                            <th>Tên</th>
+                            <th>Email/SĐT</th>
+                            <th style="width: 120px;">Ngày tạo</th>
+                            <th style="width: 120px;">Trạng thái</th>
+                            <th style="width: 100px;">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td>#@user.ID</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img src="@(string.IsNullOrEmpty(user.Avatar) ? "/images/default.png" : user.Avatar)"
+                                             class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
+                                        <span>@user.Ten</span>
+                                    </div>
+                                </td>
+                                <td>@user.EmailorSDT</td>
+                                <td>@(user.Ngaytao?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                <td>
+                                    @if (user.TrangThai)
+                                    {
+                                        <span class="badge bg-success">Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Đã khóa</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (user.TrangThai)
+                                    {
+                                        <button class="btn btn-sm btn-outline-danger" onclick="khoaNguoiDung(@user.ID)">
+                                            <span class="material-icons-outlined" style="font-size: 16px;">lock</span>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-sm btn-outline-success" onclick="moKhoaNguoiDung(@user.ID)">
+                                            <span class="material-icons-outlined" style="font-size: 16px;">lock_open</span>
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function khoaNguoiDung(userId) {
+        if (!confirm('Bạn có chắc muốn KHÓA tài khoản này?')) return;
+        
+        fetch('/Admin/QuanLyNguoiDung/KhoaNguoiDung', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'userId=' + userId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        });
+    }
+    
+    function moKhoaNguoiDung(userId) {
+        if (!confirm('Bạn có chắc muốn MỞ KHÓA tài khoản này?')) return;
+        
+        fetch('/Admin/QuanLyNguoiDung/MoKhoaNguoiDung', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'userId=' + userId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        });
+    }
+</script>

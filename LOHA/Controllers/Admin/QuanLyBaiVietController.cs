@@ -58,6 +58,7 @@ namespace LOHA.Controllers.Admin
 
                 // Tìm bài viết
                 var baiViet = await _context.Baiviets
+                    .Include(b => b.User)  // ← lấy tên người đăng
                     .Include(b => b.Binhluans)
                     .Include(b => b.Thichs)
                     .FirstOrDefaultAsync(b => b.Id == id);
@@ -66,6 +67,10 @@ namespace LOHA.Controllers.Admin
                 {
                     return Json(new { success = false, message = "Không tìm thấy bài viết" });
                 }
+
+                // Lưu thông tin để ghi log trước khi xóa
+                string tenNguoiDang = baiViet.User?.Ten ?? "Unknown";
+                int userId = baiViet.UserId;
 
                 // Xóa ảnh nếu có
                 if (!string.IsNullOrEmpty(baiViet.Anh))
@@ -77,9 +82,17 @@ namespace LOHA.Controllers.Admin
                     }
                 }
 
-                // Xóa bài viết (EF sẽ tự xóa BinhLuan và Thich liên quan nếu có Cascade)
+                // Xóa bài viết
                 _context.Baiviets.Remove(baiViet);
                 await _context.SaveChangesAsync();
+
+                // ===== GHI NHẬT KÝ =====
+                await GhiNhatKy(
+                    "XOA_BAI",
+                    $"Xóa bài viết #{id} của {tenNguoiDang} (User #{userId})",
+                    $"Bài viết #{id}",
+                    "BaiViet"
+                );
 
                 return Json(new { success = true, message = "Đã xóa bài viết thành công" });
             }
@@ -87,6 +100,43 @@ namespace LOHA.Controllers.Admin
             {
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
+        }
+        // Helper ghi nhật ký hoạt động
+        private async Task GhiNhatKy(string hanhDong, string moTa, string doiTuong, string loaiDoiTuong)
+        {
+            var lotusSession = HttpContext.Session.GetString("lotus");
+
+            var nhatKy = new NhatKyHoatDongAdmin
+            {
+                HanhDong = hanhDong,
+                MoTa = moTa,
+                DoiTuong = doiTuong,
+                AdminThucHien = lotusSession ?? "Unknown",
+                LoaiDoiTuong = loaiDoiTuong,
+                ThoiGian = DateTime.Now
+            };
+
+            _context.NhatKyHoatDongAdmins.Add(nhatKy);
+            await _context.SaveChangesAsync();
+        }
+        // ===== XEM CHI TIẾT BÀI VIẾT (GIAO DIỆN ADMIN) =====
+        [HttpGet]
+        [Route("XemChiTiet/{id}")]
+        public async Task<IActionResult> XemChiTiet(int id)
+        {
+            var check = KiemTraDangNhap();
+            if (check != null) return check;
+
+            var baiViet = await _context.Baiviets
+                .Include(b => b.User)
+                .Include(b => b.Thichs)
+                .Include(b => b.Binhluans)
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+            if (baiViet == null) return NotFound();
+
+            ViewBag.TenAdmin = HttpContext.Session.GetString("lotus");
+            return View(baiViet);
         }
     }
 }

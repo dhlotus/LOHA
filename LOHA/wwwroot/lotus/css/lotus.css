@@ -290,3 +290,18 @@ body {
     background: linear-gradient(135deg, #F59E0B, #D97706);
     color: white;
 }
+/* Căn chỉnh icon và chữ trong cột Hành động */
+.table-dark td .d-flex {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap; /* Không cho xuống dòng */
+    white-space: nowrap; /* Không ngắt dòng */
+}
+
+.table-dark td .material-icons-outlined {
+    flex-shrink: 0; /* Icon không bị co lại */
+}
+.table-dark td:nth-child(6) {
+    white-space: nowrap;
+}
