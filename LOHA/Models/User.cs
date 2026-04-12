@@ -31,16 +31,11 @@ namespace LOHA.Models
         [RegularExpression(@"^(?=.*[A-Za-z])(?=.*\d).+$", ErrorMessage = "Mật khẩu phải bao gồm cả chữ và số")]
         [DataType(DataType.Password)]
         public string? Matkhau { get; set; }
-
         public string? Avatar { get; set; }
         public DateTime? Ngaytao { get; set; }
         public List<Baiviet>? Baiviets { get; set; }
-
-        
-
         public string? AnhNen { get; set; }
-        
-        
+        public bool TrangThai { get; set; } = true; // true: Hoạt động, false: Đã khóa
         public DateTime? NgayCapNhatTen { get; set; } // Thời gian cập nhật của tên
         public DateTime? NgayCapNhatNgaySinh { get; set; } // Thời gian cập nhật của ngày sinh
         // Validation tùy chỉnh cho ngày sinh

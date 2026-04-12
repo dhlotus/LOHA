@@ -4,6 +4,7 @@ using LOHA.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LOHA.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260411151441_ThemCotTrangThaiUser")]
+    partial class ThemCotTrangThaiUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,74 +50,6 @@ namespace LOHA.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Baiviets");
-                });
-
-            modelBuilder.Entity("LOHA.Models.BaoCaoBaiViet", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BaiVietId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("LyDo")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<int>("NguoiBaoCaoId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ThoiGian")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("TrangThai")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BaiVietId");
-
-                    b.HasIndex("NguoiBaoCaoId");
-
-                    b.ToTable("BaoCaoBaiViet");
-                });
-
-            modelBuilder.Entity("LOHA.Models.BaoCaoNguoiDung", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("LyDo")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<int>("NguoiBaoCaoId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("NguoiBiBaoCaoId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ThoiGian")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("TrangThai")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NguoiBaoCaoId");
-
-                    b.HasIndex("NguoiBiBaoCaoId");
-
-                    b.ToTable("BaoCaoNguoiDung");
                 });
 
             modelBuilder.Entity("LOHA.Models.Binhluan", b =>
@@ -421,44 +356,6 @@ namespace LOHA.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("LOHA.Models.BaoCaoBaiViet", b =>
-                {
-                    b.HasOne("LOHA.Models.Baiviet", "BaiViet")
-                        .WithMany()
-                        .HasForeignKey("BaiVietId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LOHA.Models.User", "NguoiBaoCao")
-                        .WithMany()
-                        .HasForeignKey("NguoiBaoCaoId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("BaiViet");
-
-                    b.Navigation("NguoiBaoCao");
-                });
-
-            modelBuilder.Entity("LOHA.Models.BaoCaoNguoiDung", b =>
-                {
-                    b.HasOne("LOHA.Models.User", "NguoiBaoCao")
-                        .WithMany()
-                        .HasForeignKey("NguoiBaoCaoId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("LOHA.Models.User", "NguoiBiBaoCao")
-                        .WithMany()
-                        .HasForeignKey("NguoiBiBaoCaoId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("NguoiBaoCao");
-
-                    b.Navigation("NguoiBiBaoCao");
                 });
 
             modelBuilder.Entity("LOHA.Models.Binhluan", b =>

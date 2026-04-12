@@ -17,9 +17,11 @@ namespace LOHA.Models
         public DbSet<DatLaiMatKhau> DatLaiMatKhau { get; set; }
         public DbSet<XacThucEmail> XacThucEmails { get; set; }
         public DbSet<Lotus> Lotuss { get; set; }
+        public DbSet<BaoCaoBaiViet> BaoCaoBaiViets { get; set; }
+        public DbSet<BaoCaoNguoiDung> BaoCaoNguoiDungs { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder); // ❗ bắt buộc
+            base.OnModelCreating(modelBuilder); 
 
             // 🟢 Binhluan
             modelBuilder.Entity<Binhluan>()
@@ -44,7 +46,32 @@ namespace LOHA.Models
                 .HasOne(t => t.User)
                 .WithMany()
                 .HasForeignKey(t => t.UserId)
-                .OnDelete(DeleteBehavior.NoAction); // 🔥 THÊM DÒNG NÀY
+                .OnDelete(DeleteBehavior.NoAction); 
+                                                    // Báo cáo bài viết
+            modelBuilder.Entity<BaoCaoBaiViet>()
+                .HasOne(b => b.NguoiBaoCao)
+                .WithMany()
+                .HasForeignKey(b => b.NguoiBaoCaoId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<BaoCaoBaiViet>()
+                .HasOne(b => b.BaiViet)
+                .WithMany()
+                .HasForeignKey(b => b.BaiVietId)
+                .OnDelete(DeleteBehavior.Cascade); // Xóa bài viết → Xóa luôn báo cáo
+
+            // Báo cáo người dùng
+            modelBuilder.Entity<BaoCaoNguoiDung>()
+                .HasOne(b => b.NguoiBaoCao)
+                .WithMany()
+                .HasForeignKey(b => b.NguoiBaoCaoId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<BaoCaoNguoiDung>()
+                .HasOne(b => b.NguoiBiBaoCao)
+                .WithMany()
+                .HasForeignKey(b => b.NguoiBiBaoCaoId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

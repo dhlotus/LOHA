@@ -40,13 +40,38 @@
                     int? currentUserId = ViewBag.CurrentUserId as int?;
                 }
 
-                @if (currentUserId != null && currentUserId == Model.UserId)
-                {
+                @* Nút 3 chấm - Dropdown menu *@
+                <div class="dropdown">
                     <button class="btn btn-light btn-sm rounded-circle"
-                            onclick="openDeleteModal(@Model.Id)">
+                            type="button"
+                            id="dropdownMenu-@Model.Id"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
                         <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
-                }
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu-@Model.Id">
+                        @if (currentUserId != null && currentUserId == Model.UserId)
+                        {
+                            @* Chủ bài viết: Hiện nút Xóa *@
+                            <li>
+                                <a class="dropdown-item text-danger" href="#" onclick="openDeleteModal(@Model.Id); return false;">
+                                    <i class="fa-regular fa-trash-can me-2"></i>
+                                    Xóa bài viết
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            @* Không phải chủ bài viết: Hiện nút Báo cáo *@
+                            <li>
+                                <a class="dropdown-item text-warning" href="#" onclick="moPopupBaoCaoBaiViet(@Model.Id); return false;">
+                                    <span class="material-icons-outlined me-2" style="vertical-align: middle; font-size: 16px;">flag</span>
+                                    Báo cáo bài viết
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
 
             </div>
             
@@ -138,6 +163,68 @@
             </div>
         </div>
     </div>
+    <!-- ===== POPUP BÁO CÁO BÀI VIẾT ===== -->
+    <div class="modal fade" id="baoCaoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" style="color: #1E2A78;">
+                        <span class="material-icons-outlined me-2" style="vertical-align: middle; color: #F59E0B;">flag</span>
+                        Báo cáo bài viết
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body pt-2">
+                    <p class="text-secondary mb-3">Vui lòng chọn lý do báo cáo:</p>
+                
+                    <div class="d-flex flex-column gap-2">
+                        <label class="form-check-label p-3 border rounded-3" style="cursor: pointer;">
+                            <input type="radio" name="lyDo" value="Spam" class="form-check-input me-2" checked>
+                            <span class="material-icons-outlined me-2" style="vertical-align: middle; color: #6C63FF;">mail</span>
+                            <strong>Spam</strong>
+                            <small class="d-block text-secondary ms-4">Bài viết quảng cáo, lặp lại nhiều lần</small>
+                        </label>
+                    
+                        <label class="form-check-label p-3 border rounded-3" style="cursor: pointer;">
+                            <input type="radio" name="lyDo" value="Nội dung nhạy cảm" class="form-check-input me-2">
+                            <span class="material-icons-outlined me-2" style="vertical-align: middle; color: #EF4444;">visibility_off</span>
+                            <strong>Nội dung nhạy cảm</strong>
+                            <small class="d-block text-secondary ms-4">Ảnh hoặc nội dung không phù hợp</small>
+                        </label>
+                    
+                        <label class="form-check-label p-3 border rounded-3" style="cursor: pointer;">
+                            <input type="radio" name="lyDo" value="Quấy rối" class="form-check-input me-2">
+                            <span class="material-icons-outlined me-2" style="vertical-align: middle; color: #F59E0B;">warning</span>
+                            <strong>Quấy rối</strong>
+                            <small class="d-block text-secondary ms-4">Nội dung gây khó chịu, xúc phạm</small>
+                        </label>
+                    
+                        <label class="form-check-label p-3 border rounded-3" style="cursor: pointer;">
+                            <input type="radio" name="lyDo" value="Lừa đảo" class="form-check-input me-2">
+                            <span class="material-icons-outlined me-2" style="vertical-align: middle; color: #DC2626;">report</span>
+                            <strong>Lừa đảo</strong>
+                            <small class="d-block text-secondary ms-4">Thông tin sai sự thật, lừa đảo</small>
+                        </label>
+                    
+                        <label class="form-check-label p-3 border rounded-3" style="cursor: pointer;">
+                            <input type="radio" name="lyDo" value="Khác" class="form-check-input me-2">
+                            <span class="material-icons-outlined me-2" style="vertical-align: middle; color: #9CA3AF;">more_horiz</span>
+                            <strong>Khác</strong>
+                            <small class="d-block text-secondary ms-4">Lý do khác</small>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-warning rounded-pill px-4" id="xacNhanBaoCao"
+                            style="background: #F59E0B; border: none; color: white;">
+                        <span class="material-icons-outlined me-1" style="vertical-align: middle; font-size: 18px;">send</span>
+                        Gửi báo cáo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @functions {
@@ -159,4 +246,45 @@
             guiBinhLuan(postId, inputId);
         }
     }
+        // Biến lưu ID bài viết đang báo cáo
+    var baiVietDangBaoCao = 0;
+
+    // Hàm mở popup báo cáo
+    function moPopupBaoCaoBaiViet(baiVietId) {
+        baiVietDangBaoCao = baiVietId;
+    
+        // Reset radio về Spam
+        document.querySelector('input[name="lyDo"][value="Spam"]').checked = true;
+    
+        var modal = new bootstrap.Modal(document.getElementById('baoCaoModal'));
+        modal.show();
+    }
+
+    // Xử lý gửi báo cáo
+    document.getElementById('xacNhanBaoCao').addEventListener('click', function() {
+        var lyDo = document.querySelector('input[name="lyDo"]:checked').value;
+    
+        fetch('/User/BaoCaoBaiViet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'baiVietId=' + baiVietDangBaoCao + '&lyDo=' + encodeURIComponent(lyDo)
+        })
+        .then(response => response.json())
+        .then(data => {
+            var modal = bootstrap.Modal.getInstance(document.getElementById('baoCaoModal'));
+            modal.hide();
+        
+            if (data.success) {
+                alert('Đã gửi báo cáo. Cảm ơn bạn!');
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra');
+        });
+    });
 </script>

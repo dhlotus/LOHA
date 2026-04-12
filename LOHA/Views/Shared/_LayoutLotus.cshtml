@@ -40,8 +40,8 @@
                         <span>Người dùng</span>
                     </a>
                 </li>
-                <li class="lotus-menu-item">
-                    <a href="#">
+                <li class="lotus-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "QuanLyBaiViet" ? "active" : "")">
+                    <a href="/Admin/QuanLyBaiViet">
                         <span class="material-icons-outlined">article</span>
                         <span>Bài viết</span>
                     </a>
@@ -53,10 +53,25 @@
                     </a>
                 </li>
                 <li class="lotus-menu-item">
-                    <a href="#">
+                    <a href="#" data-bs-toggle="collapse" data-bs-target="#baoCaoSubmenu" aria-expanded="false">
                         <span class="material-icons-outlined">flag</span>
                         <span>Báo cáo</span>
+                        <span class="material-icons-outlined ms-auto">expand_more</span>
                     </a>
+                    <ul class="collapse" id="baoCaoSubmenu">
+                        <li class="lotus-submenu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "BaoCaoBaiViet" ? "active" : "")">
+                            <a href="/Admin/BaoCaoBaiViet">
+                                <span class="material-icons-outlined">article</span>
+                                <span>Bài viết</span>
+                            </a>
+                        </li>
+                        <li class="lotus-submenu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "BaoCaoNguoiDung" ? "active" : "")">
+                            <a href="/Admin/BaoCaoNguoiDung">
+                                <span class="material-icons-outlined">person</span>
+                                <span>Người dùng</span>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
             <div class="lotus-footer">

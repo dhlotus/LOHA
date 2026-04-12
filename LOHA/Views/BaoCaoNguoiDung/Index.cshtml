@@ -1,0 +1,169 @@
+﻿@model List<LOHA.Models.BaoCaoNguoiDung>
+@{
+    ViewData["Title"] = "Báo cáo người dùng";
+    Layout = "_LayoutLotus";
+}
+
+<div class="lotus-dashboard">
+    <div class="lotus-welcome mb-4">
+        <h2><span class="material-icons-outlined me-2" style="vertical-align: middle;">person_off</span>Báo cáo người dùng</h2>
+        <p class="text-white-50">Xem và xử lý các báo cáo người dùng</p>
+    </div>
+
+    <!-- Thống kê nhanh -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="lotus-stat-card">
+                <div class="lotus-stat-icon bg-warning">
+                    <span class="material-icons-outlined">pending</span>
+                </div>
+                <div class="lotus-stat-info">
+                    <h3>@Model.Count</h3>
+                    <p>Báo cáo chờ xử lý</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách báo cáo -->
+    @if (Model.Count == 0)
+    {
+        <div class="lotus-card">
+            <div class="lotus-card-body text-center py-5">
+                <span class="material-icons-outlined" style="font-size: 48px; color: #F59E0B;">check_circle</span>
+                <h4 class="mt-3 text-white">Không có báo cáo nào</h4>
+                <p class="text-white-50">Tất cả báo cáo đã được xử lý</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-dark table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Người báo cáo</th>
+                        <th>Người bị báo cáo</th>
+                        <th>Lý do</th>
+                        <th>Thời gian</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var bc in Model)
+                    {
+                        <tr id="baoCao-@bc.Id">
+                            <td>#@bc.Id</td>
+                            <td>@bc.NguoiBaoCao?.Ten</td>
+                            <td>
+                                <a href="#" onclick="xemTruocNguoiDung(@bc.NguoiBiBaoCaoId); return false;" class="text-info">
+                                    @bc.NguoiBiBaoCao?.Ten
+                                </a>
+                            </td>
+                            <td>
+                                <span class="badge bg-warning">@bc.LyDo</span>
+                            </td>
+                            <td>@bc.ThoiGian.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="dongYBaoCao(@bc.Id, @bc.NguoiBiBaoCaoId)">
+                                    <span class="material-icons-outlined" style="font-size: 16px;">check</span>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="tuChoiBaoCao(@bc.Id)">
+                                    <span class="material-icons-outlined" style="font-size: 16px;">close</span>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- Popup xem trước người dùng -->
+<div class="modal fade" id="xemTruocUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">
+                    <span class="material-icons-outlined me-2" style="vertical-align: middle;">person</span>
+                    Thông tin người dùng
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="xemTruocUserContent">
+                <div class="text-center py-3">
+                    <div class="spinner-border text-warning" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <a href="#" id="linkDenTrangCaNhan" target="_blank" class="btn btn-outline-info">
+                    <span class="material-icons-outlined me-1">open_in_new</span>
+                    Xem trang cá nhân
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Xem trước người dùng
+    function xemTruocNguoiDung(userId) {
+        var modal = new bootstrap.Modal(document.getElementById('xemTruocUserModal'));
+        modal.show();
+        
+        document.getElementById('linkDenTrangCaNhan').href = '/User/Trangcanhan?id=' + userId;
+        
+        fetch('/Admin/BaoCaoNguoiDung/XemTruocNguoiDung?id=' + userId)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('xemTruocUserContent').innerHTML = html;
+            })
+            .catch(error => {
+                document.getElementById('xemTruocUserContent').innerHTML = '<p class="text-danger">Lỗi tải thông tin</p>';
+            });
+    }
+    
+    // Đồng ý báo cáo (Khóa tài khoản)
+    function dongYBaoCao(baoCaoId, userId) {
+        if (!confirm('Đồng ý báo cáo sẽ KHÓA tài khoản này. Bạn chắc chắn?')) return;
+        
+        fetch('/Admin/BaoCaoNguoiDung/DongYBaoCao', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'baoCaoId=' + baoCaoId + '&userId=' + userId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('baoCao-' + baoCaoId).remove();
+                location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        });
+    }
+    
+    // Từ chối báo cáo
+    function tuChoiBaoCao(baoCaoId) {
+        if (!confirm('Từ chối báo cáo này?')) return;
+        
+        fetch('/Admin/BaoCaoNguoiDung/TuChoiBaoCao', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'baoCaoId=' + baoCaoId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('baoCao-' + baoCaoId).remove();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        });
+    }
+</script>

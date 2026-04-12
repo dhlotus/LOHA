@@ -264,3 +264,29 @@ body {
         font-size: 24px;
     }
 }
+/* Submenu */
+.lotus-submenu-item {
+    list-style: none;
+}
+
+.lotus-submenu-item a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px 10px 48px;
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    border-radius: 12px;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.lotus-submenu-item a:hover {
+    background: rgba(245, 158, 11, 0.1);
+    color: #F59E0B;
+}
+
+.lotus-submenu-item.active a {
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    color: white;
+}

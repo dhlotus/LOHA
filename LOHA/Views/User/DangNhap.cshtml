@@ -5,7 +5,7 @@
     var dangKyThanhCong = TempData["DangKyThanhCong"]?.ToString();
     var thongBao = TempData["ThongBao"]?.ToString() ?? "";
 }
-
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 @if (!string.IsNullOrEmpty(dangKyThanhCong) && dangKyThanhCong == "true")
 {
     <div class="popup-success" id="successPopup">
@@ -52,7 +52,41 @@
         
     <a href="/User/DangKy" class="register-btn">Tạo tài khoản mới</a>
 </form>
+<!-- ===== POPUP TÀI KHOẢN BỊ KHÓA ===== -->
+@if (TempData["TaiKhoanBiKhoa"]?.ToString() == "true")
+{
+    <div class="modal fade" id="khoaTaiKhoanModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-body text-center p-4">
+                    <div class="mb-3">
+                        <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex p-3">
+                            <span class="material-icons-outlined" style="font-size: 48px; color: #DC2626;">lock</span>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold mb-2" style="color: #1E2A78;">Tài khoản bị khóa</h5>
+                    <p class="text-secondary mb-4">
+                        Tài khoản của bạn đã bị khóa do vi phạm điều khoản.<br />
+                        Vui lòng liên hệ quản trị viên để được hỗ trợ.
+                    </p>
+                    <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal"
+                            style="background: linear-gradient(135deg, #1E2A78, #6C63FF); border: none;">
+                        <span class="material-icons-outlined me-1" style="vertical-align: middle;">close</span>
+                        Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <script>
+        // Tự động hiển thị popup khi trang load
+        document.addEventListener('DOMContentLoaded', function() {
+            var modal = new bootstrap.Modal(document.getElementById('khoaTaiKhoanModal'));
+            modal.show();
+        });
+    </script>
+}
 <script>
     // Kiểm tra input để active button
     function checkInputs() {

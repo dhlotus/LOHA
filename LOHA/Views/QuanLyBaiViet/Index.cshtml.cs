@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace LOHA.Views.User
+namespace LOHA.Views.QuanLyBaiViet
 {
-    public class XacNhanOTPModel : PageModel
+    public class IndexModel : PageModel
     {
         public void OnGet()
         {

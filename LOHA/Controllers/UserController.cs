@@ -275,13 +275,18 @@ namespace LOHA.Controllers // nhóm chứa các class
 
             var user = _context.Users
                 .FirstOrDefault(x => x.EmailorSDT == model.EmailorSDT);
-
+            // Thêm kiểm tra tài khoản bị khóa
+            
             if (user == null || user.Matkhau != model.Matkhau) // So sánh trực tiếp
             {
                 ModelState.AddModelError("", "Sai email hoặc mật khẩu");
                 return View(model);
             }
-
+            if (!user.TrangThai)
+            {
+                TempData["TaiKhoanBiKhoa"] = "true";
+                return RedirectToAction("DangNhap");
+            }
             if (user?.EmailorSDT != null)
             {
                 HttpContext.Session.SetString("user", user.EmailorSDT);
@@ -1271,6 +1276,125 @@ namespace LOHA.Controllers // nhóm chứa các class
             }
 
             return Json(new { success = true });
+        }
+        // ===== GỬI BÁO CÁO BÀI VIẾT =====
+        [HttpPost]
+        public async Task<IActionResult> BaoCaoBaiViet(int baiVietId, string lyDo)
+        {
+            try
+            {
+                // Lấy user hiện tại
+                var userSession = HttpContext.Session.GetString("user");
+                if (string.IsNullOrEmpty(userSession))
+                {
+                    return Json(new { success = false, message = "Vui lòng đăng nhập" });
+                }
+
+                var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy user" });
+                }
+
+                // Kiểm tra bài viết tồn tại
+                var baiViet = await _context.Baiviets.FindAsync(baiVietId);
+                if (baiViet == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bài viết" });
+                }
+
+                // Kiểm tra đã báo cáo chưa (tránh spam)
+                var daBaoCao = await _context.BaoCaoBaiViets
+                    .AnyAsync(b => b.NguoiBaoCaoId == currentUser.ID && b.BaiVietId == baiVietId && b.TrangThai == 0);
+
+                if (daBaoCao)
+                {
+                    return Json(new { success = false, message = "Bạn đã báo cáo bài viết này rồi" });
+                }
+
+                // Tạo báo cáo mới
+                var baoCao = new BaoCaoBaiViet
+                {
+                    NguoiBaoCaoId = currentUser.ID,
+                    BaiVietId = baiVietId,
+                    LyDo = lyDo,
+                    ThoiGian = DateTime.Now,
+                    TrangThai = 0 // Chờ xử lý
+                };
+
+                _context.BaoCaoBaiViets.Add(baoCao);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Đã gửi báo cáo" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
+        // ===== GỬI BÁO CÁO NGƯỜI DÙNG (GIỚI HẠN 12 TIẾNG) =====
+        [HttpPost]
+        public async Task<IActionResult> BaoCaoNguoiDung(int nguoiBiBaoCaoId, string lyDo)
+        {
+            try
+            {
+                // 1. Lấy user hiện tại
+                var userSession = HttpContext.Session.GetString("user");
+                if (string.IsNullOrEmpty(userSession))
+                {
+                    return Json(new { success = false, message = "Vui lòng đăng nhập" });
+                }
+
+                var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy user" });
+                }
+
+                // 2. Kiểm tra không tự báo cáo chính mình
+                if (currentUser.ID == nguoiBiBaoCaoId)
+                {
+                    return Json(new { success = false, message = "Không thể báo cáo chính mình" });
+                }
+
+                // 3. Kiểm tra người bị báo cáo có tồn tại không
+                var nguoiBiBaoCao = await _context.Users.FindAsync(nguoiBiBaoCaoId);
+                if (nguoiBiBaoCao == null)
+                {
+                    return Json(new { success = false, message = "Người dùng không tồn tại" });
+                }
+
+                // 4. Kiểm tra giới hạn 12 tiếng
+                var gioiHan12Tieng = DateTime.Now.AddHours(-12);
+                var daBaoCaoGanDay = await _context.BaoCaoNguoiDungs
+                    .AnyAsync(b => b.NguoiBaoCaoId == currentUser.ID
+                                && b.NguoiBiBaoCaoId == nguoiBiBaoCaoId
+                                && b.ThoiGian >= gioiHan12Tieng);
+
+                if (daBaoCaoGanDay)
+                {
+                    return Json(new { success = false, message = "Bạn đã báo cáo người dùng này trong 12 giờ qua. Vui lòng đợi thêm!" });
+                }
+
+                // 5. Tạo báo cáo mới
+                var baoCao = new BaoCaoNguoiDung
+                {
+                    NguoiBaoCaoId = currentUser.ID,
+                    NguoiBiBaoCaoId = nguoiBiBaoCaoId,
+                    LyDo = lyDo,
+                    ThoiGian = DateTime.Now,
+                    TrangThai = 0 // Chờ xử lý
+                };
+
+                _context.BaoCaoNguoiDungs.Add(baoCao);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Đã gửi báo cáo. Cảm ơn bạn!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
         }
 
     }

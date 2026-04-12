@@ -68,49 +68,47 @@
                 <h1 class="fw-bold display-6 display-md-5" style="color: #1E2A78;">@Model.Ten</h1>
             </div>
 
-            <!-- NÚT KẾT BẠN -->
-            @if (ViewBag.CurrentUserId != Model.ID)
-            {
+        <!-- NÚT KẾT BẠN + BÁO CÁO -->
+        @if (ViewBag.CurrentUserId != Model.ID)
+        {
+            <div class="d-flex gap-2">
                 @if (ViewBag.DaLaBanBe)
                 {
                     // Lấy nhóm mà người dùng hiện tại đã xếp cho người này
-                    // Cần truyền từ Controller qua ViewBag.NhomCuaToi
                     var nhomHienTai = ViewBag.NhomCuaToi ?? "Bạn bè";
     
-                    <div class="d-flex gap-2">
-                        <!-- Nút dropdown hiển thị tên nhóm + mũi tên -->
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary rounded-pill px-4 dropdown-toggle"
-                                    type="button"
-                                    id="dropdownNhom-@Model.ID"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false"
-                                    style="border-color: #E5E7EB; color: #1E2A78;">
-                                <span class="material-icons-outlined me-1" style="vertical-align: middle; font-size: 18px;">
-                                    @(nhomHienTai == "Gia đình" ? "family_restroom" :
-                                      nhomHienTai == "Đồng nghiệp" ? "work" :
-                                      nhomHienTai == "Khác" ? "more_horiz" : "people")
-                                </span>
-                                @nhomHienTai
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownNhom-@Model.ID">
-                                <li>
-                                    <a class="dropdown-item text-danger" href="#" onclick="huyKetBan(@Model.ID); return false;">
-                                        <span class="material-icons-outlined me-2" style="vertical-align: middle; font-size: 18px;">person_remove</span>
-                                        Huỷ kết bạn
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-        
-                        <!-- Nút Nhắn tin -->
-                        <a href="/Chat/ChatVoi?userId=@Model.ID"
-                               class="btn btn-primary rounded-pill px-4"
-                               style="background: linear-gradient(135deg, #1E2A78, #6C63FF); border: none;">
-                            <span class="material-icons-outlined me-1" style="vertical-align: middle;">chat_bubble</span>
-                            Nhắn tin
-                        </a>
+                    <!-- Nút dropdown hiển thị tên nhóm + mũi tên -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary rounded-pill px-4 dropdown-toggle"
+                                type="button"
+                                id="dropdownNhom-@Model.ID"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                style="border-color: #E5E7EB; color: #1E2A78;">
+                            <span class="material-icons-outlined me-1" style="vertical-align: middle; font-size: 18px;">
+                                @(nhomHienTai == "Gia đình" ? "family_restroom" :
+                                  nhomHienTai == "Đồng nghiệp" ? "work" :
+                                  nhomHienTai == "Khác" ? "more_horiz" : "people")
+                            </span>
+                            @nhomHienTai
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownNhom-@Model.ID">
+                            <li>
+                                <a class="dropdown-item text-danger" href="#" onclick="huyKetBan(@Model.ID); return false;">
+                                    <span class="material-icons-outlined me-2" style="vertical-align: middle; font-size: 18px;">person_remove</span>
+                                    Huỷ kết bạn
+                                </a>
+                            </li>
+                        </ul>
                     </div>
+        
+                    <!-- Nút Nhắn tin -->
+                    <a href="/Chat/ChatVoi?userId=@Model.ID"
+                           class="btn btn-primary rounded-pill px-4"
+                           style="background: linear-gradient(135deg, #1E2A78, #6C63FF); border: none;">
+                        <span class="material-icons-outlined me-1" style="vertical-align: middle;">chat_bubble</span>
+                        Nhắn tin
+                    </a>
                 }
                 else if (ViewBag.DaGuiLoiMoi)
                 {
@@ -132,29 +130,41 @@
                         Kết bạn
                     </button>
                 }
-            }
-            else
-            {
-                <a asp-controller="User" asp-action="ChinhSua" class="btn-edit-profile">
-                    <i class="fa-regular fa-pen-to-square"></i>
-                    <span>Chỉnh sửa thông tin</span>
-                </a>
-            }
-        </div>
+        
+                @* ===== NÚT 3 CHẤM - BÁO CÁO ===== *@
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary rounded-circle"
+                            type="button"
+                            id="dropdownMenuUser-@Model.ID"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            style="width: 42px; height: 42px; border-color: #E5E7EB;">
+                        <i class="fa-solid fa-ellipsis"></i>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuUser-@Model.ID">
+                        <li>
+                            <a class="dropdown-item text-warning" href="#" onclick="moPopupBaoCaoNguoiDung(@Model.ID, '@Model.Ten'); return false;">
+                                <span class="material-icons-outlined me-2" style="vertical-align: middle; font-size: 18px;">flag</span>
+                                Báo cáo người dùng
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        }
 
-        <!-- Stats -->
-        <div class="d-flex flex-wrap gap-3 mt-3">
-            <div class="text-center">
-                <span class="d-block fw-bold fs-3" style="color: #1E2A78;">@ViewBag.Baiviets.Count</span>
-                <span class="text-secondary small">Bài viết</span>
-            </div>
-            <div class="text-center">
-                <span class="d-block fw-bold fs-3" style="color: #1E2A78;">@ViewBag.SoBanBe</span>
-                <span class="text-secondary small">Bạn bè</span>
-            </div>
+    </div>
+    <!-- Stats -->
+    <div class="d-flex flex-wrap gap-3 mt-3">
+        <div class="text-center">
+            <span class="d-block fw-bold fs-3" style="color: #1E2A78;">@ViewBag.Baiviets.Count</span>
+            <span class="text-secondary small">Bài viết</span>
+        </div>
+        <div class="text-center">
+            <span class="d-block fw-bold fs-3" style="color: #1E2A78;">@ViewBag.SoBanBe</span>
+            <span class="text-secondary small">Bạn bè</span>
         </div>
     </div>
-
     <!-- ===== TABS ===== -->
     <ul class="nav nav-tabs profile-tabs mt-4" id="profileTab" role="tablist">
         <li class="nav-item flex-fill" role="presentation">
@@ -450,7 +460,68 @@
         </div>
     </div>
 </div>
-
+<!-- ===== POPUP BÁO CÁO NGƯỜI DÙNG ===== -->
+<div class="modal fade" id="baoCaoNguoiDungModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" style="color: #1E2A78;">
+                    <span class="material-icons-outlined me-2" style="vertical-align: middle; color: #F59E0B;">flag</span>
+                    Báo cáo người dùng
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-secondary mb-3" id="tenNguoiBiBaoCao">Báo cáo <strong></strong> với lý do:</p>
+                
+                <div class="d-flex flex-column gap-2">
+                    <label class="form-check-label p-3 border rounded-3" style="cursor: pointer;">
+                        <input type="radio" name="lyDoNguoiDung" value="Giả mạo" class="form-check-input me-2" checked>
+                        <span class="material-icons-outlined me-2" style="vertical-align: middle; color: #EF4444;">person_off</span>
+                        <strong>Giả mạo</strong>
+                        <small class="d-block text-secondary ms-4">Tài khoản giả mạo người khác</small>
+                    </label>
+                    
+                    <label class="form-check-label p-3 border rounded-3" style="cursor: pointer;">
+                        <input type="radio" name="lyDoNguoiDung" value="Quấy rối" class="form-check-input me-2">
+                        <span class="material-icons-outlined me-2" style="vertical-align: middle; color: #F59E0B;">warning</span>
+                        <strong>Quấy rối</strong>
+                        <small class="d-block text-secondary ms-4">Nhắn tin hoặc bình luận quấy rối</small>
+                    </label>
+                    
+                    <label class="form-check-label p-3 border rounded-3" style="cursor: pointer;">
+                        <input type="radio" name="lyDoNguoiDung" value="Spam" class="form-check-input me-2">
+                        <span class="material-icons-outlined me-2" style="vertical-align: middle; color: #6C63FF;">mail</span>
+                        <strong>Spam</strong>
+                        <small class="d-block text-secondary ms-4">Đăng bài hoặc gửi tin nhắn spam</small>
+                    </label>
+                    
+                    <label class="form-check-label p-3 border rounded-3" style="cursor: pointer;">
+                        <input type="radio" name="lyDoNguoiDung" value="Nội dung không phù hợp" class="form-check-input me-2">
+                        <span class="material-icons-outlined me-2" style="vertical-align: middle; color: #DC2626;">visibility_off</span>
+                        <strong>Nội dung không phù hợp</strong>
+                        <small class="d-block text-secondary ms-4">Đăng nội dung nhạy cảm, phản cảm</small>
+                    </label>
+                    
+                    <label class="form-check-label p-3 border rounded-3" style="cursor: pointer;">
+                        <input type="radio" name="lyDoNguoiDung" value="Khác" class="form-check-input me-2">
+                        <span class="material-icons-outlined me-2" style="vertical-align: middle; color: #9CA3AF;">more_horiz</span>
+                        <strong>Khác</strong>
+                        <small class="d-block text-secondary ms-4">Lý do khác</small>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-warning rounded-pill px-4" id="xacNhanBaoCaoNguoiDung"
+                        style="background: #F59E0B; border: none; color: white;">
+                    <span class="material-icons-outlined me-1" style="vertical-align: middle; font-size: 18px;">send</span>
+                    Gửi báo cáo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- CSS cho Profile Tabs và Responsive -->
 <style>
     /* Profile Tabs - Bootstrap style */
@@ -1097,6 +1168,50 @@
             });
         });
 
+    });
+        // Biến lưu ID người bị báo cáo
+    var nguoiBiBaoCaoId = 0;
+
+    // Hàm mở popup báo cáo người dùng
+    function moPopupBaoCaoNguoiDung(userId, tenNguoiDung) {
+        nguoiBiBaoCaoId = userId;
+    
+        // Hiển thị tên người bị báo cáo
+        document.querySelector('#tenNguoiBiBaoCao strong').innerText = tenNguoiDung;
+    
+        // Reset radio về "Giả mạo"
+        document.querySelector('input[name="lyDoNguoiDung"][value="Giả mạo"]').checked = true;
+    
+        var modal = new bootstrap.Modal(document.getElementById('baoCaoNguoiDungModal'));
+        modal.show();
+    }
+
+    // Xử lý gửi báo cáo người dùng
+    document.getElementById('xacNhanBaoCaoNguoiDung').addEventListener('click', function() {
+        var lyDo = document.querySelector('input[name="lyDoNguoiDung"]:checked').value;
+    
+        fetch('/User/BaoCaoNguoiDung', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'nguoiBiBaoCaoId=' + nguoiBiBaoCaoId + '&lyDo=' + encodeURIComponent(lyDo)
+        })
+        .then(response => response.json())
+        .then(data => {
+            var modal = bootstrap.Modal.getInstance(document.getElementById('baoCaoNguoiDungModal'));
+            modal.hide();
+        
+            if (data.success) {
+                alert('Đã gửi báo cáo. Cảm ơn bạn!');
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra');
+        });
     });
 </script>
 
