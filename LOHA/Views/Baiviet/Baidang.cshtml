@@ -2,160 +2,126 @@
 
 @{
     string avatarDefault = "/images/default.png";
+    int? currentUserId = ViewBag.CurrentUserId as int?;
 }
 
 <div class="post-item mb-4" id="post-@Model.Id">
     <div class="card border-0 shadow-sm post-card">
         <div class="card-body">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-3 position-relative">
-    
-                <div class="d-flex align-items-center">
-
-                    <a asp-controller="User"
-                           asp-action="TrangCaNhan"
-                           asp-route-id="@Model.UserId">
-                        <img src="@avatarDefault"
-                             class="rounded-circle me-2"
-                             style="width: 48px; height: 48px; object-fit: cover; cursor:pointer;" />
+            
+            <!-- ===== HEADER: AVATAR + TÊN ===== -->
+            <div class="post-header">
+                <a asp-controller="User" asp-action="TrangCaNhan" asp-route-id="@Model.UserId">
+                    <img src="@avatarDefault" class="post-avatar" />
+                </a>
+                <div class="post-user-info">
+                    <a asp-controller="User" asp-action="TrangCaNhan" asp-route-id="@Model.UserId" class="post-user-name">
+                        @Model.User?.Ten
                     </a>
-
-                    <div>
-                        <a asp-controller="User"
-                               asp-action="TrangCaNhan"
-                               asp-route-id="@Model.UserId"
-                               class="text-decoration-none fw-bold"
-                               style="color: #1E2A78;">
-                            @Model.User?.Ten
-                        </a>
-
-                        <small class="text-secondary d-block">
-                            <i class="fa-regular fa-clock me-1"></i>@Tinhthoigian(Model.Ngaydang)
-                        </small>
-                    </div>
-
                 </div>
-
-                @{
-                    int? currentUserId = ViewBag.CurrentUserId as int?;
-                }
-
-                @* Nút 3 chấm - Dropdown menu *@
-                <div class="dropdown">
-                    <button class="btn btn-light btn-sm rounded-circle"
-                            type="button"
-                            id="dropdownMenu-@Model.Id"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false">
+                
+                @* Nút 3 chấm *@
+                <div class="dropdown ms-auto">
+                    <button class="post-menu-btn" type="button" id="dropdownMenu-@Model.Id" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenu-@Model.Id">
                         @if (currentUserId != null && currentUserId == Model.UserId)
                         {
-                            @* Chủ bài viết: Hiện nút Xóa *@
                             <li>
                                 <a class="dropdown-item text-danger" href="#" onclick="openDeleteModal(@Model.Id); return false;">
-                                    <i class="fa-regular fa-trash-can me-2"></i>
-                                    Xóa bài viết
+                                    <i class="fa-regular fa-trash-can me-2"></i>Xóa bài viết
                                 </a>
                             </li>
                         }
                         else
                         {
-                            @* Không phải chủ bài viết: Hiện nút Báo cáo *@
                             <li>
                                 <a class="dropdown-item text-warning" href="#" onclick="moPopupBaoCaoBaiViet(@Model.Id); return false;">
-                                    <span class="material-icons-outlined me-2" style="vertical-align: middle; font-size: 16px;">flag</span>
-                                    Báo cáo bài viết
+                                    <span class="material-icons-outlined me-2" style="font-size: 16px;">flag</span>Báo cáo bài viết
                                 </a>
                             </li>
                         }
                     </ul>
                 </div>
-
             </div>
-            
-           
-            <!-- Nội dung -->
-            <p class="mb-3" style="line-height: 1.6;">@Model.Noidung</p>
 
-            <!-- Ảnh -->
+            <!-- ===== NỘI DUNG ===== -->
+            <p class="post-content">@Model.Noidung</p>
+
+            <!-- ===== ẢNH ===== -->
             @if (!string.IsNullOrEmpty(Model.Anh))
             {
-                <div class="post-image-container mb-3">
-                    <img src="/baiviet/@Model.Anh"
-                         class="img-fluid w-100"
-                         style="max-height: 400px; object-fit: contain; background: #f8f9fa;" />
+                <div class="post-image">
+                    <img src="/baiviet/@Model.Anh" />
                 </div>
             }
 
-            <!-- Stats -->
-            <div class="d-flex justify-content-between text-secondary small py-2 border-top border-bottom">
-                <div>
-                    <i class="fa-regular fa-heart me-1" style="color: #FF4D6D;"></i>
-                    <span id="total-like-@Model.Id">@Model.Thichs.Count</span> lượt thích
-                </div>
-                <div>
-                    <i class="fa-regular fa-comment me-1" style="color: #6C63FF;"></i>
-                    <span id="comment-count-@Model.Id">@(Model.Binhluans?.Count ?? 0)</span> bình luận
-                </div>
+            <!-- ===== STATS (LIKE + COMMENT) ===== -->
+            <div class="post-stats">
+                <span><i class="fa-regular fa-heart"></i> <span id="total-like-@Model.Id">@Model.Thichs.Count</span></span>
+                <span><i class="fa-regular fa-comment"></i> <span id="comment-count-@Model.Id">@(Model.Binhluans?.Count ?? 0)</span></span>
             </div>
 
-            <!-- Actions -->
-            <div class="d-flex gap-2 mt-3 post-actions">
-                <button onclick="thichBaiViet(@Model.Id, this)"
-                        class="btn flex-fill @(ViewBag.Thichs?.Contains(Model.Id) == true ? "btn-primary liked" : "btn-light") rounded-pill like-btn">
-                    <i class="fa-solid fa-heart"></i>
-                    <span>Thích</span>
-                    <span class="like-count ms-1" id="like-count-@Model.Id">@Model.Thichs.Count</span>
-                </button>
-
-                <button onclick="moBinhLuan(@Model.Id, this)"
-                        class="btn btn-light flex-fill rounded-pill">
-                    <i class="fa-regular fa-comment me-2"></i>
-                    <span>Bình luận</span>
-                </button>
-
+            <!-- ===== CARD PROGRESS (100%) ===== -->
+            <div class="post-progress">
+                <div class="post-progress-bar" style="width: 100%;"></div>
             </div>
 
-            <!-- Khu vực bình luận (ẩn mặc định) -->
-            <div id="comment-section-@Model.Id" style="display: none;" class="mt-3">
-                <!-- Danh sách bình luận -->
-                <div id="comment-list-@Model.Id" class="mb-3">
+            <!-- ===== THỜI GIAN ===== -->
+            <div class="post-time">
+                <i class="fa-regular fa-clock"></i> @Tinhthoigian(Model.Ngaydang)
+            </div>
+
+            <!-- ===== ACTIONS (CHỈ ICON) ===== -->
+            <div class="post-actions">
+                <button onclick="thichBaiViet(@Model.Id, this)" class="post-action-btn @(ViewBag.Thichs?.Contains(Model.Id) == true ? "liked" : "")">
+                    <i class="fa-regular fa-heart"></i>
+                    <span class="like-count" id="like-count-@Model.Id">@Model.Thichs.Count</span>
+                </button>
+                <button onclick="moBinhLuan(@Model.Id, this)" class="post-action-btn">
+                    <i class="fa-regular fa-comment"></i>
+                </button>
+            </div>
+
+            <!-- ===== KHU VỰC BÌNH LUẬN ===== -->
+            <div id="comment-section-@Model.Id" style="display: none;" class="comment-section">
+                <div id="comment-list-@Model.Id" class="comment-list">
                     @if (Model.Binhluans != null && Model.Binhluans.Any())
                     {
-                        foreach (var bl in Model.Binhluans.OrderByDescending(b => b.Ngaydang))
+                        @foreach (var bl in Model.Binhluans.OrderByDescending(b => b.Ngaydang))
                         {
-                            <div class="d-flex mb-2">
-                                <img src="@avatarDefault"
-                                     class="rounded-circle me-2"
-                                     style="width: 32px; height: 32px; object-fit: cover;" />
-                                <div class="bg-light p-2 rounded-3 flex-grow-1">
-                                    <div class="d-flex justify-content-between">
-                                        <span class="fw-bold small">@bl.User?.Ten</span>
-                                        <small class="text-secondary">@bl.Ngaydang.ToString("HH:mm")</small>
+                            bool coQuyenXoa = (currentUserId != null && currentUserId == bl.UserId)
+                                           || (currentUserId != null && currentUserId == Model.UserId);
+    
+                            <div class="comment-item" id="binhluan-@bl.Id">
+                                <img src="@avatarDefault" class="comment-avatar" />
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <span class="comment-user">@bl.User?.Ten</span>
+                                        <div class="comment-meta">
+                                            <small>@bl.Ngaydang.ToString("HH:mm")</small>
+                                            @if (coQuyenXoa)
+                                            {
+                                                <button class="btn-delete-comment" onclick="xoaBinhLuan(@bl.Id)">
+                                                    <span class="material-icons-outlined">delete</span>
+                                                </button>
+                                            }
+                                        </div>
                                     </div>
-                                    <p class="mb-0 small">@bl.Noidung</p>
+                                    <p class="comment-text">@bl.Noidung</p>
                                 </div>
                             </div>
                         }
                     }
                 </div>
 
-                <!-- Form bình luận -->
-                <div class="d-flex gap-2">
-                    <img src="@avatarDefault"
-                         class="rounded-circle"
-                         style="width: 32px; height: 32px; object-fit: cover;" />
-                    <div class="input-group">
-                        <input type="text"
-                               class="form-control form-control-sm rounded-pill"
-                               id="comment-input-@Model.Id"
-                               placeholder="Viết bình luận..."
+                <div class="comment-form">
+                    <img src="@avatarDefault" class="comment-avatar" />
+                    <div class="comment-input-wrapper">
+                        <input type="text" id="comment-input-@Model.Id" placeholder="Viết bình luận..."
                                onkeydown="handleEnter(event, @Model.Id, 'comment-input-@Model.Id')" />
-                              
-                        <button class="btn btn-primary btn-sm rounded-pill ms-2 px-3"
-                                onclick="guiBinhLuan(@Model.Id, 'comment-input-@Model.Id')">
+                        <button onclick="guiBinhLuan(@Model.Id, 'comment-input-@Model.Id')">
                             <i class="fa-regular fa-paper-plane"></i>
                         </button>
                     </div>
@@ -226,7 +192,40 @@
         </div>
     </div>
 </div>
+<!-- ===== POPUP XÁC NHẬN XÓA BÌNH LUẬN ===== -->
+<div class="modal fade" id="xoaBinhLuanModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-body text-center p-4">
+                <div class="mb-3">
+                    <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex p-3">
+                        <span class="material-icons-outlined" style="font-size: 40px; color: #EF4444;">delete</span>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2" style="color: #1E2A78;">Xóa bình luận?</h5>
+                <p class="text-secondary mb-4">Bình luận sẽ bị xóa vĩnh viễn. Bạn có chắc chắn?</p>
+                <input type="hidden" id="binhluanIdToDelete" />
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-danger rounded-pill px-4" id="confirmXoaBinhLuanBtn">
+                        <span class="material-icons-outlined me-1" style="font-size: 18px;">delete</span>Xóa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    /* Hiện nút xóa khi hover vào comment */
+    .comment-item:hover .btn-delete-comment {
+        opacity: 1 !important;
+    }
 
+    .btn-delete-comment:hover {
+        background: rgba(239, 68, 68, 0.1) !important;
+        border-radius: 50% !important;
+    }
+</style>
 @functions {
     public string Tinhthoigian(DateTime ngaydang)
     {
@@ -277,14 +276,105 @@
             modal.hide();
         
             if (data.success) {
-                alert('Đã gửi báo cáo. Cảm ơn bạn!');
+                showToast('Đã gửi báo cáo. Cảm ơn bạn!', 'success');
             } else {
-                alert(data.message);
+                showToast(data.message, 'error');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Có lỗi xảy ra');
+            showToast('Có lỗi xảy ra', 'error');
         });
     });
+        // Biến lưu ID bình luận cần xóa
+    var binhLuanIdToDelete = 0;
+
+    // Mở popup xác nhận xóa bình luận
+    function xoaBinhLuan(binhLuanId) {
+        binhLuanIdToDelete = binhLuanId;
+        var modal = new bootstrap.Modal(document.getElementById('xoaBinhLuanModal'));
+        modal.show();
+    }
+
+    // Xử lý khi click nút Xóa trong popup
+    document.getElementById('confirmXoaBinhLuanBtn').addEventListener('click', function() {
+        var modal = bootstrap.Modal.getInstance(document.getElementById('xoaBinhLuanModal'));
+        modal.hide();
+    
+        fetch('/Baiviet/XoaBinhLuan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'id=' + binhLuanIdToDelete
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const commentElement = document.getElementById('binhluan-' + binhLuanIdToDelete);
+                const postCard = commentElement.closest('.post-item');
+                const postId = postCard.id.replace('post-', '');
+            
+                commentElement.remove();
+            
+                const commentCountSpan = document.getElementById('comment-count-' + postId);
+                if (commentCountSpan) commentCountSpan.innerText = data.soLuong;
+            
+                const totalCommentSpan = document.getElementById('total-comment-' + postId);
+                if (totalCommentSpan) totalCommentSpan.innerText = data.soLuong;
+            } else {
+                showToast(data.message, 'error');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+        // Hiển thị thông báo dạng Toast
+    function showToast(message, type = 'success') {
+        // Tạo container toast nếu chưa có
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.style.cssText = 'position:fixed; top:20px; right:20px; z-index:9999;';
+            document.body.appendChild(toastContainer);
+        }
+    
+        // Tạo toast
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            background: ${type === 'success' ? '#10B981' : '#EF4444'};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+            min-width: 250px;
+        `;
+    
+        const icon = type === 'success' ? 'check_circle' : 'error_outline';
+        toast.innerHTML = `
+            <span class="material-icons-outlined">${icon}</span>
+            <span style="flex:1;">${message}</span>
+            <button onclick="this.parentElement.remove()" style="background:none;border:none;color:white;cursor:pointer;opacity:0.7;">×</button>
+        `;
+    
+        toastContainer.appendChild(toast);
+    
+        // Tự động ẩn sau 3 giây
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Thêm CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @@keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
 </script>
+
+

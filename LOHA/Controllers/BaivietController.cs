@@ -140,18 +140,25 @@ namespace LOHA.Controllers
                 .Include(bl => bl.User)  // Lấy luôn thông tin user
                 .FirstOrDefault(bl => bl.Id == binhluan.Id);
 
-            // Tạo HTML cho bình luận mới (sẽ được JavaScript chèn vào trang)
+            // Tạo HTML cho bình luận mới (CÓ NÚT XÓA)
             string html = $@"
-        <div class='d-flex mb-3' id='binhluan-{binhluanMoi.Id}'>
-            <img src='/images/default.png' class='rounded-circle me-2' style='width:32px;height:32px;object-fit:cover' />
-            <div class='bg-light p-2 rounded flex-grow-1'>
-                <div class='d-flex justify-content-between'>
-                    <b>{binhluanMoi.User.Ten}</b>
-                    <small class='text-muted'>{binhluanMoi.Ngaydang.ToString("HH:mm dd/MM")}</small>
-                </div>
-                <p class='mb-0 mt-1'>{binhluanMoi.Noidung}</p>
-            </div>
-        </div>";
+                <div class='d-flex mb-2 comment-item position-relative' id='binhluan-{binhluanMoi.Id}'>
+                    <img src='/images/default.png' class='rounded-circle me-2' style='width:32px;height:32px;object-fit:cover' />
+                    <div class='bg-light p-2 rounded-3 flex-grow-1'>
+                        <div class='d-flex justify-content-between align-items-start'>
+                            <span class='fw-bold small'>{binhluanMoi.User.Ten}</span>
+                            <div class='d-flex align-items-center gap-2'>
+                                <small class='text-secondary'>{binhluanMoi.Ngaydang.ToString("HH:mm")}</small>
+                                <button class='btn-delete-comment' 
+                                        onclick='xoaBinhLuan({binhluanMoi.Id})'
+                                        style='opacity: 0; transition: opacity 0.2s; background: none; border: none; padding: 2px; cursor: pointer;'>
+                                    <span class='material-icons-outlined' style='font-size: 16px; color: #EF4444;'>delete</span>
+                                </button>
+                            </div>
+                        </div>
+                        <p class='mb-0 small'>{binhluanMoi.Noidung}</p>
+                    </div>
+                </div>";
 
             // Trả về JSON chứa kết quả
             return Json(new
@@ -448,6 +455,61 @@ namespace LOHA.Controllers
             _context.SaveChanges();
 
             return Json(new { success = true, msg = "Đã gửi lời mời thành công" });
+        }
+        // ===== XÓA BÌNH LUẬN =====
+        [HttpPost]
+        public async Task<IActionResult> XoaBinhLuan(int id)
+        {
+            try
+            {
+                // Lấy user hiện tại
+                var userSession = HttpContext.Session.GetString("user");
+                if (string.IsNullOrEmpty(userSession))
+                {
+                    return Json(new { success = false, message = "Vui lòng đăng nhập" });
+                }
+
+                var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy user" });
+                }
+
+                // Tìm bình luận
+                var binhluan = await _context.Binhluans
+                    .Include(b => b.Baiviet)
+                    .FirstOrDefaultAsync(b => b.Id == id);
+
+                if (binhluan == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bình luận" });
+                }
+
+                // Kiểm tra quyền xóa: là chủ comment HOẶC chủ bài viết
+                bool coQuyenXoa = (binhluan.UserId == currentUser.ID)
+                               || (binhluan.Baiviet != null && binhluan.Baiviet.UserId == currentUser.ID);
+
+                if (!coQuyenXoa)
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền xóa bình luận này" });
+                }
+
+                // Lưu ID bài viết để trả về
+                int baivietId = binhluan.BaivietId;
+
+                // Xóa bình luận
+                _context.Binhluans.Remove(binhluan);
+                await _context.SaveChangesAsync();
+
+                // Đếm số bình luận còn lại
+                int soLuongConLai = await _context.Binhluans.CountAsync(b => b.BaivietId == baivietId);
+
+                return Json(new { success = true, message = "Đã xóa bình luận", soLuong = soLuongConLai });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
         }
 
     }

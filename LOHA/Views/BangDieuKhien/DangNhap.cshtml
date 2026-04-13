@@ -1,6 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Đăng nhập";
-    Layout = null; // Không dùng layout, trang login riêng
+    Layout = null;
 }
 
 <!DOCTYPE html>
@@ -8,7 +8,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LOTUS - Đăng nhập</title>
+    <title>LOTUS - Quản trị hệ thống</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -27,118 +27,320 @@
             }
 
             body {
-                background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+                font-family: 'Inter', sans-serif;
+                background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
                 min-height: 100vh;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-family: 'Inter', sans-serif;
                 padding: 20px;
+                position: relative;
+                overflow: hidden;
             }
 
-            .lotus-login-container {
-                width: 100%;
-                max-width: 420px;
+                /* Grid Pattern sáng */
+                body::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-image: linear-gradient(rgba(30, 42, 120, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(30, 42, 120, 0.03) 1px, transparent 1px);
+                    background-size: 50px 50px;
+                    pointer-events: none;
+                    z-index: 0;
+                }
+
+                /* Gradient sáng từ góc */
+                body::after {
+                    content: '';
+                    position: absolute;
+                    top: -30%;
+                    right: -20%;
+                    width: 80%;
+                    height: 150%;
+                    background: radial-gradient(circle at 80% 30%, rgba(30, 42, 120, 0.08) 0%, transparent 60%);
+                    pointer-events: none;
+                    z-index: 0;
+                }
+
+            .gradient-left {
+                position: absolute;
+                bottom: -20%;
+                left: -20%;
+                width: 70%;
+                height: 120%;
+                background: radial-gradient(circle at 20% 80%, rgba(108, 99, 255, 0.06) 0%, transparent 60%);
+                pointer-events: none;
+                z-index: 0;
             }
 
-            .lotus-login-card {
-                background: rgba(255, 255, 255, 0.03);
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.08);
+            .login-container {
+                display: flex;
+                width: 1100px;
+                max-width: 100%;
+                min-height: 600px;
+                background: rgba(255, 255, 255, 0.85);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(30, 42, 120, 0.12);
                 border-radius: 32px;
-                padding: 48px 40px;
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                overflow: hidden;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(30, 42, 120, 0.05) inset;
+                position: relative;
+                z-index: 1;
             }
 
-            .lotus-logo {
-                text-align: center;
-                margin-bottom: 40px;
+            /* ===== CỘT TRÁI - THÔNG TIN HỆ THỐNG ===== */
+            .info-section {
+                flex: 1.1;
+                background: rgba(255, 255, 255, 0.5);
+                padding: 50px 45px;
+                display: flex;
+                flex-direction: column;
+                border-right: 1px solid rgba(30, 42, 120, 0.08);
             }
 
-            .lotus-logo-icon {
-                width: 80px;
-                height: 80px;
-                background: linear-gradient(135deg, #F59E0B, #EA580C);
-                border-radius: 24px;
+            .system-logo {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                margin-bottom: 50px;
+            }
+
+            .logo-icon {
+                width: 52px;
+                height: 52px;
+                background: linear-gradient(135deg, #1E2A78, #6C63FF);
+                border-radius: 16px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                margin: 0 auto 16px;
-                box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+                box-shadow: 0 8px 20px rgba(30, 42, 120, 0.2);
             }
 
-                .lotus-logo-icon span {
-                    font-size: 48px;
+                .logo-icon span {
+                    font-size: 30px;
                     color: white;
                 }
 
-            .lotus-logo h1 {
-                color: white;
-                font-size: 32px;
+            .logo-text h2 {
+                color: #1E2A78;
+                font-size: 28px;
                 font-weight: 700;
+                letter-spacing: 2px;
+                margin-bottom: 2px;
+            }
+
+            .logo-text span {
+                color: #64748B;
+                font-size: 12px;
+                font-weight: 600;
                 letter-spacing: 3px;
-                margin-bottom: 8px;
+                text-transform: uppercase;
             }
 
-            .lotus-logo p {
-                color: rgba(255, 255, 255, 0.4);
-                font-size: 14px;
-                font-weight: 400;
+            .system-info {
+                flex: 1;
             }
 
-            .lotus-input-group {
+            .info-title {
+                color: #1E2A78;
+                font-size: 12px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                margin-bottom: 25px;
+            }
+
+            .info-item {
+                display: flex;
+                align-items: flex-start;
+                gap: 14px;
                 margin-bottom: 24px;
             }
 
-            .lotus-input-label {
-                display: block;
-                color: rgba(255, 255, 255, 0.6);
-                font-size: 14px;
-                font-weight: 500;
-                margin-bottom: 8px;
+            .info-icon {
+                width: 40px;
+                height: 40px;
+                background: rgba(30, 42, 120, 0.06);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
 
-            .lotus-input-wrapper {
+                .info-icon span {
+                    font-size: 20px;
+                    color: #1E2A78;
+                }
+
+            .info-content h4 {
+                color: #1E2A78;
+                font-size: 15px;
+                font-weight: 600;
+                margin-bottom: 4px;
+            }
+
+            .info-content p {
+                color: #64748B;
+                font-size: 13px;
+                line-height: 1.5;
+            }
+
+            .system-status {
+                margin-top: auto;
+                padding-top: 30px;
+                border-top: 1px solid rgba(30, 42, 120, 0.1);
+            }
+
+            .status-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 12px;
+            }
+
+            .status-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: #10B981;
+                box-shadow: 0 0 8px #10B981;
+            }
+
+                .status-dot.warning {
+                    background: #F59E0B;
+                    box-shadow: 0 0 8px #F59E0B;
+                }
+
+            .status-text {
+                color: #64748B;
+                font-size: 13px;
+            }
+
+                .status-text strong {
+                    color: #1E2A78;
+                    font-weight: 600;
+                }
+
+            .version-info {
+                color: #94A3B8;
+                font-size: 11px;
+                margin-top: 20px;
+            }
+
+            /* ===== CỘT PHẢI - FORM ĐĂNG NHẬP ===== */
+            .form-section {
+                flex: 0.9;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 50px 45px;
+                background: white;
+            }
+
+            .form-wrapper {
+                width: 100%;
+                max-width: 380px;
+            }
+
+            .admin-avatar {
+                display: flex;
+                justify-content: center;
+                margin-bottom: 25px;
+            }
+
+            .avatar-circle {
+                width: 85px;
+                height: 85px;
+                background: linear-gradient(135deg, #F8FAFF, #E2E8F0);
+                border: 2px solid #1E2A78;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 8px 20px rgba(30, 42, 120, 0.12);
+            }
+
+                .avatar-circle span {
+                    font-size: 44px;
+                    color: #1E2A78;
+                }
+
+            .form-header {
+                text-align: center;
+                margin-bottom: 35px;
+            }
+
+                .form-header h3 {
+                    color: #1E2A78;
+                    font-size: 26px;
+                    font-weight: 700;
+                    margin-bottom: 8px;
+                    letter-spacing: -0.5px;
+                }
+
+                .form-header p {
+                    color: #64748B;
+                    font-size: 14px;
+                }
+
+            /* Input Modern */
+            .input-group-modern {
                 position: relative;
+                margin-bottom: 20px;
             }
 
-            .lotus-input-icon {
+            .input-icon-modern {
                 position: absolute;
                 left: 16px;
                 top: 50%;
                 transform: translateY(-50%);
-                color: rgba(255, 255, 255, 0.3);
-                font-size: 20px;
+                z-index: 2;
             }
 
-            .lotus-input {
+                .input-icon-modern span {
+                    font-size: 20px;
+                    color: #94A3B8;
+                    transition: color 0.2s;
+                }
+
+            .form-input-modern {
                 width: 100%;
-                background: rgba(255, 255, 255, 0.05);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 16px;
+                background: #F8FAFC;
+                border: 1.5px solid #E2E8F0;
+                border-radius: 14px;
                 padding: 16px 16px 16px 52px;
-                color: white;
+                color: #1E2A78;
                 font-size: 15px;
-                transition: all 0.2s ease;
+                transition: all 0.25s ease;
             }
 
-                .lotus-input:focus {
+                .form-input-modern:focus {
                     outline: none;
-                    border-color: #F59E0B;
-                    background: rgba(255, 255, 255, 0.08);
-                    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15);
+                    border-color: #1E2A78;
+                    background: white;
+                    box-shadow: 0 0 0 4px rgba(30, 42, 120, 0.08);
                 }
 
-                .lotus-input::placeholder {
-                    color: rgba(255, 255, 255, 0.25);
+                    .form-input-modern:focus + .input-icon-modern span,
+                    .input-group-modern:focus-within .input-icon-modern span {
+                        color: #1E2A78;
+                    }
+
+                .form-input-modern::placeholder {
+                    color: #94A3B8;
+                    font-weight: 400;
                 }
 
-            .lotus-btn {
+            /* Login Button */
+            .login-btn-modern {
                 width: 100%;
-                background: linear-gradient(135deg, #F59E0B, #EA580C);
+                background: linear-gradient(135deg, #1E2A78, #6C63FF);
                 border: none;
-                border-radius: 16px;
-                padding: 16px;
+                border-radius: 14px;
+                padding: 16px 24px;
                 color: white;
                 font-weight: 600;
                 font-size: 16px;
@@ -146,85 +348,217 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 8px;
-                transition: all 0.2s ease;
-                margin-top: 32px;
+                gap: 10px;
+                transition: all 0.25s ease;
+                box-shadow: 0 4px 15px rgba(30, 42, 120, 0.2);
+                margin-top: 10px;
             }
 
-                .lotus-btn:hover {
+                .login-btn-modern:hover {
+                    background: linear-gradient(135deg, #2A3A8A, #7D76FF);
                     transform: translateY(-2px);
-                    box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+                    box-shadow: 0 8px 25px rgba(30, 42, 120, 0.3);
                 }
 
-            .lotus-error {
-                background: rgba(220, 38, 38, 0.15);
-                border: 1px solid rgba(220, 38, 38, 0.3);
-                border-radius: 16px;
+                .login-btn-modern span:last-child {
+                    transition: transform 0.2s;
+                }
+
+                .login-btn-modern:hover span:last-child {
+                    transform: translateX(4px);
+                }
+
+            /* Login Error */
+            .login-error {
+                background: rgba(239, 68, 68, 0.06);
+                border: 1px solid rgba(239, 68, 68, 0.2);
+                border-radius: 12px;
                 padding: 14px 18px;
-                margin-bottom: 24px;
+                margin-bottom: 25px;
                 display: flex;
                 align-items: center;
-                gap: 10px;
-                color: #FCA5A5;
+                gap: 12px;
+                color: #DC2626;
                 font-size: 14px;
             }
 
-            .lotus-footer {
+            /* Form Footer */
+            .form-footer-modern {
+                margin-top: 35px;
                 text-align: center;
-                margin-top: 32px;
-                color: rgba(255, 255, 255, 0.3);
-                font-size: 13px;
             }
+
+            .security-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                background: #F0F2FF;
+                padding: 8px 18px;
+                border-radius: 30px;
+                color: #1E2A78;
+                font-size: 12px;
+                font-weight: 500;
+                margin-bottom: 12px;
+                border: 1px solid rgba(30, 42, 120, 0.1);
+            }
+
+                .security-badge span:first-child {
+                    font-size: 16px;
+                    color: #10B981;
+                }
+
+            .access-note {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                color: #94A3B8;
+                font-size: 12px;
+            }
+
+                .access-note span:first-child {
+                    font-size: 14px;
+                    color: #1E2A78;
+                }
     </style>
 </head>
 <body>
-    <div class="lotus-login-container">
-        <div class="lotus-login-card">
-            <!-- Logo -->
-            <div class="lotus-logo">
-                <div class="lotus-logo-icon">
+    <div class="gradient-left"></div>
+    <div class="noise-texture"></div>
+    <div class="login-container">
+        <!-- CỘT TRÁI - THÔNG TIN HỆ THỐNG -->
+        <div class="info-section">
+            <div class="system-logo">
+                <div class="logo-icon">
                     <span class="material-icons-outlined">local_florist</span>
                 </div>
-                <h1>LOTUS</h1>
-                <p>Bảng điều khiển quản trị</p>
+                <div class="logo-text">
+                    <h2>LOTUS</h2>
+                    <span>Internal Admin</span>
+                </div>
             </div>
 
-            <!-- Hiển thị lỗi -->
-            @if (ViewBag.Loi != null)
-            {
-                <div class="lotus-error">
-                    <span class="material-icons-outlined">error_outline</span>
-                    <span>@ViewBag.Loi</span>
-                </div>
-            }
-
-            <!-- Form đăng nhập -->
-            <form method="post" asp-action="DangNhap" asp-controller="BangDieuKhien">
-                <div class="lotus-input-group">
-                    <label class="lotus-input-label">Tên đăng nhập</label>
-                    <div class="lotus-input-wrapper">
-                        <span class="material-icons-outlined lotus-input-icon">person</span>
-                        <input type="text" name="tenDangNhap" class="lotus-input" placeholder="Nhập tên đăng nhập" required autofocus />
+            <div class="system-info">
+                <div class="info-title">Thông tin hệ thống</div>
+                
+                <div class="info-item">
+                    <div class="info-icon">
+                        <span class="material-icons-outlined">dns</span>
+                    </div>
+                    <div class="info-content">
+                        <h4>Môi trường</h4>
+                        <p>Internal Network • Production</p>
                     </div>
                 </div>
 
-                <div class="lotus-input-group">
-                    <label class="lotus-input-label">Mật khẩu</label>
-                    <div class="lotus-input-wrapper">
-                        <span class="material-icons-outlined lotus-input-icon">lock</span>
-                        <input type="password" name="matKhau" class="lotus-input" placeholder="Nhập mật khẩu" required />
+                <div class="info-item">
+                    <div class="info-icon">
+                        <span class="material-icons-outlined">database</span>
+                    </div>
+                    <div class="info-content">
+                        <h4>Cơ sở dữ liệu</h4>
+                        <p>SQL Server 2022 • LocalDB</p>
                     </div>
                 </div>
 
-                <button type="submit" class="lotus-btn">
-                    <span class="material-icons-outlined">login</span>
-                    <span>Đăng nhập vào bảng điều khiển</span>
-                </button>
-            </form>
+                <div class="info-item">
+                    <div class="info-icon">
+                        <span class="material-icons-outlined">update</span>
+                    </div>
+                    <div class="info-content">
+                        <h4>Phiên bản</h4>
+                        <p>LOTUS v2.1.0 • Build 2026.0412</p>
+                    </div>
+                </div>
 
-            <!-- Footer -->
-            <div class="lotus-footer">
-                LOTUS Admin • Bảo mật nội bộ
+                <div class="info-item">
+                    <div class="info-icon">
+                        <span class="material-icons-outlined">admin_panel_settings</span>
+                    </div>
+                    <div class="info-content">
+                        <h4>Quyền truy cập</h4>
+                        <p>Chỉ dành cho quản trị viên được ủy quyền</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="system-status">
+                <div class="status-item">
+                    <span class="status-dot"></span>
+                    <span class="status-text"><strong>Hệ thống</strong> • Hoạt động bình thường</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot"></span>
+                    <span class="status-text"><strong>Database</strong> • Kết nối ổn định</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot warning"></span>
+                    <span class="status-text"><strong>Phiên làm việc</strong> • Yêu cầu xác thực</span>
+                </div>
+                <div class="version-info">
+                    Lần đăng nhập cuối: @DateTime.Now.AddDays(-1).ToString("HH:mm dd/MM/yyyy")
+                </div>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI - FORM ĐĂNG NHẬP -->
+        <!-- CỘT PHẢI - FORM ĐĂNG NHẬP -->
+        <div class="form-section">
+            <div class="form-wrapper">
+                <!-- Avatar/Icon quản trị -->
+                <div class="admin-avatar">
+                    <div class="avatar-circle">
+                        <span class="material-icons-outlined">shield_person</span>
+                    </div>
+                </div>
+
+                <div class="form-header">
+                    <h3>Truy cập quản trị</h3>
+                    <p>Xác thực danh tính để tiếp tục</p>
+                </div>
+
+                <!-- Hiển thị lỗi -->
+                @if (ViewBag.Loi != null)
+                {
+                    <div class="login-error">
+                        <span class="material-icons-outlined">error_outline</span>
+                        <span>@ViewBag.Loi</span>
+                    </div>
+                }
+
+                <!-- Form đăng nhập -->
+                <form method="post" asp-action="DangNhap" asp-controller="BangDieuKhien">
+                    <div class="input-group-modern">
+                        <div class="input-icon-modern">
+                            <span class="material-icons-outlined">person</span>
+                        </div>
+                        <input type="text" name="tenDangNhap" class="form-input-modern" placeholder="Tên đăng nhập" required autofocus />
+                    </div>
+
+                    <div class="input-group-modern">
+                        <div class="input-icon-modern">
+                            <span class="material-icons-outlined">lock</span>
+                        </div>
+                        <input type="password" name="matKhau" class="form-input-modern" placeholder="Mật khẩu" required />
+                    </div>
+   
+
+                    <button type="submit" class="login-btn-modern">
+                        <span>Đăng nhập</span>
+                        <span class="material-icons-outlined">arrow_forward</span>
+                    </button>
+                </form>
+
+                <div class="form-footer-modern">
+                    <div class="security-badge">
+                        <span class="material-icons-outlined">verified</span>
+                        <span>Kết nối bảo mật SSL/TLS</span>
+                    </div>
+                    <div class="access-note">
+                        <span class="material-icons-outlined">vpn_key</span>
+                        <span>Chỉ dành cho quản trị viên được ủy quyền</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
