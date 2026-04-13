@@ -265,12 +265,14 @@
 
     function moBinhLuan(baivietId, btn) {
         const commentSection = document.getElementById('comment-section-' + baivietId);
-        if (commentSection.style.display === 'none') {
+        const icon = btn.querySelector('i');
+    
+        if (commentSection.style.display === 'none' || commentSection.style.display === '') {
             commentSection.style.display = 'block';
-            btn.innerHTML = '<i class="fa-regular fa-comment-dots me-2"></i><span>Ẩn</span>';
+            icon.className = 'fa-regular fa-comment-dots';  // Chỉ đổi icon
         } else {
             commentSection.style.display = 'none';
-            btn.innerHTML = '<i class="fa-regular fa-comment me-2"></i><span>Bình luận</span>';
+            icon.className = 'fa-regular fa-comment';       // Chỉ đổi icon
         }
     }
 

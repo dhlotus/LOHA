@@ -140,23 +140,21 @@ namespace LOHA.Controllers
                 .Include(bl => bl.User)  // Lấy luôn thông tin user
                 .FirstOrDefault(bl => bl.Id == binhluan.Id);
 
-            // Tạo HTML cho bình luận mới (CÓ NÚT XÓA)
+            // Tạo HTML cho bình luận mới (THEO GIAO DIỆN MỚI)
             string html = $@"
-                <div class='d-flex mb-2 comment-item position-relative' id='binhluan-{binhluanMoi.Id}'>
-                    <img src='/images/default.png' class='rounded-circle me-2' style='width:32px;height:32px;object-fit:cover' />
-                    <div class='bg-light p-2 rounded-3 flex-grow-1'>
-                        <div class='d-flex justify-content-between align-items-start'>
-                            <span class='fw-bold small'>{binhluanMoi.User.Ten}</span>
-                            <div class='d-flex align-items-center gap-2'>
-                                <small class='text-secondary'>{binhluanMoi.Ngaydang.ToString("HH:mm")}</small>
-                                <button class='btn-delete-comment' 
-                                        onclick='xoaBinhLuan({binhluanMoi.Id})'
-                                        style='opacity: 0; transition: opacity 0.2s; background: none; border: none; padding: 2px; cursor: pointer;'>
-                                    <span class='material-icons-outlined' style='font-size: 16px; color: #EF4444;'>delete</span>
+                <div class='comment-item' id='binhluan-{binhluanMoi.Id}'>
+                    <img src='/images/default.png' class='comment-avatar' />
+                    <div class='comment-content'>
+                        <div class='comment-header'>
+                            <span class='comment-user'>{binhluanMoi.User.Ten}</span>
+                            <div class='comment-meta'>
+                                <small>{binhluanMoi.Ngaydang.ToString("HH:mm")}</small>
+                                <button class='btn-delete-comment' onclick='xoaBinhLuan({binhluanMoi.Id})'>
+                                    <span class='material-icons-outlined'>delete</span>
                                 </button>
                             </div>
                         </div>
-                        <p class='mb-0 small'>{binhluanMoi.Noidung}</p>
+                        <p class='comment-text'>{binhluanMoi.Noidung}</p>
                     </div>
                 </div>";
 
@@ -511,6 +509,29 @@ namespace LOHA.Controllers
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
+        [HttpGet]
+        public async Task<IActionResult> LayBinhLuan(int id)
+        {
+            var binhluans = await _context.Binhluans
+                .Include(b => b.User)
+                .Where(b => b.BaivietId == id)
+                .OrderByDescending(b => b.Ngaydang)
+                .ToListAsync();
 
+            // Lấy currentUserId để kiểm tra quyền xóa
+            var userSession = HttpContext.Session.GetString("user");
+            int? currentUserId = null;
+            if (!string.IsNullOrEmpty(userSession))
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
+                currentUserId = user?.ID;
+            }
+
+            var baiviet = await _context.Baiviets.FindAsync(id);
+            ViewBag.BaivietUserId = baiviet?.UserId;
+            ViewBag.CurrentUserId = currentUserId;
+
+            return PartialView("_BinhLuanList", binhluans);
+        }
     }
 }

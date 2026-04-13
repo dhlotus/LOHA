@@ -5,7 +5,7 @@
     int? currentUserId = ViewBag.CurrentUserId as int?;
 }
 
-<div class="post-item mb-4" id="post-@Model.Id">
+<div class="post-item mb-4" id="post-@Model.Id" style="position: relative;">
     <div class="post-card">
         <div class="card-body">
             
@@ -28,12 +28,11 @@
                     <ul class="dropdown-menu">
                         @if (currentUserId != null && currentUserId == Model.UserId)
                         {
-                            <li><a class="dropdown-item" href="#" onclick="suaBaiViet(@Model.Id)"><i class="fa-regular fa-pen-to-square me-2"></i>Sửa</a></li>
-                            <li><a class="dropdown-item text-danger" href="#" onclick="openDeleteModal(@Model.Id)"><i class="fa-regular fa-trash-can me-2"></i>Xóa</a></li>
+                            <li><a class="dropdown-item text-danger" onclick="openDeleteModal(@Model.Id)"><i class="fa-regular fa-trash-can me-2"></i>Xóa</a></li>
                         }
                         else
                         {
-                            <li><a class="dropdown-item text-warning" href="#" onclick="moPopupBaoCaoBaiViet(@Model.Id)"><span class="material-icons-outlined me-2">flag</span>Báo cáo</a></li>
+                            <li><a class="dropdown-item text-warning" onclick="moPopupBaoCaoBaiViet(@Model.Id)"><span class="material-icons-outlined me-2">flag</span>Báo cáo</a></li>
                         }
                     </ul>
                 </div>
@@ -70,59 +69,67 @@
             <div class="post-actions">
                 <button onclick="thichBaiViet(@Model.Id, this)" class="post-action-btn @(ViewBag.Thichs?.Contains(Model.Id) == true ? "liked" : "")">
                     <i class="fa-regular fa-heart"></i>
-                    <span class="like-count">@Model.Thichs.Count</span>
                 </button>
-                <button onclick="moBinhLuan(@Model.Id, this)" class="post-action-btn">
+                <button onclick="toggleBinhLuan(@Model.Id, this)" class="post-action-btn" id="comment-btn-@Model.Id">
                     <i class="fa-regular fa-comment"></i>
                 </button>
             </div>
 
-            <!-- ===== BÌNH LUẬN ===== -->
-            <!-- ===== KHU VỰC BÌNH LUẬN ===== -->
-            <div id="comment-section-@Model.Id" style="display: none;" class="comment-section">
-                <div id="comment-list-@Model.Id" class="comment-list">
-                    @if (Model.Binhluans != null && Model.Binhluans.Any())
-                    {
-                        @foreach (var bl in Model.Binhluans.OrderByDescending(b => b.Ngaydang))
-                        {
-                            bool coQuyenXoa = (currentUserId != null && currentUserId == bl.UserId)
-                                           || (currentUserId != null && currentUserId == Model.UserId);
+        </div>
+    </div>
+    <!-- ===== HỘP BÌNH LUẬN (CỘT PHẢI) ===== -->
+    <div class="comment-panel" id="comment-panel-@Model.Id" style="display: none;">
+        <div class="comment-panel-header">
+            <h4>Bình luận (<span id="panel-comment-count-@Model.Id">@(Model.Binhluans?.Count ?? 0)</span>)</h4>
+            <button class="comment-panel-close" onclick="closeBinhLuan(@Model.Id)">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+            
+        <div class="comment-panel-body" id="comment-list-panel-@Model.Id">
+            @if (Model.Binhluans != null && Model.Binhluans.Any())
+            {
+                foreach (var bl in Model.Binhluans.OrderByDescending(b => b.Ngaydang))
+                {
+                    bool coQuyenXoa = (currentUserId != null && currentUserId == bl.UserId)
+                                    || (currentUserId != null && currentUserId == Model.UserId);
     
-                            <div class="comment-item" id="binhluan-@bl.Id">
-                                <img src="@avatarDefault" class="comment-avatar" />
-                                <div class="comment-content">
-                                    <div class="comment-header">
-                                        <span class="comment-user">@bl.User?.Ten</span>
-                                        <div class="comment-meta">
-                                            <small>@bl.Ngaydang.ToString("HH:mm")</small>
-                                            @if (coQuyenXoa)
-                                            {
-                                                <button class="btn-delete-comment" onclick="xoaBinhLuan(@bl.Id)">
-                                                    <span class="material-icons-outlined">delete</span>
-                                                </button>
-                                            }
-                                        </div>
-                                    </div>
-                                    <p class="comment-text">@bl.Noidung</p>
+                    <div class="comment-item" id="binhluan-@bl.Id">
+                        <img src="@avatarDefault" class="comment-avatar" />
+                        <div class="comment-content">
+                            <div class="comment-header">
+                                <span class="comment-user">@bl.User?.Ten</span>
+                                <div class="comment-meta">
+                                    <small>@bl.Ngaydang.ToString("HH:mm")</small>
+                                    @if (coQuyenXoa)
+                                    {
+                                        <button class="btn-delete-comment" onclick="xoaBinhLuan(@bl.Id)">
+                                            <span class="material-icons-outlined">delete</span>
+                                        </button>
+                                    }
                                 </div>
                             </div>
-                        }
-                    }
-                </div>
-
-                <div class="comment-form">
-                    <img src="@avatarDefault" class="comment-avatar" />
-                    <div class="comment-input-wrapper">
-                        <input type="text" id="comment-input-@Model.Id" placeholder="Viết bình luận..."
-                               onkeydown="handleEnter(event, @Model.Id, 'comment-input-@Model.Id')" />
-                        <button onclick="guiBinhLuan(@Model.Id, 'comment-input-@Model.Id')">
-                            <i class="fa-regular fa-paper-plane"></i>
-                        </button>
+                            <p class="comment-text">@bl.Noidung</p>
+                        </div>
                     </div>
-                </div>
+                }
+            }
+            else
+            {
+                <p class="no-comment-text">Chưa có bình luận nào</p>
+            }
+        </div>
+            
+        <div class="comment-panel-footer">
+            <div class="comment-input-wrapper">
+                <input type="text" id="panel-comment-input-@Model.Id" placeholder="Viết bình luận..." />
+                <button onclick="guiBinhLuanPanel(@Model.Id)">
+                    <i class="fa-regular fa-paper-plane"></i>
+                </button>
             </div>
         </div>
     </div>
+    
     <!-- ===== POPUP BÁO CÁO BÀI VIẾT ===== -->
     <div class="modal fade" id="baoCaoModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -369,4 +376,74 @@
         }
     `;
     document.head.appendChild(style);
+        // Gửi bình luận từ panel
+    function guiBinhLuanPanel(baivietId) {
+        const input = document.getElementById('panel-comment-input-' + baivietId);
+        const noidung = input.value.trim();
+    
+        if (noidung === '') {
+            // Focus lại vào input
+            input.focus();
+            // Hiện thông báo nhẹ (tùy chọn)
+            showToast('Vui lòng nhập nội dung bình luận', 'error');
+            return;
+        }
+    
+        fetch('/Baiviet/ThemBinhLuan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `baivietId=${baivietId}&noidung=${encodeURIComponent(noidung)}&anchor=`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Thêm bình luận mới vào danh sách
+                const commentList = document.getElementById('comment-list-panel-' + baivietId);
+            
+                // Xóa thông báo "Chưa có bình luận" nếu có
+                const noComment = commentList.querySelector('.no-comment-text');
+                if (noComment) noComment.remove();
+            
+                // Thêm HTML mới vào đầu danh sách
+                commentList.insertAdjacentHTML('afterbegin', data.html);
+            
+                // Xóa nội dung input
+                input.value = '';
+            
+                // Cập nhật số lượng bình luận trong panel header
+                const countSpan = document.getElementById('panel-comment-count-' + baivietId);
+                if (countSpan) countSpan.innerText = data.soLuong;
+            
+                // Cập nhật số lượng bình luận ở bài viết
+                const postCountSpan = document.getElementById('comment-count-' + baivietId);
+                if (postCountSpan) postCountSpan.innerText = data.soLuong;
+            
+                // Focus lại vào input để tiếp tục nhập
+                input.focus();
+            } else {
+                showToast(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Có lỗi xảy ra', 'error');
+        });
+    }
+        // Thêm sự kiện Enter cho input trong panel
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sự kiện này sẽ được gắn khi panel được tạo
+        // Chúng ta sẽ dùng event delegation
+    });
+
+    // Dùng event delegation cho input trong panel (vì panel được tạo động)
+    document.addEventListener('keypress', function(e) {
+        if (e.target.matches('input[id^="panel-comment-input-"]')) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const inputId = e.target.id;
+                const baivietId = inputId.replace('panel-comment-input-', '');
+                guiBinhLuanPanel(baivietId);
+            }
+        }
+    });
 </script>

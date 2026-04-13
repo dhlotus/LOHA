@@ -386,6 +386,40 @@
         window.addEventListener('popstate', function() {
             dongThanhTimKiem();
         });
+        let currentOpenPostId = null;
+
+        function toggleBinhLuan(baivietId, btn) {
+        const panel = document.getElementById('comment-panel-' + baivietId);
+        const isOpening = panel.style.display === 'none' || panel.style.display === '';
+    
+        // Đóng panel đang mở (nếu có và khác ID)
+        if (currentOpenPostId !== null && currentOpenPostId !== baivietId) {
+        const oldPanel = document.getElementById('comment-panel-' + currentOpenPostId);
+        const oldBtn = document.getElementById('comment-btn-' + currentOpenPostId);
+        if (oldPanel) oldPanel.style.display = 'none';
+        if (oldBtn) oldBtn.classList.remove('active');
+        }
+    
+        if (isOpening) {
+        panel.style.display = 'flex';
+        btn.classList.add('active');
+        currentOpenPostId = baivietId;
+        } else {
+        panel.style.display = 'none';
+        btn.classList.remove('active');
+        currentOpenPostId = null;
+        }
+        }
+
+        function closeBinhLuan(baivietId) {
+        const panel = document.getElementById('comment-panel-' + baivietId);
+        const btn = document.getElementById('comment-btn-' + baivietId);
+        panel.style.display = 'none';
+        btn.classList.remove('active');
+        if (currentOpenPostId === baivietId) {
+        currentOpenPostId = null;
+        }
+        }
     </script>
     <div class="modal fade" id="confirmXoaBaiVietModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">

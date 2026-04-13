@@ -1,0 +1,37 @@
+﻿@model List<LOHA.Models.Binhluan>
+@{
+    int? currentUserId = ViewBag.CurrentUserId;
+    int baivietUserId = ViewBag.BaivietUserId ?? 0;
+    string avatarDefault = "/images/default.png";
+}
+
+@if (Model.Any())
+{
+    foreach (var bl in Model)
+    {
+        bool coQuyenXoa = (currentUserId != null && currentUserId == bl.UserId) || (currentUserId == baivietUserId);
+        
+        <div class="comment-item" id="binhluan-@bl.Id">
+            <img src="@avatarDefault" class="comment-avatar" />
+            <div class="comment-content">
+                <div class="comment-header">
+                    <span class="comment-user">@bl.User?.Ten</span>
+                    <div class="comment-meta">
+                        <small>@bl.Ngaydang.ToString("HH:mm")</small>
+                        @if (coQuyenXoa)
+                        {
+                            <button class="btn-delete-comment" onclick="xoaBinhLuan(@bl.Id)">
+                                <span class="material-icons-outlined">delete</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+                <p class="comment-text">@bl.Noidung</p>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <p class="no-comment-text">Chưa có bình luận nào</p>
+}
