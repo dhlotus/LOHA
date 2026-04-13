@@ -22,21 +22,18 @@
         <span class="badge bg-primary rounded-pill px-3 py-2" id="total-posts">@Model.Count bài viết</span>
     </div>
 
-    <div class="card mb-4 shadow-sm border-0" style="border-radius: 16px;">
-        <div class="card-body">
-            <div class="d-flex align-items-center">
-                <img src="/images/default.png" class="rounded-circle me-2" style="width:45px; height:45px; object-fit:cover; border: 1px solid #ddd;">
-                
-                <button type="button" class="btn btn-light rounded-pill flex-grow-1 text-start ps-3 text-muted border-0 me-2" 
-                        data-bs-toggle="modal" data-bs-target="#modalDangBai" style="background-color: #f0f2f5; height: 45px;">
-                    bạn đang nghĩ gì thế?
-                </button>
+    <div class="create-post-card">
+        <div class="create-post-body">
+            <img src="/images/default.png" class="create-post-avatar" />
+        
+            <button type="button" class="create-post-button flex-grow-1" data-bs-toggle="modal" data-bs-target="#modalDangBai">
+                <span class="material-icons-outlined">edit_note</span>
+                <span>Bạn đang nghĩ gì thế?</span>
+            </button>
 
-                <button type="button" class="btn btn-light rounded-circle d-flex align-items-center justify-content-center border-0" 
-                        id="btnQuickUpload" style="width: 45px; height: 45px; background-color: #f0f2f5;">
-                    <i class="fa-solid fa-image text-success fs-5"></i>
-                </button>
-            </div>
+            <button type="button" class="create-post-image-btn" id="btnQuickUpload">
+                <span class="material-icons-outlined">image</span>
+            </button>
         </div>
     </div>
 
@@ -103,12 +100,31 @@
     </div>
 </div>
 
-<div id="deleteModal" class="custom-modal" onclick="closeDeleteModal()">
-    <div class="custom-modal-content" onclick="event.stopPropagation()">
-        <h5>Bạn có muốn xoá bài viết này không?</h5>
-        <div class="text-end mt-3">
-            <button class="btn btn-secondary me-2" onclick="closeDeleteModal()">Huỷ</button>
-            <button class="btn btn-danger" onclick="confirmDelete()">Xoá</button>
+<!-- ===== POPUP XÁC NHẬN XÓA BÀI VIẾT ===== -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg rounded-4" style="background: #1E293B; color: white;">
+            <div class="modal-body text-center p-4">
+                <div class="mb-3">
+                    <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex p-3" style="background: rgba(239, 68, 68, 0.1) !important;">
+                        <span class="material-icons-outlined" style="font-size: 48px; color: #EF4444;">delete_forever</span>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2" style="color: white;">Xóa bài viết?</h5>
+                <p class="mb-4" style="color: rgba(255,255,255,0.7);">Bài viết sẽ bị xóa vĩnh viễn và không thể khôi phục.</p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <button type="button" class="btn px-4 py-2 rounded-3" data-bs-dismiss="modal" 
+                            style="background: rgba(255,255,255,0.1); color: white; border: none;">
+                        <span class="material-icons-outlined me-1" style="font-size: 16px; vertical-align: middle;">close</span>
+                        Hủy
+                    </button>
+                    <button type="button" class="btn px-4 py-2 rounded-3" onclick="confirmDelete()"
+                            style="background: #EF4444; color: white; border: none;">
+                        <span class="material-icons-outlined me-1" style="font-size: 16px; vertical-align: middle;">delete</span>
+                        Xóa
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -279,13 +295,34 @@
     }
 
     let deletePostId = 0;
-    function openDeleteModal(id) { deletePostId = id; document.getElementById("deleteModal").style.display = "flex"; }
-    function closeDeleteModal() { document.getElementById("deleteModal").style.display = "none"; }
+        function openDeleteModal(id) {
+        deletePostId = id;
+        var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        modal.show();
+    }
     function confirmDelete() {
-        fetch('/Baiviet/XoaBaiViet', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + deletePostId })
+        fetch('/Baiviet/XoaBaiViet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'id=' + deletePostId
+        })
         .then(res => res.json())
         .then(data => {
-            if (data.success) { document.getElementById('post-' + deletePostId)?.remove(); closeDeleteModal(); }
+            // Đóng popup
+            var modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+            modal.hide();
+        
+            if (data.success) {
+                document.getElementById('post-' + deletePostId)?.remove();
+                showToast('Đã xóa bài viết thành công', 'success');
+            } else {
+                showToast(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            var modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+            modal.hide();
+            showToast('Có lỗi xảy ra', 'error');
         });
     }
 </script>

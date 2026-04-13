@@ -6,13 +6,13 @@
 }
 
 <div class="post-item mb-4" id="post-@Model.Id">
-    <div class="card border-0 shadow-sm post-card">
+    <div class="post-card">
         <div class="card-body">
             
-            <!-- ===== HEADER: AVATAR + TÊN ===== -->
+            <!-- ===== HEADER ===== -->
             <div class="post-header">
                 <a asp-controller="User" asp-action="TrangCaNhan" asp-route-id="@Model.UserId">
-                    <img src="@avatarDefault" class="post-avatar" />
+                    <img src="@avatarDefault" class="post-avatar" style="width:48px; height:48px;" />
                 </a>
                 <div class="post-user-info">
                     <a asp-controller="User" asp-action="TrangCaNhan" asp-route-id="@Model.UserId" class="post-user-name">
@@ -22,25 +22,18 @@
                 
                 @* Nút 3 chấm *@
                 <div class="dropdown ms-auto">
-                    <button class="post-menu-btn" type="button" id="dropdownMenu-@Model.Id" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="post-menu-btn" type="button" data-bs-toggle="dropdown">
                         <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu-@Model.Id">
+                    <ul class="dropdown-menu">
                         @if (currentUserId != null && currentUserId == Model.UserId)
                         {
-                            <li>
-                                <a class="dropdown-item text-danger" href="#" onclick="openDeleteModal(@Model.Id); return false;">
-                                    <i class="fa-regular fa-trash-can me-2"></i>Xóa bài viết
-                                </a>
-                            </li>
+                            <li><a class="dropdown-item" href="#" onclick="suaBaiViet(@Model.Id)"><i class="fa-regular fa-pen-to-square me-2"></i>Sửa</a></li>
+                            <li><a class="dropdown-item text-danger" href="#" onclick="openDeleteModal(@Model.Id)"><i class="fa-regular fa-trash-can me-2"></i>Xóa</a></li>
                         }
                         else
                         {
-                            <li>
-                                <a class="dropdown-item text-warning" href="#" onclick="moPopupBaoCaoBaiViet(@Model.Id); return false;">
-                                    <span class="material-icons-outlined me-2" style="font-size: 16px;">flag</span>Báo cáo bài viết
-                                </a>
-                            </li>
+                            <li><a class="dropdown-item text-warning" href="#" onclick="moPopupBaoCaoBaiViet(@Model.Id)"><span class="material-icons-outlined me-2">flag</span>Báo cáo</a></li>
                         }
                     </ul>
                 </div>
@@ -57,13 +50,13 @@
                 </div>
             }
 
-            <!-- ===== STATS (LIKE + COMMENT) ===== -->
+            <!-- ===== STATS ===== -->
             <div class="post-stats">
                 <span><i class="fa-regular fa-heart"></i> <span id="total-like-@Model.Id">@Model.Thichs.Count</span></span>
                 <span><i class="fa-regular fa-comment"></i> <span id="comment-count-@Model.Id">@(Model.Binhluans?.Count ?? 0)</span></span>
             </div>
 
-            <!-- ===== CARD PROGRESS (100%) ===== -->
+            <!-- ===== PROGRESS ===== -->
             <div class="post-progress">
                 <div class="post-progress-bar" style="width: 100%;"></div>
             </div>
@@ -73,17 +66,18 @@
                 <i class="fa-regular fa-clock"></i> @Tinhthoigian(Model.Ngaydang)
             </div>
 
-            <!-- ===== ACTIONS (CHỈ ICON) ===== -->
+            <!-- ===== ACTIONS ===== -->
             <div class="post-actions">
                 <button onclick="thichBaiViet(@Model.Id, this)" class="post-action-btn @(ViewBag.Thichs?.Contains(Model.Id) == true ? "liked" : "")">
                     <i class="fa-regular fa-heart"></i>
-                    <span class="like-count" id="like-count-@Model.Id">@Model.Thichs.Count</span>
+                    <span class="like-count">@Model.Thichs.Count</span>
                 </button>
                 <button onclick="moBinhLuan(@Model.Id, this)" class="post-action-btn">
                     <i class="fa-regular fa-comment"></i>
                 </button>
             </div>
 
+            <!-- ===== BÌNH LUẬN ===== -->
             <!-- ===== KHU VỰC BÌNH LUẬN ===== -->
             <div id="comment-section-@Model.Id" style="display: none;" class="comment-section">
                 <div id="comment-list-@Model.Id" class="comment-list">
@@ -376,5 +370,3 @@
     `;
     document.head.appendChild(style);
 </script>
-
-
