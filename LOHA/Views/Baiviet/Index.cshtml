@@ -24,7 +24,7 @@
 
     <div class="create-post-card">
         <div class="create-post-body">
-            <img src="/images/default.png" class="create-post-avatar" />
+            <img src="@(ViewBag.CurrentUserAvatar ?? "/images/default.png")" class="create-post-avatar" />
         
             <button type="button" class="create-post-button flex-grow-1" data-bs-toggle="modal" data-bs-target="#modalDangBai">
                 <span class="material-icons-outlined">edit_note</span>

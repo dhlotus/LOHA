@@ -191,14 +191,15 @@ namespace LOHA.Controllers
                 {
                     success = true,
                     html = $@"
-                <div class='d-flex justify-content-end mb-3'>
-                    <div class='bg-primary text-white p-3 rounded-3' style='max-width: 70%;'>
-                        <p class='mb-1'>{noiDung}</p>
-                        <div class='text-end'>
-                            <small class='text-white-50'>{DateTime.Now.ToString("HH:mm")}</small>
+                    <div class='d-flex justify-content-end mb-3'>
+                        <div class='bg-primary text-white p-3 rounded-3' style='max-width: 70%;'>
+                            <p class='mb-1'>{noiDung}</p>
+                            <div class='text-end'>
+                                <small class='text-white-50'>{DateTime.Now.ToString("HH:mm")}</small>
+                            </div>
                         </div>
-                    </div>
-                </div>"
+                    </div>",
+                    avatarNguoiGui = string.IsNullOrEmpty(nguoiGui.Avatar) ? "/images/default.png" : nguoiGui.Avatar
                 });
             }
             catch (Exception ex)

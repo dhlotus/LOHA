@@ -28,7 +28,10 @@
                         <a href="/Chat/ChatVoi?userId=@user.ID" class="list-group-item list-group-item-action border-0 shadow-sm mb-2 rounded-3">
                             <div class="d-flex align-items-center">
                                 <!-- Avatar -->
-                                <img src="/images/default.png"
+                                @{
+                                    string avatarUser = string.IsNullOrEmpty(user.Avatar) ? "/images/default.png" : user.Avatar;
+                                }
+                                <img src="@avatarUser"
                                      class="rounded-circle me-3"
                                      style="width: 50px; height: 50px; object-fit: cover;" />
 

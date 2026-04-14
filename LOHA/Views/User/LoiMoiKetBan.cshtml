@@ -32,12 +32,17 @@
         <div class="row">
             @foreach (var loiMoi in Model)
             {
+                // Lấy avatar của người gửi
+                string avatarNguoiGui = string.IsNullOrEmpty(loiMoi.NguoiGui?.Avatar)
+                    ? "/images/default.png"
+                    : loiMoi.NguoiGui.Avatar;
+    
                 <div class="col-md-6 mb-3" id="loiMoi-@loiMoi.Id">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <div class="d-flex align-items-center gap-3">
                                 <!-- Avatar -->
-                                <img src="/images/default.png"
+                                <img src="@avatarNguoiGui"
                                      class="rounded-circle"
                                      style="width: 70px; height: 70px; object-fit: cover;" />
 

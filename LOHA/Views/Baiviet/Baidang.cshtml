@@ -3,6 +3,7 @@
 @{
     string avatarDefault = "/images/default.png";
     int? currentUserId = ViewBag.CurrentUserId as int?;
+    string avatar = string.IsNullOrEmpty(Model.User?.Avatar) ? "/images/default.png" : Model.User.Avatar;
 }
 
 <div class="post-item mb-4" id="post-@Model.Id" style="position: relative;">
@@ -12,7 +13,7 @@
             <!-- ===== HEADER ===== -->
             <div class="post-header">
                 <a asp-controller="User" asp-action="TrangCaNhan" asp-route-id="@Model.UserId">
-                    <img src="@avatarDefault" class="post-avatar" style="width:48px; height:48px;" />
+                    <img src="@avatar" class="post-avatar" style="width:48px; height:48px;" />
                 </a>
                 <div class="post-user-info">
                     <a asp-controller="User" asp-action="TrangCaNhan" asp-route-id="@Model.UserId" class="post-user-name">
@@ -89,13 +90,16 @@
         <div class="comment-panel-body" id="comment-list-panel-@Model.Id">
             @if (Model.Binhluans != null && Model.Binhluans.Any())
             {
-                foreach (var bl in Model.Binhluans.OrderByDescending(b => b.Ngaydang))
+                @foreach (var bl in Model.Binhluans.OrderByDescending(b => b.Ngaydang))
                 {
                     bool coQuyenXoa = (currentUserId != null && currentUserId == bl.UserId)
                                     || (currentUserId != null && currentUserId == Model.UserId);
     
+                    // Lấy avatar của người comment
+                    string commentAvatar = string.IsNullOrEmpty(bl.User?.Avatar) ? "/images/default.png" : bl.User.Avatar;
+    
                     <div class="comment-item" id="binhluan-@bl.Id">
-                        <img src="@avatarDefault" class="comment-avatar" />
+                        <img src="@commentAvatar" class="comment-avatar" />
                         <div class="comment-content">
                             <div class="comment-header">
                                 <span class="comment-user">@bl.User?.Ten</span>

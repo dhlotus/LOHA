@@ -65,8 +65,18 @@ namespace LOHA.Controllers
                 }
             }
             ViewBag.Thichs = thichs;
-
             ViewBag.CurrentUserId = currentUserId;
+
+            if (userHT != null)
+            {
+                ViewBag.CurrentUserAvatar = string.IsNullOrEmpty(userHT.Avatar)
+                    ? "/images/default.png"
+                    : userHT.Avatar;
+            }
+            else
+            {
+                ViewBag.CurrentUserAvatar = "/images/default.png";
+            }
 
             return View(baiviets);
         }
@@ -152,9 +162,13 @@ namespace LOHA.Controllers
                 .FirstOrDefault(bl => bl.Id == binhluan.Id);
 
             // Tạo HTML cho bình luận mới (THEO GIAO DIỆN MỚI)
+            string avatarComment = string.IsNullOrEmpty(binhluanMoi.User.Avatar)
+                ? "/images/default.png"
+                : binhluanMoi.User.Avatar;
+
             string html = $@"
                 <div class='comment-item' id='binhluan-{binhluanMoi.Id}'>
-                    <img src='/images/default.png' class='comment-avatar' />
+                    <img src='{avatarComment}' class='comment-avatar' />
                     <div class='comment-content'>
                         <div class='comment-header'>
                             <span class='comment-user'>{binhluanMoi.User.Ten}</span>

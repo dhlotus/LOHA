@@ -19,7 +19,10 @@
                 <a href="/Chat/Index" class="btn btn-outline-secondary rounded-circle me-3">
                     <i class="fa-solid fa-circle-arrow-left"></i>
                 </a>
-                <img src="/images/default.png"
+                @{
+                    string avatarNguoiNhan = string.IsNullOrEmpty(ViewBag.NguoiNhan?.Avatar) ? "/images/default.png" : ViewBag.NguoiNhan.Avatar;
+                }
+                <img src="@avatarNguoiNhan"
                      class="rounded-circle me-2"
                      style="width: 40px; height: 40px; object-fit: cover;" />
                 <div>
@@ -61,7 +64,7 @@
                             {
                                 <!-- Tin nhắn của bạn (bên trái) -->
                                 <div class="d-flex mb-3">
-                                    <img src="/images/default.png"
+                                    <img src="@avatarNguoiNhan"
                                          class="rounded-circle me-2"
                                          style="width: 32px; height: 32px; object-fit: cover;" />
                                     <div class="bg-light p-3 rounded-3" style="max-width: 70%;">
@@ -127,15 +130,16 @@
             connection.on("NhanTinMoi", function(nguoiGuiId, noiDung, thoiGian) {
                 // Kiểm tra nếu tin nhắn là từ người đang chat
                 if (nguoiGuiId == @(ViewBag.NguoiNhan?.ID ?? 0)) {
+                    var avatar = avatarNguoiGui || '/images/default.png';
                     var html = `
                         <div class='d-flex mb-3'>
-                            <img src='/images/default.png'
-                                 class='rounded-circle me-2'
-                                 style='width: 32px; height: 32px; object-fit: cover;' />
+                            <img src='${avatar}'
+                            class='rounded-circle me-2'
+                            style='width: 32px; height: 32px; object-fit: cover;' />
                             <div class='bg-light p-3 rounded-3' style='max-width: 70%;'>
-                                <p class='mb-1'>${noiDung}</p>
-                                <small class='text-secondary'>${thoiGian}</small>
-                            </div>
+                        <p class='mb-1'>${noiDung}</p>
+                        <small class='text-secondary'>${thoiGian}</small>
+                        </div>
                         </div>
                     `;
 
