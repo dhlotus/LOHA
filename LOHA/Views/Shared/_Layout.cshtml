@@ -55,31 +55,51 @@
     </div>
 
     <!-- Navbar (Desktop) -->
-    <nav class="loha-navbar d-flex align-items-center d-none d-lg-flex">
-        <div class="d-flex align-items-center" style="width: 260px;">
+    <nav class="loha-navbar d-none d-lg-flex">
+        <!-- Logo bên trái - Đồng bộ với sidebar -->
+        <div class="loha-nav-left">
             <span class="loha-logo">LOHA</span>
         </div>
 
+        <!-- Search bar ở giữa -->
         <div class="flex-grow-1 d-flex justify-content-center">
-            <form action="/User/TimKiem" method="get" class="loha-search">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text"
-                       name="tuKhoa"
-                       placeholder="Tìm kiếm bạn bè..."
-                       value="@Context.Request.Query["tuKhoa"]" />
+            <form action="/User/TimKiem" method="get" class="loha-search-wrapper">
+                <div class="loha-search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text"
+                           name="tuKhoa"
+                           placeholder="Tìm kiếm bạn bè..."
+                           value="@Context.Request.Query["tuKhoa"]"
+                           autocomplete="off" />
+                </div>
+                <button type="submit" class="loha-search-btn">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <span>Tìm kiếm</span>
+                </button>
             </form>
         </div>
 
-        <div class="d-flex align-items-center gap-2" style="width: 260px; justify-content: flex-end;">
-            <div class="loha-nav-icon">
+        <!-- Icon điều hướng bên phải -->
+        <div class="loha-nav-right">
+            <a href="/User/LoiMoiKetBan" class="loha-nav-icon text-decoration-none position-relative">
                 <i class="fa-regular fa-bell"></i>
-            </div>
-            <div class="loha-nav-icon">
+                <span id="notification-badge-desktop"
+                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                      style="display: none; font-size: 10px; min-width: 18px; height: 18px; line-height: 18px; padding: 0 5px; margin-left: -8px; margin-top: 4px;">
+                    0
+                </span>
+            </a>
+            <a href="/Chat/Index" class="loha-nav-icon text-decoration-none position-relative">
                 <i class="fa-regular fa-message"></i>
-            </div>
-            <div class="loha-nav-icon">
+                <span id="chat-badge-desktop"
+                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                      style="display: none; font-size: 10px; min-width: 18px; height: 18px; line-height: 18px; padding: 0 5px; margin-left: -8px; margin-top: 4px;">
+                    0
+                </span>
+            </a>
+            <a href="/User/Trangcanhan" class="loha-nav-icon text-decoration-none">
                 <i class="fa-regular fa-circle-user"></i>
-            </div>
+            </a>
         </div>
     </nav>
 
@@ -88,11 +108,16 @@
             <!-- Sidebar trái (Desktop) -->
             <div class="col-lg-3 d-none d-lg-block">
                 <div class="loha-sidebar">
-                    <a href="/Baiviet/Index" class="loha-menu-item text-decoration-none @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                    @{
+                        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+                        var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+                    }
+
+                    <a href="/Baiviet/Index" class="loha-menu-item text-decoration-none @(currentController == "Baiviet" && currentAction == "Index" ? "active" : "")">
                         <i class="fa-solid fa-house"></i>
                         <span>Trang chủ</span>
                     </a>
-                    <a href="/User/Trangcanhan" class="loha-menu-item text-decoration-none @(ViewContext.RouteData.Values["action"]?.ToString() == "Trangcanhan" ? "active" : "")">
+                    <a href="/User/Trangcanhan" class="loha-menu-item text-decoration-none @(currentController == "User" && currentAction == "Trangcanhan" ? "active" : "")">
                         <i class="fa-solid fa-user"></i>
                         <span>Hồ sơ</span>
                     </a>
@@ -100,12 +125,10 @@
                         <i class="fa-solid fa-user-group me-2"></i>
                         <span>Bạn bè</span>
                     </a>
-                    <a href="/Chat/Index" class="loha-menu-item text-decoration-none position-relative">
+                    <a href="/Chat/Index" class="loha-menu-item text-decoration-none position-relative @(currentController == "Chat" && currentAction == "Index" ? "active" : "")">
                         <div class="d-flex align-items-center">
                             <i class="fa-regular fa-message me-2"></i>
                             <span>Tin nhắn</span>
-
-                            <!-- Chấm đỏ báo tin nhắn chưa đọc -->
                             <span id="chat-notification-badge-desktop"
                                   class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger"
                                   style="display: none; font-size: 10px; min-width: 18px; height: 18px; line-height: 18px; padding: 0 5px; margin-left: 15px; margin-top: -5px;">
@@ -114,11 +137,9 @@
                         </div>
                     </a>
 
-                    <div class="loha-menu-item" onclick="location.href='/User/LoiMoiKetBan'">
+                    <div class="loha-menu-item @(currentController == "User" && currentAction == "LoiMoiKetBan" ? "active" : "")" onclick="location.href='/User/LoiMoiKetBan'">
                         <div class="position-relative d-inline-block">
                             <i class="fa-regular fa-bell"></i>
-
-                            <!-- Chấm đỏ thông báo - NẰM TRÊN PHẢI QUẢ CHUÔNG -->
                             <span id="notification-badge"
                                   class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                                   style="display: none; font-size: 10px; min-width: 18px; height: 18px; line-height: 18px; padding: 0 5px; margin-left: -5px; margin-top: -5px;">
@@ -142,7 +163,7 @@
 
             <!-- Content chính (chiếm hết trên mobile) -->
             <div class="col-lg-6 col-12 d-flex flex-column">
-                    @RenderBody()
+                @RenderBody()
             </div>
 
             <!-- Sidebar phải (Desktop) - ĐÃ XÓA gợi ý và hoạt động -->
@@ -206,18 +227,18 @@
     <script>
         // Hàm cập nhật số thông báo
         function capNhatThongBao() {
-            fetch('/User/DemLoiMoiKetBan')
-                .then(response => response.json())
-                .then(data => {
-                    var badge = document.getElementById('notification-badge');
-                    if (data.count > 0) {
-                        badge.style.display = 'inline-block';
-                        badge.innerText = data.count > 99 ? '99+' : data.count;
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                })
-                .catch(error => console.error('Lỗi khi lấy thông báo:', error));
+        fetch('/User/DemLoiMoiKetBan')
+        .then(response => response.json())
+        .then(data => {
+        var badge = document.getElementById('notification-badge');
+        if (data.count > 0) {
+        badge.style.display = 'inline-block';
+        badge.innerText = data.count > 99 ? '99+' : data.count;
+        } else {
+        badge.style.display = 'none';
+        }
+        })
+        .catch(error => console.error('Lỗi khi lấy thông báo:', error));
         }
 
         // Gọi ngay khi trang load
@@ -226,162 +247,162 @@
         // Tự động cập nhật mỗi 30 giây
         setInterval(capNhatThongBao, 30000);
 
-                // Hàm đếm tin nhắn chưa đọc
+        // Hàm đếm tin nhắn chưa đọc
         function demTinNhanChuaDoc() {
-            fetch('/Chat/DemTinNhanChuaDoc')
-                .then(response => response.json())
-                .then(data => {
-                    // Cập nhật badge desktop
-                    var badgeDesktop = document.getElementById('chat-notification-badge-desktop');
-                    if (badgeDesktop) {
-                        if (data.count > 0) {
-                            badgeDesktop.style.display = 'inline-block';
-                            badgeDesktop.innerText = data.count > 99 ? '99+' : data.count;
-                        } else {
-                            badgeDesktop.style.display = 'none';
-                        }
-                    }
+        fetch('/Chat/DemTinNhanChuaDoc')
+        .then(response => response.json())
+        .then(data => {
+        // Cập nhật badge desktop
+        var badgeDesktop = document.getElementById('chat-notification-badge-desktop');
+        if (badgeDesktop) {
+        if (data.count > 0) {
+        badgeDesktop.style.display = 'inline-block';
+        badgeDesktop.innerText = data.count > 99 ? '99+' : data.count;
+        } else {
+        badgeDesktop.style.display = 'none';
+        }
+        }
 
-                    // Cập nhật badge mobile
-                    var badgeMobile = document.getElementById('chat-notification-badge');
-                    if (badgeMobile) {
-                        if (data.count > 0) {
-                            badgeMobile.style.display = 'inline-block';
-                            badgeMobile.innerText = data.count > 99 ? '99+' : data.count;
-                        } else {
-                            badgeMobile.style.display = 'none';
-                        }
-                    }
-                })
-                .catch(error => console.error('Lỗi đếm tin nhắn:', error));
+        // Cập nhật badge mobile
+        var badgeMobile = document.getElementById('chat-notification-badge');
+        if (badgeMobile) {
+        if (data.count > 0) {
+        badgeMobile.style.display = 'inline-block';
+        badgeMobile.innerText = data.count > 99 ? '99+' : data.count;
+        } else {
+        badgeMobile.style.display = 'none';
+        }
+        }
+        })
+        .catch(error => console.error('Lỗi đếm tin nhắn:', error));
         }
 
 
-                 // Cập nhật badge mobile cho tin nhắn
+        // Cập nhật badge mobile cho tin nhắn
         function demTinNhanChuaDoc() {
-            fetch('/Chat/DemTinNhanChuaDoc')
-                .then(response => response.json())
-                .then(data => {
-                    var badgeMobile = document.getElementById('mobile-chat-badge');
-                    if (badgeMobile) {
-                        if (data.count > 0) {
-                            badgeMobile.style.display = 'inline-block';
-                            badgeMobile.innerText = data.count > 99 ? '99+' : data.count;
-                        } else {
-                            badgeMobile.style.display = 'none';
-                        }
-                    }
-                })
-                .catch(error => console.error('Lỗi đếm tin nhắn:', error));
+        fetch('/Chat/DemTinNhanChuaDoc')
+        .then(response => response.json())
+        .then(data => {
+        var badgeMobile = document.getElementById('mobile-chat-badge');
+        if (badgeMobile) {
+        if (data.count > 0) {
+        badgeMobile.style.display = 'inline-block';
+        badgeMobile.innerText = data.count > 99 ? '99+' : data.count;
+        } else {
+        badgeMobile.style.display = 'none';
+        }
+        }
+        })
+        .catch(error => console.error('Lỗi đếm tin nhắn:', error));
         }
 
         // Cập nhật badge mobile cho lời mời
         function capNhatThongBao() {
-            fetch('/User/DemLoiMoiKetBan')
-                .then(response => response.json())
-                .then(data => {
-                    var badgeMobile = document.getElementById('mobile-notification-badge');
-                    if (badgeMobile) {
-                        if (data.count > 0) {
-                            badgeMobile.style.display = 'inline-block';
-                            badgeMobile.innerText = data.count > 99 ? '99+' : data.count;
-                        } else {
-                            badgeMobile.style.display = 'none';
-                        }
-                    }
-                })
-                .catch(error => console.error('Lỗi khi lấy thông báo:', error));
+        fetch('/User/DemLoiMoiKetBan')
+        .then(response => response.json())
+        .then(data => {
+        var badgeMobile = document.getElementById('mobile-notification-badge');
+        if (badgeMobile) {
+        if (data.count > 0) {
+        badgeMobile.style.display = 'inline-block';
+        badgeMobile.innerText = data.count > 99 ? '99+' : data.count;
+        } else {
+        badgeMobile.style.display = 'none';
+        }
+        }
+        })
+        .catch(error => console.error('Lỗi khi lấy thông báo:', error));
         }
 
         // Gọi khi load trang
         document.addEventListener('DOMContentLoaded', function() {
-            capNhatThongBao();
-            demTinNhanChuaDoc();
+        capNhatThongBao();
+        demTinNhanChuaDoc();
         });
 
         // Tự động cập nhật mỗi 30 giây
         setInterval(capNhatThongBao, 30000);
         setInterval(demTinNhanChuaDoc, 30000);
 
-            // Hiệu ứng ẩn/hiện header khi cuộn trên mobile
+        // Hiệu ứng ẩn/hiện header khi cuộn trên mobile
         (function() {
-            var lastScrollTop = 0;
-            var header = document.getElementById('mobileHeader');
-            var ticking = false;
+        var lastScrollTop = 0;
+        var header = document.getElementById('mobileHeader');
+        var ticking = false;
 
-            if (!header) return; // Nếu không có header mobile thì thoát
+        if (!header) return; // Nếu không có header mobile thì thoát
 
-            window.addEventListener('scroll', function() {
-                var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        window.addEventListener('scroll', function() {
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
-                // Yêu cầu animation frame để tối ưu hiệu suất
-                if (!ticking) {
-                    window.requestAnimationFrame(function() {
-                        // Cuộn xuống (ẩn header)
-                        if (scrollTop > lastScrollTop && scrollTop > 50) {
-                            header.classList.add('hide');
-                        }
-                        // Cuộn lên (hiện header)
-                        else if (scrollTop < lastScrollTop) {
-                            header.classList.remove('hide');
-                        }
+        // Yêu cầu animation frame để tối ưu hiệu suất
+        if (!ticking) {
+        window.requestAnimationFrame(function() {
+        // Cuộn xuống (ẩn header)
+        if (scrollTop > lastScrollTop && scrollTop > 50) {
+        header.classList.add('hide');
+        }
+        // Cuộn lên (hiện header)
+        else if (scrollTop < lastScrollTop) {
+        header.classList.remove('hide');
+        }
 
-                        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-                        ticking = false;
-                    });
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        ticking = false;
+        });
 
-                    ticking = true;
-                }
-            });
+        ticking = true;
+        }
+        });
 
-            // Hiện header khi chạm lên đầu trang
-            window.addEventListener('scroll', function() {
-                if (window.scrollY <= 0) {
-                    header.classList.remove('hide');
-                }
-            });
+        // Hiện header khi chạm lên đầu trang
+        window.addEventListener('scroll', function() {
+        if (window.scrollY <= 0) {
+        header.classList.remove('hide');
+        }
+        });
         })();
         
-            // Mở thanh tìm kiếm
+        // Mở thanh tìm kiếm
         function moThanhTimKiem() {
-            var header = document.getElementById('mobileHeader');
-            var searchBar = document.getElementById('mobileSearchBar');
+        var header = document.getElementById('mobileHeader');
+        var searchBar = document.getElementById('mobileSearchBar');
 
-            // Ẩn header
-            header.classList.add('hide-for-search');
+        // Ẩn header
+        header.classList.add('hide-for-search');
 
-            // Hiện thanh tìm kiếm
-            searchBar.classList.add('show');
+        // Hiện thanh tìm kiếm
+        searchBar.classList.add('show');
 
-            // Focus vào input sau khi animation kết thúc
-            setTimeout(function() {
-                document.getElementById('searchInput').focus();
-            }, 300);
+        // Focus vào input sau khi animation kết thúc
+        setTimeout(function() {
+        document.getElementById('searchInput').focus();
+        }, 300);
         }
 
         // Đóng thanh tìm kiếm
         function dongThanhTimKiem() {
-            var header = document.getElementById('mobileHeader');
-            var searchBar = document.getElementById('mobileSearchBar');
+        var header = document.getElementById('mobileHeader');
+        var searchBar = document.getElementById('mobileSearchBar');
 
-            // Hiện header
-            header.classList.remove('hide-for-search');
+        // Hiện header
+        header.classList.remove('hide-for-search');
 
-            // Ẩn thanh tìm kiếm
-            searchBar.classList.remove('show');
+        // Ẩn thanh tìm kiếm
+        searchBar.classList.remove('show');
         }
 
         // Tự động submit form khi nhấn Enter
         document.getElementById('searchInput')?.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                document.getElementById('searchForm').submit();
-            }
+        if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('searchForm').submit();
+        }
         });
 
         // Đóng thanh tìm kiếm khi click back button
         window.addEventListener('popstate', function() {
-            dongThanhTimKiem();
+        dongThanhTimKiem();
         });
         let currentOpenPostId = null;
 
