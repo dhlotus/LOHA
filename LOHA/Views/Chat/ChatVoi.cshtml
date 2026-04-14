@@ -32,10 +32,19 @@
                     <h5>@ViewBag.NguoiNhan.Ten</h5>
                 </div>
                 
-                <!-- Icon menu (tùy chọn) -->
-                <button class="chat-action-btn">
-                    <i class="fa-solid fa-ellipsis-vertical"></i>
-                </button>
+                <!-- Dropdown menu 3 chấm -->
+                <div class="dropdown">
+                    <button class="chat-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item text-danger" href="#" onclick="moPopupXoaTinNhan(); return false;">
+                                <i class="fa-regular fa-trash-can me-2"></i>Xóa tin nhắn
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
 
             <!-- ===== KHUNG TIN NHẮN ===== -->
@@ -111,7 +120,34 @@
         </div>
     </div>
 </div>
-
+<!-- ===== POPUP XÁC NHẬN XÓA TIN NHẮN ===== -->
+<div class="modal fade" id="xoaTinNhanModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg rounded-4" style="background: #1E293B; color: white;">
+            <div class="modal-body text-center p-4">
+                <div class="mb-3">
+                    <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex p-3" style="background: rgba(239, 68, 68, 0.1) !important;">
+                        <span class="material-icons-outlined" style="font-size: 48px; color: #EF4444;">delete_forever</span>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2" style="color: white;">Xóa tin nhắn?</h5>
+                <p class="mb-4" style="color: rgba(255,255,255,0.7);">Toàn bộ lịch sử trò chuyện với <strong>@ViewBag.NguoiNhan.Ten</strong> sẽ bị xóa vĩnh viễn và không thể khôi phục.</p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <button type="button" class="btn px-4 py-2 rounded-3" data-bs-dismiss="modal"
+                            style="background: rgba(255,255,255,0.1); color: white; border: none;">
+                        <span class="material-icons-outlined me-1" style="font-size: 16px; vertical-align: middle;">close</span>
+                        Hủy
+                    </button>
+                    <button type="button" class="btn px-4 py-2 rounded-3" onclick="xacNhanXoaTinNhan()"
+                            style="background: #EF4444; color: white; border: none;">
+                        <span class="material-icons-outlined me-1" style="font-size: 16px; vertical-align: middle;">delete</span>
+                        Xóa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
 
@@ -223,6 +259,84 @@
         .catch(error => {
         console.error('Error:', error);
         });
+        }
+        // ===== XÓA TIN NHẮN =====
+        function moPopupXoaTinNhan() {
+            var modal = new bootstrap.Modal(document.getElementById('xoaTinNhanModal'));
+            modal.show();
+        }
+
+        function xacNhanXoaTinNhan() {
+            fetch('/Chat/XoaTinNhan?nguoiNhanId=' + nguoiNhanId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Đóng popup
+                var modal = bootstrap.Modal.getInstance(document.getElementById('xoaTinNhanModal'));
+                modal.hide();
+        
+                if (data.success) {
+                    // Xóa hết tin nhắn trong khung chat
+                    document.getElementById('khungChat').innerHTML = `
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <span class="material-icons-outlined" style="font-size: 64px; color: #6D5DFC; opacity: 0.4;">chat_bubble_outline</span>
+                            </div>
+                            <h5 class="fw-bold" style="color: #2D1B69;">Chưa có tin nhắn nào</h5>
+                            <p class="text-secondary">Hãy bắt đầu cuộc trò chuyện ngay!</p>
+                        </div>
+                    `;
+                    showToast('Đã xóa toàn bộ tin nhắn', 'success');
+                } else {
+                    showToast(data.message || 'Có lỗi xảy ra', 'error');
+                }
+            })
+            .catch(error => {
+                var modal = bootstrap.Modal.getInstance(document.getElementById('xoaTinNhanModal'));
+                modal.hide();
+                showToast('Có lỗi xảy ra', 'error');
+                console.error('Lỗi:', error);
+            });
+        }
+
+        // Hàm hiển thị Toast thông báo (nếu chưa có)
+        function showToast(message, type = 'success') {
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.style.cssText = 'position:fixed; top:20px; right:20px; z-index:9999;';
+                document.body.appendChild(toastContainer);
+            }
+    
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                background: ${type === 'success' ? '#10B981' : '#EF4444'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 12px;
+                margin-bottom: 10px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideIn 0.3s ease;
+                min-width: 250px;
+            `;
+    
+            const icon = type === 'success' ? 'check_circle' : 'error_outline';
+            toast.innerHTML = `
+                <span class="material-icons-outlined">${icon}</span>
+                <span style="flex:1;">${message}</span>
+                <button onclick="this.parentElement.remove()" style="background:none;border:none;color:white;cursor:pointer;opacity:0.7;">×</button>
+            `;
+    
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
     </script>
 }

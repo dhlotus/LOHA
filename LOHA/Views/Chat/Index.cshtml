@@ -34,46 +34,53 @@
 
                 string avatarUser = string.IsNullOrEmpty(user.Avatar) ? "/images/default.png" : user.Avatar;
                 bool isUnread = tinCuoi != null && !tinCuoi.DaXem && tinCuoi.NguoiNhanID == ViewBag.CurrentUserId;
-
-                <a href="/Chat/ChatVoi?userId=@user.ID" class="chat-card" data-username="@user.Ten.ToLower()">
-                    <div class="chat-avatar-wrapper">
-                        <img src="@avatarUser" class="chat-avatar" />
-                        <!-- Có thể thêm chấm trạng thái online sau -->
-                        <!-- <span class="chat-status"></span> -->
-                    </div>
+                <div class="chat-card-wrapper">
+                    <a href="/Chat/ChatVoi?userId=@user.ID" class="chat-card" data-username="@user.Ten.ToLower()">
+                        <div class="chat-avatar-wrapper">
+                            <img src="@avatarUser" class="chat-avatar" />
+                            <!-- Có thể thêm chấm trạng thái online sau -->
+                            <!-- <span class="chat-status"></span> -->
+                        </div>
                     
-                    <div class="chat-info">
-                        <div class="chat-header">
-                            <span class="chat-name">@user.Ten</span>
-                            @if (tinCuoi != null)
-                            {
-                                <span class="chat-time">@tinCuoi.ThoiGian.ToString("HH:mm")</span>
-                            }
-                        </div>
-                        
-                        <div class="chat-preview">
-                            @if (tinCuoi != null)
-                            {
-                                <span class="chat-last-message">
-                                    @if (tinCuoi.NguoiGuiID == ViewBag.CurrentUserId)
-                                    {
-                                        <span style="opacity: 0.7;">Bạn: </span>
-                                    }
-                                    @tinCuoi.NoiDung
-                                </span>
-                                
-                                @if (isUnread)
+                        <div class="chat-info">
+                            <div class="chat-header">
+                                <span class="chat-name">@user.Ten</span>
+                                @if (tinCuoi != null)
                                 {
-                                    <span class="chat-badge-new"></span>
+                                    <span class="chat-time">@tinCuoi.ThoiGian.ToString("HH:mm")</span>
                                 }
-                            }
-                            else
-                            {
-                                <span class="chat-last-message" style="opacity: 0.5;">👋 Bắt đầu trò chuyện</span>
-                            }
+                            </div>
+                        
+                            <div class="chat-preview">
+                                @if (tinCuoi != null)
+                                {
+                                    <span class="chat-last-message">
+                                        @if (tinCuoi.NguoiGuiID == ViewBag.CurrentUserId)
+                                        {
+                                            <span style="opacity: 0.7;">Bạn: </span>
+                                        }
+                                        @tinCuoi.NoiDung
+                                    </span>
+                                
+                                    @if (isUnread)
+                                    {
+                                        <span class="chat-badge-new"></span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="chat-last-message" style="opacity: 0.5;">👋 Bắt đầu trò chuyện</span>
+                                }
+                            </div>
                         </div>
+                    </a>
+                    <div class="chat-card-menu">
+                        <button class="chat-menu-btn" onclick="moPopupXoaChatNhanh(@user.ID, '@user.Ten')">
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                        </button>
                     </div>
-                </a>
+                </div>
+                
             }
         </div>
     }
@@ -89,7 +96,36 @@
         </div>
     }
 </div>
-
+<!-- ===== POPUP XÁC NHẬN XÓA CHAT NHANH ===== -->
+<div class="modal fade" id="xoaChatNhanhModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg rounded-4" style="background: #1E293B; color: white;">
+            <div class="modal-body text-center p-4">
+                <div class="mb-3">
+                    <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex p-3" style="background: rgba(239, 68, 68, 0.1) !important;">
+                        <span class="material-icons-outlined" style="font-size: 48px; color: #EF4444;">delete_forever</span>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2" style="color: white;">Xóa tin nhắn?</h5>
+                <p class="mb-4" style="color: rgba(255,255,255,0.7);">
+                    Toàn bộ lịch sử trò chuyện với <strong id="tenNguoiXoaChat">người này</strong> sẽ bị xóa vĩnh viễn.
+                </p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <button type="button" class="btn px-4 py-2 rounded-3" data-bs-dismiss="modal"
+                            style="background: rgba(255,255,255,0.1); color: white; border: none;">
+                        <span class="material-icons-outlined me-1" style="font-size: 16px; vertical-align: middle;">close</span>
+                        Hủy
+                    </button>
+                    <button type="button" class="btn px-4 py-2 rounded-3" onclick="xacNhanXoaChatNhanh()"
+                            style="background: #EF4444; color: white; border: none;">
+                        <span class="material-icons-outlined me-1" style="font-size: 16px; vertical-align: middle;">delete</span>
+                        Xóa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts {
     <script>
         // Tìm kiếm realtime
@@ -119,5 +155,102 @@
                 })
                 .catch(err => console.log('Auto-refresh skipped'));
         }, 15000);
+                // ===== XÓA CHAT NHANH =====
+        let nguoiNhanIdToDelete = 0;
+
+        function moPopupXoaChatNhanh(userId, tenNguoiDung) {
+            nguoiNhanIdToDelete = userId;
+            document.getElementById('tenNguoiXoaChat').innerText = tenNguoiDung;
+    
+            var modal = new bootstrap.Modal(document.getElementById('xoaChatNhanhModal'));
+            modal.show();
+        }
+
+        function xacNhanXoaChatNhanh() {
+            if (nguoiNhanIdToDelete === 0) return;
+    
+            fetch('/Chat/XoaTinNhan?nguoiNhanId=' + nguoiNhanIdToDelete, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Đóng popup
+                var modal = bootstrap.Modal.getInstance(document.getElementById('xoaChatNhanhModal'));
+                modal.hide();
+        
+                if (data.success) {
+                    // Xóa chat-card khỏi giao diện
+                    const chatCard = document.querySelector(`.chat-card-menu button[onclick*="${nguoiNhanIdToDelete}"]`)?.closest('.chat-card-wrapper');
+                    if (chatCard) {
+                        chatCard.remove();
+                    }
+            
+                    // Nếu không còn chat card nào, hiển thị thông báo trống
+                    if (document.querySelectorAll('.chat-card-wrapper').length === 0) {
+                        const container = document.querySelector('.chat-list-container');
+                        if (container) {
+                            container.innerHTML = `
+                                <div class="text-center py-5 w-100">
+                                    <div class="mb-4">
+                                        <span class="material-icons-outlined" style="font-size: 64px; color: #6D5DFC; opacity: 0.4;">chat_bubble_outline</span>
+                                    </div>
+                                    <h5 class="fw-bold" style="color: #2D1B69;">Chưa có tin nhắn nào</h5>
+                                    <p class="text-secondary">Hãy bắt đầu cuộc trò chuyện ngay!</p>
+                                </div>
+                            `;
+                        }
+                    }
+            
+                    showToast('Đã xóa lịch sử trò chuyện', 'success');
+                } else {
+                    showToast(data.message || 'Có lỗi xảy ra', 'error');
+                }
+            })
+            .catch(error => {
+                var modal = bootstrap.Modal.getInstance(document.getElementById('xoaChatNhanhModal'));
+                modal.hide();
+                showToast('Có lỗi xảy ra', 'error');
+                console.error('Lỗi:', error);
+            });
+        }
+
+        // Hàm hiển thị Toast (nếu chưa có)
+        function showToast(message, type = 'success') {
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.style.cssText = 'position:fixed; top:20px; right:20px; z-index:9999;';
+                document.body.appendChild(toastContainer);
+            }
+    
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                background: ${type === 'success' ? '#10B981' : '#EF4444'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 12px;
+                margin-bottom: 10px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideIn 0.3s ease;
+                min-width: 250px;
+            `;
+    
+            const icon = type === 'success' ? 'check_circle' : 'error_outline';
+            toast.innerHTML = `
+                <span class="material-icons-outlined">${icon}</span>
+                <span style="flex:1;">${message}</span>
+                <button onclick="this.parentElement.remove()" style="background:none;border:none;color:white;cursor:pointer;opacity:0.7;">×</button>
+            `;
+    
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
     </script>
 }

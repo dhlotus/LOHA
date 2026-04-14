@@ -48,10 +48,9 @@ namespace LOHA.Controllers
                 var user = await _context.Users.FindAsync(userId);
                 if (user != null)
                 {
-                    // Lấy tin nhắn cuối cùng (nếu có)
                     var tinCuoi = await _context.TinNhans
-                        .Where(t => (t.NguoiGuiID == currentUser.ID && t.NguoiNhanID == userId) ||
-                                   (t.NguoiGuiID == userId && t.NguoiNhanID == currentUser.ID))
+                        .Where(t => (t.NguoiGuiID == currentUser.ID && t.NguoiNhanID == userId && !t.DaXoaBoiNguoiGui) ||
+                                   (t.NguoiGuiID == userId && t.NguoiNhanID == currentUser.ID && !t.DaXoaBoiNguoiNhan))
                         .OrderByDescending(t => t.ThoiGian)
                         .FirstOrDefaultAsync();
 
@@ -122,12 +121,12 @@ namespace LOHA.Controllers
             var nguoiNhan = await _context.Users.FindAsync(userId);
             if (nguoiNhan == null)
                 return NotFound(); // Trả về lỗi 404 nếu không tìm thấy
-            
-            //Lấy lịch sử tin nhắn giữa 2 người (cả 2 chiều)
+
+            // Lấy lịch sử tin nhắn - CHỈ LẤY NHỮNG TIN CHƯA BỊ XÓA BỞI CURRENT USER
             var tinNhans = await _context.TinNhans
-                .Where(t => (t.NguoiGuiID == currentUser.ID && t.NguoiNhanID == userId) ||
-                           (t.NguoiGuiID == userId && t.NguoiNhanID == currentUser.ID))
-                .OrderBy(t => t.ThoiGian) // Cũ lên trước, mới xuống sau
+                .Where(t => (t.NguoiGuiID == currentUser.ID && t.NguoiNhanID == userId && !t.DaXoaBoiNguoiGui) ||  // Mình gửi và chưa xóa
+                            (t.NguoiGuiID == userId && t.NguoiNhanID == currentUser.ID && !t.DaXoaBoiNguoiNhan))   // Mình nhận và chưa xóa
+                .OrderBy(t => t.ThoiGian)
                 .ToListAsync();
             if (tinNhans == null)
             {
@@ -228,6 +227,63 @@ namespace LOHA.Controllers
             catch
             {
                 return Json(new { count = 0 });
+            }
+        }
+        // === XÓA TIN NHẮN 1 PHÍA ===
+        [HttpPost]  
+        public async Task<IActionResult> XoaTinNhan(int nguoiNhanId)  // ← ID của người mình muốn xóa chat
+        {
+            try
+            {
+                // ===== BƯỚC 1: KIỂM TRA ĐĂNG NHẬP =====
+                var userSession = HttpContext.Session.GetString("user");
+                // ↑ Lấy email/SĐT từ Session (đã lưu khi đăng nhập)
+
+                if (string.IsNullOrEmpty(userSession))
+                {
+                    return Json(new { success = false, message = "Vui lòng đăng nhập" });
+                }
+
+                // ===== BƯỚC 2: TÌM USER HIỆN TẠI TRONG DATABASE =====
+                var currentUser = await _context.Users
+                    .FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
+                // ↑ Tìm user có email/SĐT khớp với session
+
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy người dùng" });
+                }
+
+                // ===== BƯỚC 3: LẤY TẤT CẢ TIN NHẮN GIỮA 2 NGƯỜI =====
+                var tinNhans = await _context.TinNhans
+                    .Where(t => (t.NguoiGuiID == currentUser.ID && t.NguoiNhanID == nguoiNhanId) ||  // Mình gửi cho họ
+                               (t.NguoiGuiID == nguoiNhanId && t.NguoiNhanID == currentUser.ID))    // Họ gửi cho mình
+                    .ToListAsync();
+                // ↑ Lấy TẤT CẢ tin nhắn 2 chiều, không phân biệt ai gửi
+
+                // ===== BƯỚC 4: ĐÁNH DẤU XÓA TÙY VAI TRÒ =====
+                foreach (var tin in tinNhans)  // ← Duyệt từng tin nhắn
+                {
+                    if (tin.NguoiGuiID == currentUser.ID)  // ← Nếu mình là NGƯỜI GỬI
+                    {
+                        tin.DaXoaBoiNguoiGui = true;  // ← Đánh dấu "người gửi đã xóa"
+                    }
+                    else  // ← Ngược lại, mình là NGƯỜI NHẬN
+                    {
+                        tin.DaXoaBoiNguoiNhan = true;  // ← Đánh dấu "người nhận đã xóa"
+                    }
+                }
+
+                // ===== BƯỚC 5: LƯU THAY ĐỔI VÀO DATABASE =====
+                await _context.SaveChangesAsync();
+
+                // ===== BƯỚC 6: TRẢ VỀ KẾT QUẢ THÀNH CÔNG =====
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                // Nếu có lỗi → trả về thông báo lỗi
+                return Json(new { success = false, message = ex.Message });
             }
         }
     }

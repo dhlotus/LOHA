@@ -2404,3 +2404,109 @@ h2.fw-bold {
             margin: 0;
         }
 }
+/* ===== DROPDOWN MENU CHO CHAT ===== */
+.chat-detail-header .dropdown-menu {
+    background: #FFFFFF;
+    border: 1px solid var(--loha-border-light);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(109, 93, 252, 0.15);
+    padding: 8px;
+    min-width: 180px;
+}
+
+.chat-detail-header .dropdown-item {
+    color: var(--loha-text-primary);
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+    .chat-detail-header .dropdown-item i {
+        font-size: 18px;
+    }
+
+    .chat-detail-header .dropdown-item:hover {
+        background: rgba(109, 93, 252, 0.08);
+    }
+
+    .chat-detail-header .dropdown-item.text-danger:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #EF4444 !important;
+    }
+
+/* Responsive */
+@media (max-width: 576px) {
+    .chat-detail-header .dropdown-menu {
+        min-width: 160px;
+    }
+}
+/* ===== CHAT CARD WRAPPER - ĐỂ CHỨA NÚT 3 CHẤM ===== */
+.chat-card-wrapper {
+    position: relative;
+}
+
+/* Nút 3 chấm trên chat card */
+.chat-card-menu {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.chat-card-wrapper:hover .chat-card-menu {
+    opacity: 1;
+    visibility: visible;
+}
+
+.chat-menu-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #5E5A6E;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .chat-menu-btn:hover {
+        background: #F3F0FF;
+        color: var(--loha-primary);
+        transform: scale(1.05);
+        box-shadow: 0 6px 16px rgba(109, 93, 252, 0.15);
+    }
+
+/* Đảm bảo chat-card có padding-right đủ chỗ cho nút */
+.chat-card {
+    padding-right: 56px !important;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .chat-card-menu {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .chat-menu-btn {
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    .chat-card {
+        padding-right: 48px !important;
+    }
+}

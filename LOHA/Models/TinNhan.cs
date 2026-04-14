@@ -23,6 +23,8 @@ namespace LOHA.Models
         public virtual User? NguoiGui { get; set; } // tham chiếu đến người gửi
         [ForeignKey("NguoiNhanID")]
         public virtual User? NguoiNhan { get; set; } // tham chiếu đến người nhận
+        public bool DaXoaBoiNguoiGui { get; set; } = false;  
+        public bool DaXoaBoiNguoiNhan { get; set; } = false; 
 
     }
 }
