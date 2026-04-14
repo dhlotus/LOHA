@@ -15,11 +15,22 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <div class="container" style="max-width: 650px;">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold" style="color: #1E2A78;">
-            <i class="fa-regular fa-newspaper me-2"></i>Bảng tin
-        </h2>
-        <span class="badge bg-primary rounded-pill px-3 py-2" id="total-posts">@Model.Count bài viết</span>
+    <!-- ===== TIÊU ĐỀ BẢNG TIN NÂNG CẤP ===== -->
+    <div class="loha-feed-header">
+        <div class="loha-feed-title">
+            <div class="loha-feed-icon">
+                <i class="fa-regular fa-newspaper"></i>
+            </div>
+            <h2>Bảng tin</h2>
+            <span class="loha-feed-badge" id="total-posts">
+                <span class="badge-number">@Model.Count</span>
+                <span class="badge-text">bài mới</span>
+            </span>
+        </div>
+    
+        <div class="loha-feed-actions">
+            <!-- Dành cho nút lọc, sắp xếp (tương lai) -->
+        </div>
     </div>
 
     <div class="create-post-card">
@@ -216,22 +227,30 @@
             .then(data => {
                 if (data.html && data.html.trim() !== '') {
                     document.getElementById('posts-container').insertAdjacentHTML('beforeend', data.html);
+                
                     if (!data.hasMore) {
                         hasMore = false;
                         document.getElementById('load-more-container').style.display = 'none';
                         document.getElementById('end-message').style.display = 'block';
                     }
-                    document.getElementById('total-posts').innerText = data.totalPosts + ' bài viết';
+                
+                    // Cập nhật badge số bài viết
+                    const badgeNumber = document.querySelector('#total-posts .badge-number');
+                    if (badgeNumber) {
+                        badgeNumber.innerText = data.totalPosts;
+                    }
                 } else {
                     hasMore = false;
                     document.getElementById('load-more-container').style.display = 'none';
                     document.getElementById('end-message').style.display = 'block';
                 }
+            
                 loading = false;
                 document.getElementById('loading-spinner').style.display = 'none';
                 document.getElementById('load-more-btn').disabled = false;
             })
             .catch(error => {
+                console.error('Lỗi tải thêm bài viết:', error);
                 loading = false;
                 document.getElementById('loading-spinner').style.display = 'none';
                 document.getElementById('load-more-btn').disabled = false;

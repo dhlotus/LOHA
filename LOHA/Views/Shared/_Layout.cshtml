@@ -56,15 +56,15 @@
 
     <!-- Navbar (Desktop) -->
     <nav class="loha-navbar d-none d-lg-flex">
-        <!-- Logo bên trái - Đồng bộ với sidebar -->
+        <!-- Logo bên trái -->
         <div class="loha-nav-left">
             <span class="loha-logo">LOHA</span>
         </div>
 
-        <!-- Search bar ở giữa -->
-        <div class="flex-grow-1 d-flex justify-content-center">
-            <form action="/User/TimKiem" method="get" class="loha-search-wrapper">
-                <div class="loha-search">
+        <!-- Search Bar ở giữa -->
+        <div class="loha-search-center">
+            <form action="/User/TimKiem" method="get" class="loha-search-form">
+                <div class="loha-search-mini">
                     <i class="fa-solid fa-magnifying-glass"></i>
                     <input type="text"
                            name="tuKhoa"
@@ -72,7 +72,7 @@
                            value="@Context.Request.Query["tuKhoa"]"
                            autocomplete="off" />
                 </div>
-                <button type="submit" class="loha-search-btn">
+                <button type="submit" class="loha-search-btn-mini">
                     <i class="fa-solid fa-magnifying-glass"></i>
                     <span>Tìm kiếm</span>
                 </button>
@@ -81,22 +81,27 @@
 
         <!-- Icon điều hướng bên phải -->
         <div class="loha-nav-right">
+            <!-- Icon Thông báo -->
             <a href="/User/LoiMoiKetBan" class="loha-nav-icon text-decoration-none position-relative">
                 <i class="fa-regular fa-bell"></i>
                 <span id="notification-badge-desktop"
                       class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                      style="display: none; font-size: 10px; min-width: 18px; height: 18px; line-height: 18px; padding: 0 5px; margin-left: -8px; margin-top: 4px;">
+                      style="display: none; font-size: 10px; min-width: 18px; height: 18px; line-height: 18px; padding: 0 5px;">
                     0
                 </span>
             </a>
+        
+            <!-- Icon Tin nhắn -->
             <a href="/Chat/Index" class="loha-nav-icon text-decoration-none position-relative">
                 <i class="fa-regular fa-message"></i>
                 <span id="chat-badge-desktop"
                       class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                      style="display: none; font-size: 10px; min-width: 18px; height: 18px; line-height: 18px; padding: 0 5px; margin-left: -8px; margin-top: 4px;">
+                      style="display: none; font-size: 10px; min-width: 18px; height: 18px; line-height: 18px; padding: 0 5px;">
                     0
                 </span>
             </a>
+        
+            <!-- Icon Profile -->
             <a href="/User/Trangcanhan" class="loha-nav-icon text-decoration-none">
                 <i class="fa-regular fa-circle-user"></i>
             </a>

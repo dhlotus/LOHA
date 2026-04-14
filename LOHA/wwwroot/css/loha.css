@@ -63,11 +63,11 @@ h2.fw-bold {
 }
 /* ===== NAVBAR ===== */
 .loha-navbar {
-    height: 68px; 
-    background: rgba(255, 255, 255, 0.85); 
+    height: 64px; 
+    background: rgba(255, 255, 255, 0.9); 
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(109, 93, 252, 0.12);
+    border-bottom: 1px solid rgba(109, 93, 252, 0.08);
     padding: 0 28px;
     position: fixed;
     top: 0;
@@ -77,17 +77,21 @@ h2.fw-bold {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(109, 93, 252, 0.04); /* Shadow nhẹ tạo chiều sâu */
+    box-shadow: 0 2px 12px rgba(109, 93, 252, 0.06); 
 }
 
 
 .loha-nav-left {
-    width: 260px; 
+    width: 200px; 
     display: flex;
     align-items: center;
     padding-left: 12px;
 }
-
+.loha-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
 .loha-logo {
     font-size: 26px;
     font-weight: 700;
@@ -98,11 +102,6 @@ h2.fw-bold {
     letter-spacing: -0.5px;
     margin-left: 4px;
 }
-
-
-
-
-/* ===== SEARCH BAR NÂNG CẤP ===== */
 
 /* ===== SEARCH BAR NÂNG CẤP (CÓ NÚT TÌM KIẾM) ===== */
 .loha-search-wrapper {
@@ -1818,7 +1817,6 @@ h2.fw-bold {
 .message-sent {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 16px;
 }
 
     .message-sent .message-bubble {
@@ -1851,7 +1849,6 @@ h2.fw-bold {
 .message-received {
     display: flex;
     gap: 12px;
-    margin-bottom: 16px;
 }
 
 
@@ -2140,4 +2137,270 @@ h2.fw-bold {
         right: 0;
         border-radius: 32px 32px 0 0;
     }
+}
+/* ===== SEARCH BAR THU GỌN TRONG HEADER ===== */
+.loha-search-mini {
+    display: flex;
+    align-items: center;
+    background: #F3F0FF;
+    border-radius: 40px;
+    padding: 6px 16px;
+    width: 200px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+    margin-right: 0; 
+}
+/* ===== BỐ CỤC SEARCH BAR Ở GIỮA ===== */
+.loha-search-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loha-search-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+    .loha-search-mini:focus-within {
+        width: 280px;
+        background: #FFFFFF;
+        border-color: var(--loha-primary);
+        box-shadow: 0 4px 16px rgba(109, 93, 252, 0.15);
+    }
+
+    .loha-search-mini i {
+        color: #8A8A9E;
+        font-size: 18px;
+        margin-right: 10px;
+        transition: color 0.3s ease;
+    }
+
+    .loha-search-mini:focus-within i {
+        color: var(--loha-primary);
+    }
+
+    .loha-search-mini input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        font-family: 'Lexend', 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--loha-text-primary);
+        outline: none;
+        padding: 8px 0;
+        width: 100%;
+    }
+
+        .loha-search-mini input::placeholder {
+            color: #9CA3AF;
+            font-family: 'Lexend', 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+    /* Khi focus, placeholder mờ dần */
+    .loha-search-mini:focus-within input::placeholder {
+        opacity: 0.6;
+    }
+
+/* Responsive - Ẩn search bar trên màn hình quá nhỏ */
+@media (max-width: 1200px) {
+    .loha-search-mini {
+        width: 160px;
+    }
+
+        .loha-search-mini:focus-within {
+            width: 220px;
+        }
+}
+/* ===== TIÊU ĐỀ BẢNG TIN LOHA STYLE ===== */
+.loha-feed-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding: 14px 4px 0;
+}
+
+.loha-feed-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.loha-feed-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #F3F0FF 0%, #EDE9FF 100%);
+    border-radius: 18px;
+    box-shadow: 0 6px 16px rgba(109, 93, 252, 0.08);
+}
+
+    .loha-feed-icon i {
+        font-size: 24px;
+        color: var(--loha-primary);
+        background: var(--loha-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+.loha-feed-title h2 {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, #2D1B69 0%, #1F1147 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+
+/* Badge số bài viết - Soft Purple */
+.loha-feed-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #F3F0FF;
+    padding: 6px 16px;
+    border-radius: 40px;
+    margin-left: 8px;
+    border: 1px solid rgba(109, 93, 252, 0.12);
+    transition: all 0.25s ease;
+}
+
+    .loha-feed-badge:hover {
+        background: #EDE9FF;
+        border-color: rgba(109, 93, 252, 0.2);
+        transform: translateY(-1px);
+    }
+
+.badge-number {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--loha-primary);
+    line-height: 1;
+}
+
+.badge-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #5E5A6E;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .loha-feed-header {
+        margin-bottom: 20px;
+    }
+
+    .loha-feed-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+    }
+
+        .loha-feed-icon i {
+            font-size: 20px;
+        }
+
+    .loha-feed-title h2 {
+        font-size: 26px;
+    }
+
+    .loha-feed-badge {
+        padding: 4px 12px;
+    }
+
+    .badge-number {
+        font-size: 16px;
+    }
+
+    .badge-text {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 576px) {
+    .loha-feed-title {
+        gap: 10px;
+    }
+
+    .loha-feed-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+    }
+
+    .loha-feed-title h2 {
+        font-size: 22px;
+    }
+
+    .badge-text {
+        display: none; /* Ẩn chữ "bài mới" trên mobile nhỏ, chỉ hiện số */
+    }
+
+    .loha-feed-badge {
+        padding: 4px 10px;
+    }
+}
+
+.loha-search-btn-mini {
+    height: 48px;
+    padding: 0 20px;
+    background: var(--loha-gradient);
+    border: none;
+    border-radius: 40px;
+    color: white;
+    font-family: 'Lexend', 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(109, 93, 252, 0.2);
+    white-space: nowrap;
+    flex-shrink: 0; /* Không bị co lại */
+}
+
+    .loha-search-btn-mini i {
+        font-size: 16px;
+        color: white;
+    }
+
+    .loha-search-btn-mini:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(109, 93, 252, 0.3);
+        background: linear-gradient(135deg, #7B6DFF, #B07DFF);
+    }
+
+    .loha-search-btn-mini:active {
+        transform: translateY(0);
+        box-shadow: 0 4px 12px rgba(109, 93, 252, 0.2);
+    }
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .loha-search-btn-mini span {
+        display: none;
+    }
+
+    .loha-search-btn-mini {
+        padding: 0 16px;
+        width: 48px;
+    }
+
+        .loha-search-btn-mini i {
+            margin: 0;
+        }
 }
