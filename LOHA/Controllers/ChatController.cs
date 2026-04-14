@@ -20,6 +20,7 @@ namespace LOHA.Controllers
         // === TRANG DANH SÁCH TIN NHẮN ===
         // Hiển thị danh sách những người đã từng nhắn tin với mình
         // === TRANG DANH SÁCH TIN NHẮN ===
+        // === TRANG DANH SÁCH TIN NHẮN ===
         public async Task<IActionResult> Index()
         {
             // Lấy user hiện tại
@@ -33,62 +34,67 @@ namespace LOHA.Controllers
             if (currentUser == null)
                 return RedirectToAction("DangNhap", "User");
 
-            // ----- CÁCH 1: Lấy danh sách bạn bè (ưu tiên) -----
-            // Lấy tất cả bạn bè của user hiện tại
+            // ===== LẤY DANH SÁCH NGƯỜI CÓ TIN NHẮN CHƯA BỊ XÓA =====
+            var danhSachUser = new List<User>();
+            ViewBag.TinCuoi = new Dictionary<int, TinNhan>();
+
+            // Lấy tất cả bạn bè
             var banBeIds = await _context.KetBans
                 .Where(k => (k.NguoiGuiId == currentUser.ID || k.NguoiNhanId == currentUser.ID) && k.TrangThai == 1)
                 .Select(k => k.NguoiGuiId == currentUser.ID ? k.NguoiNhanId : k.NguoiGuiId)
                 .ToListAsync();
 
-            var danhSachUser = new List<User>();
-            ViewBag.TinCuoi = new Dictionary<int, TinNhan>();
-
             foreach (var userId in banBeIds)
             {
-                var user = await _context.Users.FindAsync(userId);
-                if (user != null)
-                {
-                    var tinCuoi = await _context.TinNhans
-                        .Where(t => (t.NguoiGuiID == currentUser.ID && t.NguoiNhanID == userId && !t.DaXoaBoiNguoiGui) ||
-                                   (t.NguoiGuiID == userId && t.NguoiNhanID == currentUser.ID && !t.DaXoaBoiNguoiNhan))
-                        .OrderByDescending(t => t.ThoiGian)
-                        .FirstOrDefaultAsync();
+                // CHỈ LẤY TIN NHẮN CHƯA BỊ XÓA BỞI CURRENT USER
+                var tinCuoi = await _context.TinNhans
+                    .Where(t => (t.NguoiGuiID == currentUser.ID && t.NguoiNhanID == userId && !t.DaXoaBoiNguoiGui) ||
+                               (t.NguoiGuiID == userId && t.NguoiNhanID == currentUser.ID && !t.DaXoaBoiNguoiNhan))
+                    .OrderByDescending(t => t.ThoiGian)
+                    .FirstOrDefaultAsync();
 
-                    if (tinCuoi != null)
-                    {
-                        ViewBag.TinCuoi[userId] = tinCuoi;
-                    }
-
-                    danhSachUser.Add(user);
-                }
-            }
-
-            // ----- CÁCH 2: Nếu không có bạn bè thì mới lấy danh sách đã nhắn -----
-            if (danhSachUser.Count == 0)
-            {
-                var danhSachNguoiNhan = await _context.TinNhans
-                    .Where(t => t.NguoiGuiID == currentUser.ID || t.NguoiNhanID == currentUser.ID)
-                    .Select(t => t.NguoiGuiID == currentUser.ID ? t.NguoiNhanID : t.NguoiGuiID)
-                    .Distinct()
-                    .ToListAsync();
-
-                foreach (var userId in danhSachNguoiNhan)
+                // CHỈ THÊM USER VÀO DANH SÁCH NẾU CÓ ÍT NHẤT 1 TIN NHẮN CHƯA XÓA
+                if (tinCuoi != null)
                 {
                     var user = await _context.Users.FindAsync(userId);
                     if (user != null)
                     {
+                        ViewBag.TinCuoi[userId] = tinCuoi;
+                        danhSachUser.Add(user);
+                    }
+                }
+            }
+
+            // Nếu không có bạn bè nào có tin nhắn, kiểm tra thêm người đã từng nhắn (không phải bạn bè)
+            if (danhSachUser.Count == 0)
+            {
+                var nguoiDaNhanIds = await _context.TinNhans
+                    .Where(t => (t.NguoiGuiID == currentUser.ID && !t.DaXoaBoiNguoiGui) ||
+                               (t.NguoiNhanID == currentUser.ID && !t.DaXoaBoiNguoiNhan))
+                    .Select(t => t.NguoiGuiID == currentUser.ID ? t.NguoiNhanID : t.NguoiGuiID)
+                    .Distinct()
+                    .ToListAsync();
+
+                foreach (var userId in nguoiDaNhanIds)
+                {
+                    // Bỏ qua nếu đã có trong danh sách
+                    if (danhSachUser.Any(u => u.ID == userId))
+                        continue;
+
+                    var user = await _context.Users.FindAsync(userId);
+                    if (user != null)
+                    {
                         var tinCuoi = await _context.TinNhans
-                            .Where(t => (t.NguoiGuiID == currentUser.ID && t.NguoiNhanID == userId) ||
-                                       (t.NguoiGuiID == userId && t.NguoiNhanID == currentUser.ID))
+                            .Where(t => (t.NguoiGuiID == currentUser.ID && t.NguoiNhanID == userId && !t.DaXoaBoiNguoiGui) ||
+                                       (t.NguoiGuiID == userId && t.NguoiNhanID == currentUser.ID && !t.DaXoaBoiNguoiNhan))
                             .OrderByDescending(t => t.ThoiGian)
                             .FirstOrDefaultAsync();
 
                         if (tinCuoi != null)
                         {
                             ViewBag.TinCuoi[userId] = tinCuoi;
+                            danhSachUser.Add(user);
                         }
-
-                        danhSachUser.Add(user);
                     }
                 }
             }
@@ -102,7 +108,7 @@ namespace LOHA.Controllers
         // === TRANG CHI TIẾT CHAT VỚI 1 NGƯỜI ===
         // Hiển thị lịch sử tin nhắn giữa mình và 1 người cụ thể
         // === TRANG CHI TIẾT CHAT VỚI 1 NGƯỜI ===
-        
+
         public async Task<IActionResult> ChatVoi(int userId) // userId là ID của người kia
         {
             // Lấy thông tin user đang đăng nhập
