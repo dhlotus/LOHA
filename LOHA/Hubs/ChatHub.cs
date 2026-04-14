@@ -69,5 +69,10 @@ namespace LOHA.Hubs
             // Xử lý khi ngắt kết nối nếu cần
             await base.OnDisconnectedAsync(exception);
         }
+        // Method để client join vào phòng chat
+        public async Task JoinPhongChat(string roomId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+        }
     }
 }

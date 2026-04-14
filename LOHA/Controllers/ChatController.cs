@@ -155,16 +155,13 @@ namespace LOHA.Controllers
         {
             try
             {
-                // Lấy user hiện tại
                 var userSession = HttpContext.Session.GetString("user");
                 if (string.IsNullOrEmpty(userSession))
                 {
                     return Json(new { success = false, message = "Vui lòng đăng nhập" });
                 }
 
-                var nguoiGui = await _context.Users
-                    .FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
-
+                var nguoiGui = await _context.Users.FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
                 if (nguoiGui == null)
                 {
                     return Json(new { success = false, message = "Không tìm thấy người dùng" });
@@ -183,24 +180,18 @@ namespace LOHA.Controllers
                 _context.TinNhans.Add(tinNhan);
                 await _context.SaveChangesAsync();
 
-                //GỬI TIN NHẮN REALTIME QUA SIGNALR
+                // Gọi Hub để gửi tin nhắn realtime
                 var chatHub = HttpContext.RequestServices.GetService<IHubContext<ChatHub>>();
-                await chatHub.Clients.All.SendAsync("NhanTinMoi", nguoiGui.ID, nguoiNhanId, noiDung, DateTime.Now);
 
-                return Json(new
-                {
-                    success = true,
-                    html = $@"
-                    <div class='d-flex justify-content-end mb-3'>
-                        <div class='bg-primary text-white p-3 rounded-3' style='max-width: 70%;'>
-                            <p class='mb-1'>{noiDung}</p>
-                            <div class='text-end'>
-                                <small class='text-white-50'>{DateTime.Now.ToString("HH:mm")}</small>
-                            </div>
-                        </div>
-                    </div>",
-                    avatarNguoiGui = string.IsNullOrEmpty(nguoiGui.Avatar) ? "/images/default.png" : nguoiGui.Avatar
-                });
+                // Tạo roomId
+                string roomId = nguoiGui.ID < nguoiNhanId
+                    ? $"chat-{nguoiGui.ID}-{nguoiNhanId}"
+                    : $"chat-{nguoiNhanId}-{nguoiGui.ID}";
+
+                // Gửi đến group
+                await chatHub.Clients.Group(roomId).SendAsync("NhanTinMoi", nguoiGui.ID, nguoiNhanId, noiDung, DateTime.Now);
+
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
