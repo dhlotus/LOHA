@@ -49,11 +49,23 @@ namespace LOHA.Controllers
                 .Include(b => b.Binhluans)
                     .ThenInclude(bl => bl.User)
                 .Include(b => b.Thichs)
-                .Where(b => friendIds.Contains(b.UserId)) // <-- CHỈ HIỆN BÀI CỦA BẠN BÈ (TRANGTHAI = 1)
+                .Where(b => friendIds.Contains(b.UserId))
                 .OrderByDescending(b => b.Ngaydang)
                 .ToList();
+            List<int> thichs = new List<int>();
+            if (!string.IsNullOrEmpty(userSession))
+            {
+                var currentUser = _context.Users.FirstOrDefault(u => u.EmailorSDT == userSession);
+                if (currentUser != null)
+                {
+                    thichs = _context.Thichs
+                        .Where(t => t.UserId == currentUser.ID)
+                        .Select(t => t.BaivietId)
+                        .ToList();
+                }
+            }
+            ViewBag.Thichs = thichs;
 
-            // ===== TRUYỀN DỮ LIỆU SANG VIEW =====
             ViewBag.CurrentUserId = currentUserId;
 
             return View(baiviets);
@@ -62,7 +74,6 @@ namespace LOHA.Controllers
         {
             return View();
         }
-        [HttpPost]
         [HttpPost]
         public IActionResult Taobaiviet(Baiviet bv, IFormFile AnhFile)
         {
@@ -247,29 +258,24 @@ namespace LOHA.Controllers
             // Kiểm tra user hiện tại đã like bài viết này chưa (cho nút like)
             // Lấy email từ session
             string? userEmail = HttpContext.Session.GetString("user");
+            List<int> thichs = new List<int>();
+
             if (!string.IsNullOrEmpty(userEmail))
             {
-                // Tìm user bằng email để lấy ID
                 var currentUser = await _context.Users
                     .FirstOrDefaultAsync(u => u.EmailorSDT == userEmail);
 
                 if (currentUser != null)
                 {
-                    // Kiểm tra user này đã like bài viết chưa
-                    ViewBag.DaThich = await _context.Thichs
-                        .AnyAsync(t => t.BaivietId == id && t.UserId == currentUser.ID);
+                    thichs = await _context.Thichs
+                        .Where(t => t.UserId == currentUser.ID)
+                        .Select(t => t.BaivietId)
+                        .ToListAsync();
                 }
-                else
-                {
-                    ViewBag.DaThich = false;
-                }
-            }
-            else
-            {
-                ViewBag.DaThich = false;
             }
 
-            // Truyền bài viết sang view
+            ViewBag.Thichs = thichs;  // ← THAY ViewBag.DaThich BẰNG ViewBag.Thichs
+
             return View(baiviet);
         }
 
