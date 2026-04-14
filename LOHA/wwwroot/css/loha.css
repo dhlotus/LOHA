@@ -27,12 +27,17 @@
 }
 
 /* ===== GLOBAL ===== */
+html {
+    overflow-y: scroll; 
+}
 body {
     background-color: var(--loha-bg);
     font-family: 'Lexend', sans-serif; /* Thay đổi font chính */
     color: var(--loha-text-primary);
     line-height: 1.6;
     font-weight: 400;
+    padding-top: 70px; /* Tạo khoảng trống cho navbar */
+    min-height: 100vh;
 }
 
 /* Title "Bảng tin" */
@@ -59,12 +64,21 @@ h2.fw-bold {
 /* ===== NAVBAR ===== */
 .loha-navbar {
     height: 70px;
-    background: white;
-    border-bottom: 1px solid var(--loha-border-light);
+    background: rgba(255, 255, 255, 0.4); /* Nền trong suốt 40% */
+    backdrop-filter: blur(12px); /* Hiệu ứng kính mờ */
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(109, 93, 252, 0.1);
     padding: 0 24px;
-    position: sticky;
+    /* QUAN TRỌNG: Chuyển sang Fixed để không chiếm không gian */
+    position: fixed;
     top: 0;
-    z-index: 1000;
+    left: 0;
+    right: 0;
+    z-index: 1050; /* Cao hơn sidebar nhưng thấp hơn modal (1050 là vừa đủ) */
+    /* Khôi phục display flex */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .loha-logo {
@@ -1464,9 +1478,10 @@ h2.fw-bold {
 /* Container chính - Floating Card */
 .chat-detail-container {
     height: calc(100vh - 140px);
-    min-height: 550px;
+    min-height: 500px;
     display: flex;
     flex-direction: column;
+    min-height: 0; 
 }
 
 .chat-detail-card {
@@ -1788,8 +1803,8 @@ h2.fw-bold {
 /* Responsive */
 @media (max-width: 768px) {
     .chat-detail-container {
-        height: calc(100vh - 100px);
-        min-height: 500px;
+        height: calc(100dvh - 120px);
+        min-height: 400px;
     }
 
     .message-sent .message-bubble,
@@ -1809,6 +1824,10 @@ h2.fw-bold {
 }
 
 @media (max-width: 576px) {
+    .chat-detail-container {
+        height: calc(100dvh - 110px);
+        min-height: 380px;
+    }
     .chat-messages {
         padding: 16px 14px;
     }
