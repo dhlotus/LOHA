@@ -4,93 +4,120 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex align-items-center mb-4">
-                <a href="javascript:history.back()" class="btn btn-outline-secondary rounded-circle me-3">
-                    <i class="fa-solid fa-arrow-left"></i>
-                </a>
-                <h2 class="fw-bold" style="color: #1E2A78;">
-                    <i class="fa-regular fa-message me-2"></i>Tin nhắn
-                </h2>
-            </div>
 
-            @if (ViewBag.DanhSachUser != null && ViewBag.DanhSachUser.Count > 0)
-            {
-                <div class="list-group">
-                    @foreach (var user in ViewBag.DanhSachUser)
-                    {
-                        var tinCuoi = ViewBag.TinCuoi != null && ViewBag.TinCuoi.ContainsKey(user.ID)
-                        ? ViewBag.TinCuoi[user.ID]
-                        : null;
-
-                        <a href="/Chat/ChatVoi?userId=@user.ID" class="list-group-item list-group-item-action border-0 shadow-sm mb-2 rounded-3">
-                            <div class="d-flex align-items-center">
-                                <!-- Avatar -->
-                                @{
-                                    string avatarUser = string.IsNullOrEmpty(user.Avatar) ? "/images/default.png" : user.Avatar;
-                                }
-                                <img src="@avatarUser"
-                                     class="rounded-circle me-3"
-                                     style="width: 50px; height: 50px; object-fit: cover;" />
-
-                                <!-- Thông tin -->
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="fw-bold mb-0">@user.Ten</h6>
-                                        @if (tinCuoi != null)
-                                        {
-                                            <small class="text-secondary">@tinCuoi.ThoiGian.ToString("HH:mm")</small>
-                                        }
-                                    </div>
-
-                                    @if (tinCuoi != null)
-                                    {
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <small class="text-secondary">
-                                                @if (tinCuoi.NguoiGuiID == ViewBag.CurrentUserId)
-                                                {
-                                                    <span>Bạn: </span>
-                                                }
-                                                @tinCuoi.NoiDung
-                                            </small>
-                                            @if (!tinCuoi.DaXem && tinCuoi.NguoiNhanID == ViewBag.CurrentUserId)
-                                            {
-                                                <span class="badge bg-danger rounded-pill">Mới</span>
-                                            }
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <small class="text-secondary">Chưa có tin nhắn</small>
-                                    }
-                                </div>
-                            </div>
-                        </a>
-                    }
-                </div>
-            }
-            else
-            {
-                <div class="text-center py-5 bg-white rounded-4 shadow-sm">
-                    <i class="fa-regular fa-message fa-4x text-secondary mb-3"></i>
-                    <h4 class="fw-bold">Chưa có tin nhắn nào</h4>
-                    <p class="text-secondary">Hãy kết bạn và bắt đầu trò chuyện</p>
-                    <a href="/User/Trangcanhan" class="btn btn-primary rounded-pill px-4 mt-3">
-                        <i class="fa-regular fa-user-group me-2"></i>Tìm bạn bè
-                    </a>
-                </div>
-            }
+<div class="container mt-3 mt-md-4">
+    <!-- Header mới của LOHA -->
+    <div class="chat-page-header">
+        <a href="javascript:history.back()" class="chat-back-btn">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div class="chat-page-title">
+            <i class="fa-regular fa-message"></i>
+            <span>Tin nhắn</span>
         </div>
     </div>
+
+    <!-- Thanh tìm kiếm nâng cấp -->
+    <div class="chat-search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="searchChatInput" placeholder="Tìm kiếm cuộc trò chuyện..." />
+    </div>
+
+    @if (ViewBag.DanhSachUser != null && ViewBag.DanhSachUser.Count > 0)
+    {
+        <div class="chat-list-container">
+            @foreach (var user in ViewBag.DanhSachUser)
+            {
+                var tinCuoi = ViewBag.TinCuoi != null && ViewBag.TinCuoi.ContainsKey(user.ID)
+                ? ViewBag.TinCuoi[user.ID]
+                : null;
+
+                string avatarUser = string.IsNullOrEmpty(user.Avatar) ? "/images/default.png" : user.Avatar;
+                bool isUnread = tinCuoi != null && !tinCuoi.DaXem && tinCuoi.NguoiNhanID == ViewBag.CurrentUserId;
+
+                <a href="/Chat/ChatVoi?userId=@user.ID" class="chat-card" data-username="@user.Ten.ToLower()">
+                    <div class="chat-avatar-wrapper">
+                        <img src="@avatarUser" class="chat-avatar" />
+                        <!-- Có thể thêm chấm trạng thái online sau -->
+                        <!-- <span class="chat-status"></span> -->
+                    </div>
+                    
+                    <div class="chat-info">
+                        <div class="chat-header">
+                            <span class="chat-name">@user.Ten</span>
+                            @if (tinCuoi != null)
+                            {
+                                <span class="chat-time">@tinCuoi.ThoiGian.ToString("HH:mm")</span>
+                            }
+                        </div>
+                        
+                        <div class="chat-preview">
+                            @if (tinCuoi != null)
+                            {
+                                <span class="chat-last-message">
+                                    @if (tinCuoi.NguoiGuiID == ViewBag.CurrentUserId)
+                                    {
+                                        <span style="opacity: 0.7;">Bạn: </span>
+                                    }
+                                    @tinCuoi.NoiDung
+                                </span>
+                                
+                                @if (isUnread)
+                                {
+                                    <span class="chat-badge-new"></span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="chat-last-message" style="opacity: 0.5;">👋 Bắt đầu trò chuyện</span>
+                            }
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5 bg-white rounded-4 shadow-sm" style="border-radius: 28px !important;">
+            <i class="fa-regular fa-message fa-4x mb-3" style="color: #6D5DFC; opacity: 0.5;"></i>
+            <h4 class="fw-bold" style="color: #2D1B69;">Chưa có tin nhắn nào</h4>
+            <p class="text-secondary">Hãy kết bạn và bắt đầu trò chuyện</p>
+            <a href="/User/Trangcanhan" class="btn px-4 py-2 mt-3" style="background: #6D5DFC; color: white; border-radius: 40px;">
+                <i class="fa-regular fa-user-group me-2"></i>Tìm bạn bè
+            </a>
+        </div>
+    }
 </div>
 
 @section Scripts {
     <script>
-        // Tự động kiểm tra tin nhắn mới và bạn bè mới mỗi 10 giây
+        // Tìm kiếm realtime
+        document.getElementById('searchChatInput').addEventListener('input', function(e) {
+            const keyword = e.target.value.toLowerCase();
+            document.querySelectorAll('.chat-card').forEach(card => {
+                const name = card.getAttribute('data-username');
+                if (name.includes(keyword)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+        
+        // Tự động reload nhẹ nhàng mỗi 15 giây (có thể thay bằng SignalR sau)
         setInterval(function() {
-            location.reload(); // Reload để cập nhật danh sách
-        }, 10000);
+            fetch(window.location.href)
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newList = doc.querySelector('.chat-list-container');
+                    if (newList) {
+                        document.querySelector('.chat-list-container').innerHTML = newList.innerHTML;
+                    }
+                })
+                .catch(err => console.log('Auto-refresh skipped'));
+        }, 15000);
     </script>
 }
