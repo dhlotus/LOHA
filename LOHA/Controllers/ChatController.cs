@@ -292,5 +292,55 @@ namespace LOHA.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+        // === API TÌM KIẾM BẠN BÈ ĐỂ CHAT ===
+        [HttpGet]
+        public async Task<IActionResult> TimKiemBanBeDeChat(string tuKhoa)
+        {
+            try
+            {
+                // Lấy user hiện tại
+                var userSession = HttpContext.Session.GetString("user");
+                if (string.IsNullOrEmpty(userSession))
+                {
+                    return Json(new { success = false, message = "Vui lòng đăng nhập" });
+                }
+
+                var currentUser = await _context.Users
+                    .FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
+
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy người dùng" });
+                }
+
+                // Lấy danh sách bạn bè (đã chấp nhận)
+                var banBeIds = await _context.KetBans
+                    .Where(k => (k.NguoiGuiId == currentUser.ID || k.NguoiNhanId == currentUser.ID) && k.TrangThai == 1)
+                    .Select(k => k.NguoiGuiId == currentUser.ID ? k.NguoiNhanId : k.NguoiGuiId)
+                    .ToListAsync();
+
+                // Tìm trong danh sách bạn bè theo từ khóa
+                var ketQua = await _context.Users
+                    .Where(u => banBeIds.Contains(u.ID) &&
+                       (string.IsNullOrEmpty(tuKhoa) ||
+                        u.Ten.ToLower().Contains(tuKhoa.ToLower()) ||      // ← Tìm trong tên (không phân biệt hoa/thường)
+                        u.EmailorSDT.ToLower().Contains(tuKhoa.ToLower()))) // ← Tìm cả trong email/SĐT
+                    .Select(u => new
+                    {
+                        id = u.ID,           // ← VIẾT THƯỜNG để khớp với JavaScript
+                        ten = u.Ten,         // ← VIẾT THƯỜNG
+                        avatar = u.Avatar ?? "/images/default.png",  // ← VIẾT THƯỜNG, có giá trị mặc định
+                        email = u.EmailorSDT // ← VIẾT THƯỜNG
+                    })
+                    .Take(10)
+                    .ToListAsync();
+
+                return Json(new { success = true, data = ketQua });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
     }
 }

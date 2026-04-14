@@ -17,10 +17,18 @@
         </div>
     </div>
 
-    <!-- Thanh tìm kiếm nâng cấp -->
+    <!-- Thanh tìm kiếm trong chat -->
     <div class="chat-search-box">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="searchChatInput" placeholder="Tìm kiếm cuộc trò chuyện..." />
+        <input type="text"
+               id="searchChatInput"
+               placeholder="Tìm kiếm bạn bè để nhắn tin..."
+               autocomplete="off" />
+    
+        <!-- Dropdown kết quả tìm kiếm -->
+        <div class="chat-search-results" id="chatSearchResults" style="display: none;">
+            <!-- Kết quả sẽ được thêm bằng JavaScript -->
+        </div>
     </div>
 
     @if (ViewBag.DanhSachUser != null && ViewBag.DanhSachUser.Count > 0)
@@ -251,6 +259,94 @@
     
             toastContainer.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
+        }
+                // ===== TÌM KIẾM BẠN BÈ ĐỂ CHAT =====
+        let searchTimeout = null;
+        const searchInput = document.getElementById('searchChatInput');
+        const searchResults = document.getElementById('chatSearchResults');
+
+        if (searchInput) {
+            // Khi gõ vào ô tìm kiếm
+            searchInput.addEventListener('input', function() {
+                const tuKhoa = this.value.trim();
+        
+                // Xóa timeout cũ
+                if (searchTimeout) {
+                    clearTimeout(searchTimeout);
+                }
+        
+                // Nếu không có từ khóa, ẩn kết quả
+                if (tuKhoa === '') {
+                    searchResults.style.display = 'none';
+                    searchResults.innerHTML = '';
+                    return;
+                }
+        
+                // Hiển thị loading
+                searchResults.style.display = 'block';
+                searchResults.innerHTML = '<div class="chat-search-result-loading">Đang tìm kiếm...</div>';
+        
+                // Delay 300ms để tránh gọi API liên tục
+                searchTimeout = setTimeout(() => {
+                    timKiemBanBe(tuKhoa);
+                }, 300);
+            });
+    
+            // Ẩn dropdown khi click ra ngoài
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.style.display = 'none';
+                }
+            });
+    
+            // Hiện lại dropdown khi focus vào input (nếu có kết quả)
+            searchInput.addEventListener('focus', function() {
+                if (this.value.trim() !== '' && searchResults.children.length > 0) {
+                    searchResults.style.display = 'block';
+                }
+            });
+        }
+
+        function timKiemBanBe(tuKhoa) {
+            fetch(`/Chat/TimKiemBanBeDeChat?tuKhoa=${encodeURIComponent(tuKhoa)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        hienThiKetQuaTimKiem(data.data);
+                    } else {
+                        searchResults.innerHTML = `<div class="chat-search-result-empty">${data.message || 'Có lỗi xảy ra'}</div>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi tìm kiếm:', error);
+                    searchResults.innerHTML = '<div class="chat-search-result-empty">Có lỗi xảy ra</div>';
+                });
+        }
+
+        function hienThiKetQuaTimKiem(users) {
+            if (!users || users.length === 0) {
+                searchResults.innerHTML = '<div class="chat-search-result-empty">Không tìm thấy bạn bè nào</div>';
+                return;
+            }
+    
+            let html = '';
+            users.forEach(user => {
+                // Dùng đúng tên trường từ API (viết thường)
+                const avatar = user.avatar || '/images/default.png';
+                const ten = user.ten || 'Người dùng';
+                const id = user.id;
+        
+                html += `
+                    <a href="/Chat/ChatVoi?userId=${id}" class="chat-search-result-item">
+                        <img src="${avatar}" class="chat-search-result-avatar" alt="${ten}" />
+                        <div class="chat-search-result-info">
+                            <div class="chat-search-result-name">${ten}</div>
+                        </div>
+                    </a>
+                `;
+            });
+    
+            searchResults.innerHTML = html;
         }
     </script>
 }
