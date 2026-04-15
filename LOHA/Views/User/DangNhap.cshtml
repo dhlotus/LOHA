@@ -32,12 +32,19 @@
         </div>
     }
     <div class="input-group">
-        <input asp-for="EmailorSDT" class="login-input" type="text" placeholder="Số di động, tên người dùng hoặc email" />
-        <span asp-validation-for="EmailorSDT" class="text-danger small"></span>
+        <div class="email-wrapper">
+            <input asp-for="EmailorSDT" class="login-input" type="text" placeholder="Số di động, tên người dùng hoặc email" />
+            <span asp-validation-for="EmailorSDT" class="text-danger small"></span>
+        </div>
     </div>
 
     <div class="input-group">
-        <input asp-for="Matkhau" class="login-input" type="password" placeholder="Mật khẩu" id="passwordInput" />
+        <div class="password-wrapper">
+            <input asp-for="Matkhau" class="login-input" type="password" placeholder="Mật khẩu" id="passwordInput" />
+            <button type="button" class="toggle-password-btn" onclick="togglePassword()">
+                <i class="fa-regular fa-eye" id="togglePasswordIcon"></i>
+            </button>
+        </div>
         <span asp-validation-for="Matkhau" class="text-danger small"></span>
     </div>
     @if (!ViewData.ModelState.IsValid)
@@ -119,4 +126,19 @@
             }, 300);
         }
     }, 3000);
+        // Toggle hiển thị/ẩn mật khẩu
+    function togglePassword() {
+        var passwordInput = document.getElementById('passwordInput');
+        var icon = document.getElementById('togglePasswordIcon');
+    
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
 </script>

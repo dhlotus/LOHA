@@ -274,7 +274,35 @@
     transition: all 0.2s ease;
     margin-top: 8px;
 }
+.password-wrapper, .email-wrapper {
+    position: relative;
+    width: 100%;
+}
 
+    .password-wrapper .login-input {
+        padding-right: 45px;
+    }
+
+.toggle-password-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #8e8e8e;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+    .toggle-password-btn:hover {
+        color: #6C63FF;
+    }
     .login-btn.active {
         background: #0866FF;
     }
