@@ -1,4 +1,4 @@
-﻿<!--BÙI ĐỨC HÀ - LOTUS->
+﻿<!-- BÙI ĐỨC HÀ - LOTUS -->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -280,43 +280,6 @@
         }
         })
         .catch(error => console.error('Lỗi đếm tin nhắn:', error));
-        }
-
-
-        // Cập nhật badge mobile cho tin nhắn
-        function demTinNhanChuaDoc() {
-        fetch('/Chat/DemTinNhanChuaDoc')
-        .then(response => response.json())
-        .then(data => {
-        var badgeMobile = document.getElementById('mobile-chat-badge');
-        if (badgeMobile) {
-        if (data.count > 0) {
-        badgeMobile.style.display = 'inline-block';
-        badgeMobile.innerText = data.count > 99 ? '99+' : data.count;
-        } else {
-        badgeMobile.style.display = 'none';
-        }
-        }
-        })
-        .catch(error => console.error('Lỗi đếm tin nhắn:', error));
-        }
-
-        // Cập nhật badge mobile cho lời mời
-        function capNhatThongBao() {
-        fetch('/User/DemLoiMoiKetBan')
-        .then(response => response.json())
-        .then(data => {
-        var badgeMobile = document.getElementById('mobile-notification-badge');
-        if (badgeMobile) {
-        if (data.count > 0) {
-        badgeMobile.style.display = 'inline-block';
-        badgeMobile.innerText = data.count > 99 ? '99+' : data.count;
-        } else {
-        badgeMobile.style.display = 'none';
-        }
-        }
-        })
-        .catch(error => console.error('Lỗi khi lấy thông báo:', error));
         }
 
         // Gọi khi load trang

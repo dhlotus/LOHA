@@ -51,59 +51,74 @@
                 }
                 else
                 {
-                    <div class="row g-4">
+                    <div class="row justify-content-center g-4">
                         @foreach (var item in ViewBag.KetQua)
                         {
                             var user = item.User;
-                            <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-                                <!-- Click vào toàn bộ card để xem trang cá nhân -->
-                                <div class="card h-100 border-0 custom-loha-card"
-                                     style="cursor: pointer; border-radius: 20px; box-shadow: 0 8px 30px rgba(109, 93, 252, 0.06); border: 1px solid var(--loha-border-light); transition: all 0.25s ease;"
+                            <div class="col-12 col-xl-10">
+                                <div class="card border-0 custom-card-horizontal h-100"
+                                     style="cursor: pointer;"
                                      onclick="window.location.href='/User/Trangcanhan?id=@user.ID'">
-                
-                                    <div class="card-body p-3 p-md-4 d-flex flex-column">
-                                        <div class="d-flex flex-column align-items-center text-center flex-grow-1">
+                                    <div class="card-body p-0">
+                                        <div class="row g-0">
                         
-                                            <!-- Avatar với viền gradient LOHA -->
-                                            <div class="position-relative d-inline-block mb-3">
-                                                <div style="width: 100px; height: 100px; border-radius: 50%; padding: 3px; background: linear-gradient(135deg, #6D5DFC, #FF6B8A);">
+                                            <!-- AVATAR -->
+                                            <div class="col-auto p-2 p-md-3">
+                                                <div class="avatar-container" onclick="event.stopPropagation()">
                                                     <img src="@(string.IsNullOrEmpty(user.Avatar) ? "/images/default.png" : user.Avatar)"
-                                                         class="rounded-circle"
-                                                         style="width: 100%; height: 100%; object-fit: cover; border: 2px solid white;" />
+                                                         alt="@user.Ten" class="rounded-circle" />
                                                 </div>
                                             </div>
-                                            <h5 class="fw-bold mb-2" style="color: var(--loha-text-primary);">@user.Ten</h5>
-                        
-                                        </div>
-                    
-                                        <!-- Nút hành động - KHÔNG bị click lan sang card -->
-                                        <div class="mt-3 w-100" onclick="event.stopPropagation()">
-                                            <div class="d-flex gap-2">
-                                                @if (item.DaLaBanBe)
-                                                {
-                                                    <a href="/Chat/ChatVoi?userId=@user.ID"
-                                                           class="btn btn-primary flex-fill rounded-pill"
-                                                           style="background: var(--loha-primary); border: none;">
-                                                        <i class="fa-regular fa-message me-1"></i>Nhắn tin
-                                                    </a>
-                                                }
-                                                else if (item.DaGuiLoiMoi)
-                                                {
-                                                    <button class="btn flex-fill rounded-pill" disabled
-                                                            style="background: #F5F5F5; color: #8E8E8E; border: none;">
-                                                        <i class="fa-regular fa-clock me-1"></i>Đã gửi
-                                                    </button>
-                                                }
-                                                else
-                                                {
-                                                    <button onclick="guiLoiMoiKetBan(@user.ID)"
-                                                            class="btn btn-primary flex-fill rounded-pill"
-                                                            id="btnTimKiem-@user.ID"
-                                                            style="background: var(--loha-primary); border: none;">
-                                                        <i class="fa-regular fa-user-plus me-1"></i>Kết bạn
-                                                    </button>
-                                                }
+
+                                            <!-- THÔNG TIN -->
+                                            <div class="col p-2 ps-0 ps-md-2 d-flex flex-column justify-content-center">
+                                                <h5 class="user-name">@user.Ten</h5>
+                                                @* Bio - có thể thêm sau khi có dữ liệu thật *@
+                                                @* <p class="user-bio">Đam mê lập trình và kết nối cộng đồng LOHA...</p> *@
                                             </div>
+
+                                            <!-- CỘT 3: NÚT HÀNH ĐỘNG -->
+                                            <div class="col-12 col-md-auto p-2 p-md-3 border-start-md">
+                                                <div class="d-flex flex-row flex-md-column gap-2 justify-content-center"
+                                                     onclick="event.stopPropagation()">
+        
+                                                    @if (item.DaLaBanBe)
+                                                    {
+                                                        <a href="/Chat/ChatVoi?userId=@user.ID"
+                                                               class="btn btn-lo-primary rounded-pill">
+                                                            <span class="btn-text">
+                                                                <span class="material-icons-outlined me-2" style="font-size: 18px; vertical-align: middle;">send</span>
+                                                                Nhắn tin
+                                                            </span>
+                                                        </a>
+                                                    }
+                                                    else if (item.DaGuiLoiMoi)
+                                                    {
+                                                        <button class="btn-lo-disabled rounded-pill" disabled>
+                                                            <span class="material-icons-outlined me-2" style="font-size: 18px; vertical-align: middle;">schedule</span>
+                                                            Đã gửi
+                                                        </button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button onclick="guiLoiMoiKetBan(@user.ID, this)"
+                                                                class="btn btn-lo-primary rounded-pill"
+                                                                id="btnTimKiem-@user.ID">
+                                                            <span class="btn-text">
+                                                                <span class="material-icons-outlined me-2" style="font-size: 18px; vertical-align: middle;">person_add</span>
+                                                                Kết bạn
+                                                            </span>
+                                                        </button>
+                                                    }
+        
+                                                    <a href="/User/Trangcanhan?id=@user.ID"
+                                                           class="btn btn-lo-outline rounded-pill">
+                                                        <span class="material-icons-outlined me-2" style="font-size: 18px; vertical-align: middle;">person</span>
+                                                        Hồ sơ
+                                                    </a>
+                                                </div>
+                                            </div>
+                        
                                         </div>
                                     </div>
                                 </div>
@@ -116,218 +131,381 @@
     </div>
 </div>
 
-<!-- Style tối thiểu (bổ sung cho Bootstrap) -->
 <style>
-    /* Ẩn mobile header mặc định trên trang tìm kiếm */
+    /* ===== BIẾN MÀU LOHA ===== */
+    :root {
+        --loha-primary: #6D5DFC;
+        --loha-primary-hover: #7B6DFF;
+        --loha-secondary: #F3F0FF;
+        --loha-text-dark: #2D1B69;
+        --loha-text-muted: #8E8E9E;
+        --loha-border-light: #E9E7F5;
+        --loha-berry: #E84A7A; /* Màu đỏ berry cho nút đăng xuất */
+    }
+
+    /* ===== ẨN MOBILE HEADER ===== */
     body .mobile-header {
         display: none;
     }
 
-    /* Hiệu ứng hover cho card */
-    .hover-shadow {
-        transition: all 0.2s ease-in-out;
-    }
-
-        .hover-shadow:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
-        }
-
-    /* Transition cho các nút */
-    .transition {
-        transition: all 0.2s ease-in-out;
-    }
-
-    /* Sticky header tìm kiếm */
+    /* ===== SEARCH HEADER (MOBILE) ===== */
     .search-header {
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
 
-    /* Đảm bảo nút tròn không bị méo */
-    .btn-outline-secondary.rounded-circle {
-        width: 42px;
-        height: 42px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-    }
-
-    /* Responsive avatar trên mobile */
-    @@media (max-width: 576px) {
-        .rounded-circle.mb-3 {
-            width: 80px !important;
-            height: 80px !important;
-        }
-
-        .card-body {
-            padding: 1rem !important;
-        }
-
-        .btn {
-            font-size: 0.85rem !important;
-            padding: 0.5rem 0.75rem !important;
-        }
-
-        .btn-outline-secondary.rounded-circle {
-            width: 38px !important;
-            height: 38px !important;
-        }
-    }
-
-    /* Desktop */
-    @@media (min-width: 992px) {
-        .rounded-circle.mb-3 {
-            width: 120px !important;
-            height: 120px !important;
-        }
-    }
-    /* ===== RESPONSIVE CHO CARD TÌM KIẾM ===== */
-    .custom-loha-card {
-        border-radius: 20px !important;
+    /* ===== CARD NGANG LOHA ===== */
+    .custom-card-horizontal {
+        border-radius: 24px !important;
+        background: #ffffff;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease !important;
         box-shadow: 0 8px 30px rgba(109, 93, 252, 0.06) !important;
-        transition: all 0.25s ease !important;
         border: 1px solid var(--loha-border-light) !important;
+        padding: 8px 12px !important;
     }
 
-        .custom-loha-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 35px rgba(109, 93, 252, 0.12) !important;
-        }
-
-    /* Responsive avatar */
-    @@media (max-width: 576px) {
-        .custom-loha-card .position-relative div[style*="width: 100px"] {
-            width: 80px !important;
-            height: 80px !important;
-        }
-    }
-
-    @@media (min-width: 992px) {
-        .custom-loha-card .position-relative div[style*="width: 100px"] {
-            width: 120px !important;
-            height: 120px !important;
-        }
-    }
-    /* ===== HIỆU ỨNG HOVER CHO CARD ===== */
-    .custom-loha-card {
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    }
-
-        .custom-loha-card:hover {
-            transform: translateY(-5px) !important;
-            box-shadow: 0 20px 40px rgba(109, 93, 252, 0.12) !important;
+        .custom-card-horizontal:hover {
+            transform: translateY(-4px) !important; /* Nổi lên khi hover */
+            box-shadow: 0 25px 45px rgba(109, 93, 252, 0.15) !important;
             border-color: var(--loha-primary) !important;
         }
 
-    /* Nút Nhắn tin / Kết bạn hover */
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #7B6DFF, #B07DFF) !important;
-        transform: scale(1.02);
+    /* ===== AVATAR ===== */
+    .avatar-container {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    /* Responsive avatar */
-    @@media (max-width: 576px) {
-        .custom-loha-card div[style*="width: 100px"] {
-            width: 80px !important;
-            height: 80px !important;
+        .avatar-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: 0 6px 15px rgba(109, 93, 252, 0.12);
+            transition: all 0.25s ease;
         }
-    
-        .custom-loha-card .card-body {
-            padding: 1rem !important;
+
+    .custom-card-horizontal:hover .avatar-container img {
+        box-shadow: 0 8px 20px rgba(109, 93, 252, 0.18);
+    }
+
+    /* ===== TÊN NGƯỜI DÙNG ===== */
+    .user-name {
+        color: var(--loha-text-dark);
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    /* ===== TAG (NẾU CÓ DÙNG SAU) ===== */
+    .badge-loha {
+        background: var(--loha-secondary);
+        color: var(--loha-primary);
+        padding: 5px 12px;
+        border-radius: 30px;
+        font-size: 11px;
+        font-weight: 500;
+        border: none;
+    }
+
+    /* ===== BIO - MỜ HƠN, GIỚI HẠN 1 DÒNG ===== */
+    .user-bio {
+        color: var(--loha-text-muted) !important;
+        font-size: 12px !important;
+        font-weight: 400;
+        margin-bottom: 0;
+        max-width: 250px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* ===== NÚT CHÍNH (NHẮN TIN/KẾT BẠN) - GRADIENT LOHA ===== */
+    .btn-lo-primary {
+        background: linear-gradient(135deg, #6D5DFC, #A86DFC) !important;
+        color: white !important;
+        border: none !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        padding: 10px 20px !important;
+        transition: all 0.25s ease !important;
+        box-shadow: 0 6px 18px rgba(109, 93, 252, 0.3) !important;
+        min-width: 130px;
+    }
+
+        .btn-lo-primary:hover {
+            background: linear-gradient(135deg, #7B6DFF, #B07DFF) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 12px 25px rgba(109, 93, 252, 0.4) !important;
         }
-    
-        .custom-loha-card h5 {
-            font-size: 1rem !important;
+
+        .btn-lo-primary:disabled {
+            opacity: 0.7;
+            transform: none;
+            box-shadow: 0 4px 12px rgba(109, 93, 252, 0.2) !important;
+        }
+
+    /* ===== NÚT PHỤ (HỒ SƠ) - CHỈ VIỀN ===== */
+    .btn-lo-outline {
+        background: transparent !important;
+        color: var(--loha-primary) !important;
+        border: 1.5px solid var(--loha-border-light) !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        padding: 10px 20px !important;
+        transition: all 0.25s ease !important;
+        min-width: 130px;
+    }
+
+        .btn-lo-outline:hover {
+            background: var(--loha-secondary) !important;
+            border-color: var(--loha-primary) !important;
+            transform: translateY(-2px) !important;
+        }
+
+    /* ===== NÚT TRẠNG THÁI (ĐÃ GỬI) ===== */
+    .btn-lo-disabled {
+        background: #F5F5F5 !important;
+        color: #A0A0A0 !important;
+        border: none !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        padding: 10px 20px !important;
+        min-width: 130px;
+        cursor: default;
+    }
+
+    /* ===== LOADING SPINNER TRONG NÚT ===== */
+    .btn-loading {
+        position: relative;
+        pointer-events: none;
+    }
+
+        .btn-loading .btn-text {
+            visibility: hidden;
+        }
+
+        .btn-loading::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
         }
     }
 
-    @@media (min-width: 992px) {
-        .custom-loha-card div[style*="width: 100px"] {
-            width: 110px !important;
-            height: 110px !important;
+    /* ===== ĐƯỜNG KẺ PHÂN CÁCH (DESKTOP) ===== */
+    @@media (min-width: 768px) {
+        .border-start-md {
+            border-left: 1px solid #F0F0F5 !important;
         }
+    }
+
+    /* ===== CĂN GIỮA DỌC ===== */
+    .custom-card-horizontal .row {
+        align-items: center !important;
+    }
+
+    /* ===== HEADER - SEARCH BAR GIỚI HẠN ĐỘ RỘNG ===== */
+    .loha-search-wrapper {
+        max-width: 500px !important;
+    }
+
+    /* ===== SIDEBAR - NÚT ĐĂNG XUẤT MÀU BERRY ===== */
+    .loha-menu-item.text-danger {
+        color: var(--loha-berry) !important;
+    }
+
+        .loha-menu-item.text-danger i {
+            color: var(--loha-berry) !important;
+        }
+
+        .loha-menu-item.text-danger:hover {
+            background: rgba(232, 74, 122, 0.08) !important;
+            color: var(--loha-berry) !important;
+        }
+
+    /* ===== RESPONSIVE ===== */
+    @@media (max-width: 767px) {
+        .avatar-container {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .user-name {
+            font-size: 1rem;
+        }
+        
+        .user-bio {
+            max-width: 180px;
+        }
+        
+        .btn-lo-primary, .btn-lo-outline, .btn-lo-disabled {
+            font-size: 13px !important;
+            padding: 8px 14px !important;
+            min-width: 100px !important;
+        }
+        
+        .container.py-4 {
+            padding-left: 12px !important;
+            padding-right: 12px !important;
+        }
+        
+        .custom-card-horizontal {
+            padding: 6px 8px !important;
+        }
+    }
+
+    /* Mobile rất nhỏ: chuyển card về dọc */
+    @@media (max-width: 480px) {
+        .custom-card-horizontal .row {
+            flex-direction: column !important;
+            text-align: center;
+        }
+        
+        .custom-card-horizontal .col-auto {
+            margin-bottom: 10px;
+        }
+        
+        .custom-card-horizontal .col {
+            text-align: center;
+            padding-left: 0 !important;
+        }
+        
+        .border-start-md {
+            border-left: none !important;
+            border-top: 1px solid #F0F0F5;
+            padding-top: 15px;
+            margin-top: 5px;
+        }
+        
+        .user-bio {
+            margin: 0 auto;
+        }
+        
+        .btn-lo-primary, .btn-lo-outline, .btn-lo-disabled {
+            min-width: 140px !important;
+        }
+    }
+    /* ===== GOOGLE MATERIAL ICONS - CĂN CHỈNH ===== */
+    .material-icons-outlined {
+        font-size: 18px;
+        vertical-align: middle;
+        line-height: 1;
+    }
+
+    /* Trong nút, icon căn giữa với text */
+    .btn .material-icons-outlined {
+        margin-top: -2px;
     }
 </style>
 
 @section Scripts {
     <script>
-            function guiLoiMoiKetBan(nguoiNhanId) {
-                fetch('/User/GuiLoiMoiKetBan', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'nguoiNhanId=' + nguoiNhanId
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        var btn = document.getElementById('btnTimKiem-' + nguoiNhanId);
-                        // Thay nút "Kết bạn" thành "Đã gửi" (màu xám)
-                        btn.outerHTML = '<button class="btn flex-fill rounded-pill" disabled style="background: #F5F5F5; color: #8E8E8E; border: none;">' +
-                                        '<i class="fa-regular fa-clock me-1"></i>Đã gửi</button>';
-                    } else {
-                        showToast(data.message || 'Có lỗi xảy ra', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showToast('Có lỗi xảy ra', 'error');
-                });
+        // ===== TOAST NOTIFICATION =====
+        function showToast(message, type = 'success') {
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.style.cssText = 'position:fixed; top:20px; right:20px; z-index:9999;';
+                document.body.appendChild(toastContainer);
             }
-            // Kiểm tra form trước khi submit
-        function kiemTraForm() {
-            var tuKhoa = document.getElementById('searchInput').value.trim();
-            if (tuKhoa === '') {
-                // Nếu không có từ khóa, focus lại vào input
-                document.getElementById('searchInput').focus();
-                return false; // Ngăn không submit
-            }
-            return true; // Cho phép submit
+            
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                background: ${type === 'success' ? '#10B981' : '#EF4444'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 12px;
+                margin-bottom: 10px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideIn 0.3s ease;
+                min-width: 250px;
+            `;
+            
+            const icon = type === 'success' ? 'check_circle' : 'error_outline';
+            toast.innerHTML = `
+                <span class="material-icons-outlined">${icon}</span>
+                <span style="flex:1;">${message}</span>
+                <button onclick="this.parentElement.remove()" style="background:none;border:none;color:white;cursor:pointer;opacity:0.7;font-size:18px;">×</button>
+            `;
+            
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
 
-        // Xử lý khi nhấn Enter (phòng trường hợp)
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault(); // Ngăn hành vi mặc định
-                var tuKhoa = this.value.trim();
-                if (tuKhoa !== '') {
-                    document.getElementById('searchForm').submit();
-                }
-            }
-        });
+        // Thêm animation
+        const style = document.createElement('style');
+        style.textContent = `@@keyframes slideIn { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }`;
+        document.head.appendChild(style);
 
-        // Focus vào input khi load trang
+        // ===== GỬI LỜI MỜI KẾT BẠN =====
+        function guiLoiMoiKetBan(nguoiNhanId, btnElement) {
+            btnElement.classList.add('btn-loading');
+            btnElement.disabled = true;
+    
+            fetch('/User/GuiLoiMoiKetBan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'nguoiNhanId=' + nguoiNhanId
+            })
+            .then(response => response.json())
+            .then(data => {
+                btnElement.classList.remove('btn-loading');
+                btnElement.disabled = false;
+        
+                if (data.success) {
+                    btnElement.outerHTML = '<button class="btn-lo-disabled rounded-pill" disabled>' +
+                                           '<span class="material-icons-outlined me-2" style="font-size: 18px; vertical-align: middle;">schedule</span>' +
+                                           'Đã gửi</button>';
+                } else {
+                    showToast(data.message || 'Có lỗi xảy ra', 'error');
+                }
+            })
+            .catch(error => {
+                btnElement.classList.remove('btn-loading');
+                btnElement.disabled = false;
+                console.error('Error:', error);
+                showToast('Có lỗi xảy ra', 'error');
+            });
+        }
+
+        // ===== XỬ LÝ FORM TÌM KIẾM =====
         document.addEventListener('DOMContentLoaded', function() {
             var searchInput = document.getElementById('searchInput');
             if (searchInput) {
                 searchInput.focus();
-                // Di chuyển con trỏ đến cuối nếu có giá trị
                 if (searchInput.value) {
                     searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
                 }
+                
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (this.value.trim() !== '') {
+                            document.getElementById('searchForm').submit();
+                        }
+                    }
+                });
             }
         });
-        // hiệu ứng loading khi submit
-                document.getElementById('searchForm').addEventListener('submit', function() {
-            var submitBtn = this.querySelector('button[type="submit"]');
-            if (!submitBtn) return; // Không có nút submit trong form này
-
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang tìm...';
-            submitBtn.disabled = true;
-        });
-
-        $(document).ready(function() {
-            // Hiệu ứng fade in cho kết quả
-            $('.col-12, .col-sm-6').hide().fadeIn(300);
-
-            // Animation cho card khi hover (nếu muốn)
-            $('.card').hover(
-                function() { $(this).addClass('shadow-lg'); },
-                function() { $(this).removeClass('shadow-lg'); }
-            );
-        });
-        $('.col-12, .col-sm-6').css('opacity', 0).animate({opacity: 1}, 300);
     </script>
 }
