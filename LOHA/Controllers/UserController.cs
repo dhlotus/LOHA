@@ -29,7 +29,6 @@ namespace LOHA.Controllers // nhóm chứa các class
             if (user.Matkhau != XacNhanMatKhau)
             {
                 ModelState.AddModelError("Matkhau", "Mật khẩu xác nhận không khớp");
-                return View(user);
             }
 
             if (ModelState.IsValid)
