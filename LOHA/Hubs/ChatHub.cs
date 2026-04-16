@@ -74,5 +74,10 @@ namespace LOHA.Hubs
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
         }
+        // Gửi sự kiện cập nhật danh sách chat cho người nhận
+        public async Task CapNhatDanhSachChat(int nguoiNhanId)
+        {
+            await Clients.User(nguoiNhanId.ToString()).SendAsync("CapNhatDanhSachChat");
+        }
     }
 }

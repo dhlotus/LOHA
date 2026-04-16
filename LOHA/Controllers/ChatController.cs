@@ -195,7 +195,8 @@ namespace LOHA.Controllers
 
                 // Gửi đến group
                 await chatHub.Clients.Group(roomId).SendAsync("NhanTinMoi", nguoiGui.ID, nguoiNhanId, noiDung, DateTime.Now);
-
+                // Gửi sự kiện cập nhật danh sách chat cho người nhận
+                await chatHub.Clients.User(nguoiNhanId.ToString()).SendAsync("CapNhatDanhSachChat");
                 return Json(new { success = true });
             }
             catch (Exception ex)
@@ -209,26 +210,24 @@ namespace LOHA.Controllers
         {
             try
             {
-                // Lấy user hiện tại
                 var userSession = HttpContext.Session.GetString("user");
                 if (string.IsNullOrEmpty(userSession))
-                {
                     return Json(new { count = 0 });
-                }
 
                 var currentUser = await _context.Users
                     .FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
 
                 if (currentUser == null)
-                {
                     return Json(new { count = 0 });
-                }
 
-                // Đếm tin nhắn chưa đọc
-                var count = await _context.TinNhans
-                    .CountAsync(t => t.NguoiNhanID == currentUser.ID && !t.DaXem);
+                // Đếm số NGƯỜI có tin nhắn chưa đọc (mỗi người chỉ tính 1)
+                var soNguoiNhanTinMoi = await _context.TinNhans
+                    .Where(t => t.NguoiNhanID == currentUser.ID && !t.DaXem && !t.DaXoaBoiNguoiNhan)
+                    .Select(t => t.NguoiGuiID)
+                    .Distinct()
+                    .CountAsync();
 
-                return Json(new { count = count });
+                return Json(new { count = soNguoiNhanTinMoi });
             }
             catch
             {
@@ -236,7 +235,7 @@ namespace LOHA.Controllers
             }
         }
         // === XÓA TIN NHẮN 1 PHÍA ===
-        [HttpPost]  
+        [HttpPost]
         public async Task<IActionResult> XoaTinNhan(int nguoiNhanId)  // ← ID của người mình muốn xóa chat
         {
             try
@@ -341,6 +340,52 @@ namespace LOHA.Controllers
             {
                 return Json(new { success = false, message = ex.Message });
             }
+        }
+        [HttpGet]
+        public async Task<IActionResult> LoadDanhSachChat()
+        {
+            var userSession = HttpContext.Session.GetString("user");
+            if (string.IsNullOrEmpty(userSession))
+                return Unauthorized();
+
+            var currentUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
+
+            if (currentUser == null)
+                return Unauthorized();
+
+            // Lấy danh sách người có tin nhắn chưa xóa (giống action Index)
+            var danhSachUser = new List<User>();
+            ViewBag.TinCuoi = new Dictionary<int, TinNhan>();
+
+            var banBeIds = await _context.KetBans
+                .Where(k => (k.NguoiGuiId == currentUser.ID || k.NguoiNhanId == currentUser.ID) && k.TrangThai == 1)
+                .Select(k => k.NguoiGuiId == currentUser.ID ? k.NguoiNhanId : k.NguoiGuiId)
+                .ToListAsync();
+
+            foreach (var userId in banBeIds)
+            {
+                var tinCuoi = await _context.TinNhans
+                    .Where(t => (t.NguoiGuiID == currentUser.ID && t.NguoiNhanID == userId && !t.DaXoaBoiNguoiGui) ||
+                               (t.NguoiGuiID == userId && t.NguoiNhanID == currentUser.ID && !t.DaXoaBoiNguoiNhan))
+                    .OrderByDescending(t => t.ThoiGian)
+                    .FirstOrDefaultAsync();
+
+                if (tinCuoi != null)
+                {
+                    var user = await _context.Users.FindAsync(userId);
+                    if (user != null)
+                    {
+                        ViewBag.TinCuoi[userId] = tinCuoi;
+                        danhSachUser.Add(user);
+                    }
+                }
+            }
+
+            ViewBag.DanhSachUser = danhSachUser;
+            ViewBag.CurrentUserId = currentUser.ID;
+
+            return PartialView("_ChatListPartial", danhSachUser);
         }
     }
 }

@@ -348,5 +348,39 @@
     
             searchResults.innerHTML = html;
         }
+                // ===== SIGNALR CẬP NHẬT DANH SÁCH CHAT REALTIME =====
+        var connection = null;
+        var currentUserId = @ViewBag.CurrentUserId;
+
+        function ketNoiSignalRChoDanhSach() {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("/chathub?userId=" + currentUserId)
+                .withAutomaticReconnect()
+                .build();
+
+            // Lắng nghe sự kiện cập nhật danh sách chat
+            connection.on("CapNhatDanhSachChat", function() {
+                // Reload danh sách chat bằng AJAX
+                taiLaiDanhSachChat();
+            });
+
+            connection.start().catch(err => console.error('SignalR lỗi:', err));
+        }
+
+        function taiLaiDanhSachChat() {
+            fetch('/Chat/LoadDanhSachChat')
+                .then(response => response.text())
+                .then(html => {
+                    document.querySelector('.chat-list-container').innerHTML = html;
+                    // Cập nhật lại badge
+                    demTinNhanChuaDoc();
+                })
+                .catch(err => console.error('Lỗi tải danh sách:', err));
+        }
+
+        // Gọi khi trang load
+        document.addEventListener('DOMContentLoaded', function() {
+            ketNoiSignalRChoDanhSach();
+        });
     </script>
 }
