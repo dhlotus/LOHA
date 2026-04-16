@@ -64,7 +64,7 @@ h2.fw-bold {
 /* ===== NAVBAR ===== */
 .loha-navbar {
     height: 64px; 
-    background: rgba(255, 255, 255, 0.9); 
+    background: rgba(255, 255, 255, 0.7); 
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid rgba(109, 93, 252, 0.08);
@@ -1599,41 +1599,6 @@ h2.fw-bold {
     border-bottom: 1px solid rgba(109, 93, 252, 0.1);
 }
 
-.chat-back-btn {
-    text-decoration: none;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.02);
-    color: #6D5DFC;
-    margin-right: 16px;
-    transition: all 0.2s;
-}
-
-    .chat-back-btn:hover {
-        background: #6D5DFC;
-        color: white;
-        transform: translateX(-2px);
-    }
-
-.chat-page-title {
-    font-size: 28px;
-    font-weight: 700;
-    color: #2D1B69;
-    letter-spacing: -0.5px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-    .chat-page-title i {
-        color: #6D5DFC;
-        font-size: 28px;
-    }
 
 /* Thanh tìm kiếm trong chat (nâng cấp) */
 .chat-search-box {
@@ -1684,9 +1649,6 @@ h2.fw-bold {
         font-size: 15px;
     }
 
-    .chat-page-title {
-        font-size: 24px;
-    }
 }
 /* ===== TRANG CHI TIẾT CHAT - PHONG CÁCH LOHA ===== */
 
@@ -1727,7 +1689,7 @@ h2.fw-bold {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #F5F3FF;
+    background: #eeeaffb5;
     border-radius: 16px;
     color: #6D5DFC;
     margin-right: 16px;
