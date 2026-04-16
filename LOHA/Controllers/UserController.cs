@@ -1395,6 +1395,63 @@ namespace LOHA.Controllers // nhóm chứa các class
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
+        // ===== TRANG DANH SÁCH BẠN BÈ =====
+        public async Task<IActionResult> BanBe()
+        {
+            // Bước 1: Kiểm tra đăng nhập
+            var userSession = HttpContext.Session.GetString("user");
+            if (string.IsNullOrEmpty(userSession))
+                return RedirectToAction("DangNhap", "User");
 
+            // Bước 2: Tìm user hiện tại
+            var currentUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
+
+            if (currentUser == null)
+                return RedirectToAction("DangNhap", "User");
+
+            // Bước 3: Lấy danh sách quan hệ bạn bè (có kèm nhóm)
+            var cacKetBan = await _context.KetBans
+                .Where(k => (k.NguoiGuiId == currentUser.ID || k.NguoiNhanId == currentUser.ID)
+                            && k.TrangThai == 1)
+                .OrderByDescending(k => k.NgayPhanHoi ?? k.NgayGui)
+                .ToListAsync();
+
+            // Bước 4: Lấy thông tin chi tiết và nhóm
+            var danhSachBanBe = new List<User>();
+            ViewBag.NhomCuaBan = new Dictionary<int, string>();
+            ViewBag.NgayKetBan = new Dictionary<int, DateTime>();
+
+            foreach (var ketBan in cacKetBan)
+            {
+                User? ban = null;
+                string nhom = "Bạn bè"; // Mặc định
+
+                if (ketBan.NguoiGuiId == currentUser.ID)
+                {
+                    ban = await _context.Users.FindAsync(ketBan.NguoiNhanId);
+                    // Nhóm mà MÌNH đã chọn cho bạn này
+                    nhom = ketBan.NhomNguoiGui ?? "Bạn bè";
+                }
+                else
+                {
+                    ban = await _context.Users.FindAsync(ketBan.NguoiGuiId);
+                    // Nhóm mà MÌNH đã chọn cho bạn này (khi mình là người nhận lời mời)
+                    nhom = ketBan.NhomNguoiNhan ?? "Bạn bè";
+                }
+
+                if (ban != null)
+                {
+                    ViewBag.NhomCuaBan[ban.ID] = nhom;
+                    ViewBag.NgayKetBan[ban.ID] = ketBan.NgayPhanHoi ?? ketBan.NgayGui;
+                    danhSachBanBe.Add(ban);
+                }
+            }
+
+            ViewBag.DanhSachBanBe = danhSachBanBe;
+            ViewBag.CurrentUserId = currentUser.ID;
+
+            return View();
+        }
     }
 }

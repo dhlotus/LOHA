@@ -1,0 +1,73 @@
+﻿@model LOHA.Models.User
+@{
+    // Lấy nhóm từ ViewBag (đã được truyền từ Controller)
+    var nhom = ViewBag.NhomCuaBan != null && ViewBag.NhomCuaBan.ContainsKey(Model.ID)
+        ? ViewBag.NhomCuaBan[Model.ID]
+        : "Bạn bè";
+    
+    // Xác định class CSS dựa trên tên nhóm (CHỈ 4 NHÓM)
+    string tagClass = nhom switch
+    {
+        "Gia đình" => "tag-gia-dinh",
+        "Đồng nghiệp" => "tag-dong-nghiep",
+        "Khác" => "tag-khac",
+        _ => "tag-ban-be"  // Mặc định là "Bạn bè"
+    };
+    
+    string tagIcon = nhom switch
+    {
+        "Gia đình" => "fa-heart",
+        "Đồng nghiệp" => "fa-briefcase",
+        "Khác" => "fa-ellipsis",
+        _ => "fa-user"  // Mặc định là "Bạn bè"
+    };
+}
+
+<div class="col-12 banbe-item" data-name="@Model.Ten.ToLower()" data-nhom="@nhom">
+    <div class="card banbe-card h-100" style="cursor: pointer;" onclick="window.location.href='/User/Trangcanhan?id=@Model.ID'">
+        <div class="card-body p-0">
+            <div class="row g-0 align-items-center">
+                
+                <!-- AVATAR SQUIRCLE -->
+                <div class="col-auto p-2" onclick="event.stopPropagation()">
+                    <div class="banbe-avatar">
+                        <img src="@(string.IsNullOrEmpty(Model.Avatar) ? "/images/default.png" : Model.Avatar)"
+                             alt="@Model.Ten" />
+                    </div>
+                </div>
+
+                <!-- THÔNG TIN -->
+                <div class="col p-2 ps-0">
+                    <h5 class="banbe-name">@Model.Ten</h5>
+                    
+                    <!-- Tag phân loại (NHÓM THỰC TẾ) -->
+                    <span class="relationship-tag @tagClass">
+                        <i class="fa-solid @tagIcon"></i> @nhom
+                    </span>
+                    
+                </div>
+
+                <!-- NÚT HÀNH ĐỘNG TRÒN -->
+                <div class="col-auto p-2" onclick="event.stopPropagation()">
+                    <div class="action-buttons">
+                        <a href="/Chat/ChatVoi?userId=@Model.ID" class="btn-icon-circle" title="Nhắn tin">
+                            <i class="fa-regular fa-message"></i>
+                        </a>
+                        <a href="/User/Trangcanhan?id=@Model.ID" class="btn-icon-circle btn-icon-outline" title="Xem hồ sơ">
+                            <i class="fa-regular fa-user"></i>
+                        </a>
+                        <div class="dropdown">
+                            <button class="btn-icon-circle btn-icon-outline" data-bs-toggle="dropdown" title="Tùy chọn">
+                                <i class="fa-solid fa-ellipsis"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item text-danger" href="#" onclick="huyKetBan(@Model.ID)"><i class="fa-regular fa-user-minus me-2"></i>Hủy kết bạn</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
