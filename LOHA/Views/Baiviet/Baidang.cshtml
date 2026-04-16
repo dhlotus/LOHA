@@ -371,14 +371,17 @@
         setTimeout(() => toast.remove(), 3000);
     }
 
-    // Thêm CSS animation
-    const style = document.createElement('style');
-    style.textContent = `
-        @@keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-    `;
+        // Kiểm tra xem style đã được thêm chưa
+    if (!document.getElementById('toast-animation-style')) {
+        const style = document.createElement('style');
+        style.id = 'toast-animation-style';
+        style.textContent = `
+            @@keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+    }
     document.head.appendChild(style);
         // Gửi bình luận từ panel
     function guiBinhLuanPanel(baivietId) {

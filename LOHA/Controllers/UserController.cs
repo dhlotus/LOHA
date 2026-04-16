@@ -1453,5 +1453,15 @@ namespace LOHA.Controllers // nhóm chứa các class
 
             return View();
         }
+        [HttpGet]
+        public IActionResult GetCurrentUserId()
+        {
+            var userSession = HttpContext.Session.GetString("user");
+            if (string.IsNullOrEmpty(userSession))
+                return Json(new { userId = 0 });
+
+            var user = _context.Users.FirstOrDefault(u => u.EmailorSDT == userSession);
+            return Json(new { userId = user?.ID ?? 0 });
+        }
     }
 }

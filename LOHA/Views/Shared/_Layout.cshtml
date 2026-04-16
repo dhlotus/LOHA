@@ -11,7 +11,8 @@
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
+    <!-- SignalR JavaScript -->  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     <!-- LOHA CSS -->
     <link rel="stylesheet" href="~/css/loha.css" asp-append-version="true" />
 
@@ -25,7 +26,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 </head>
-
+@{
+    // Lấy user hiện tại để dùng cho SignalR
+    var userSession = Context.Session.GetString("user");
+    var currentUser = userSession != null
+        ? new { Id = 0 } // Sẽ được thay bằng ID thực tế
+        : null;
+}
 <body>
     <!-- Mobile Header (chỉ hiện trên điện thoại) -->
     <div class="mobile-header d-lg-none" id="mobileHeader">
@@ -81,15 +88,33 @@
 
         <!-- Icon điều hướng bên phải -->
         <div class="loha-nav-right">
-            <!-- Icon Thông báo -->
-            <a href="/User/LoiMoiKetBan" class="loha-nav-icon text-decoration-none position-relative">
-                <i class="fa-regular fa-bell"></i>
-                <span id="notification-badge-desktop"
-                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                      style="display: none; font-size: 10px; min-width: 18px; height: 18px; line-height: 18px; padding: 0 5px;">
-                    0
-                </span>
-            </a>
+            <!-- Icon Thông báo với Dropdown -->
+            <div class="dropdown">
+                <a href="#" class="loha-nav-icon text-decoration-none position-relative" data-bs-toggle="dropdown" aria-expanded="false" id="notificationDropdownBtn">
+                    <i class="fa-regular fa-bell"></i>
+                    <span id="notification-badge-desktop"
+                          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          style="display: none; font-size: 10px; min-width: 18px; height: 18px; line-height: 18px; padding: 0;">
+                        0
+                    </span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end notification-dropdown p-0" id="notificationDropdown">
+                    <!-- Header -->
+                    <div class="notification-header">
+                        <h6 class="notification-title">Thông báo</h6>
+                        <span class="notification-count-badge" id="notification-total-badge">0</span>
+                    </div>
+        
+                    <!-- Danh sách thông báo -->
+                    <div class="notification-body" id="notification-list">
+                        <!-- Loading -->
+                        <div class="notification-loading">
+                            <div class="spinner-border spinner-border-sm" style="color: var(--loha-primary);" role="status"></div>
+                            <p>Đang tải thông báo...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         
             <!-- Icon Tin nhắn -->
             <a href="/Chat/Index" class="loha-nav-icon text-decoration-none position-relative">
@@ -230,183 +255,289 @@
     @await RenderSectionAsync("Scripts", required: false)
 
     <script>
-        // Hàm cập nhật số thông báo
+        // ===== HÀM CẬP NHẬT SỐ LỜI MỜI KẾT BẠN =====
         function capNhatThongBao() {
-        fetch('/User/DemLoiMoiKetBan')
-        .then(response => response.json())
-        .then(data => {
-        var badge = document.getElementById('notification-badge');
-        if (data.count > 0) {
-        badge.style.display = 'inline-block';
-        badge.innerText = data.count > 99 ? '99+' : data.count;
-        } else {
-        badge.style.display = 'none';
+            fetch('/User/DemLoiMoiKetBan')
+                .then(response => response.json())
+                .then(data => {
+                    var badge = document.getElementById('notification-badge');
+                    if (badge) {
+                        if (data.count > 0) {
+                            badge.style.display = 'inline-block';
+                            badge.innerText = data.count > 99 ? '99+' : data.count;
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(error => console.error('Lỗi khi lấy thông báo:', error));
         }
-        })
-        .catch(error => console.error('Lỗi khi lấy thông báo:', error));
-        }
 
-        // Gọi ngay khi trang load
-        document.addEventListener('DOMContentLoaded', capNhatThongBao);
-
-        // Tự động cập nhật mỗi 30 giây
-        setInterval(capNhatThongBao, 30000);
-
-        // Hàm đếm tin nhắn chưa đọc
+        // ===== HÀM ĐẾM TIN NHẮN CHƯA ĐỌC =====
         function demTinNhanChuaDoc() {
-        fetch('/Chat/DemTinNhanChuaDoc')
-        .then(response => response.json())
-        .then(data => {
-        // Cập nhật badge desktop
-        var badgeDesktop = document.getElementById('chat-notification-badge-desktop');
-        if (badgeDesktop) {
-        if (data.count > 0) {
-        badgeDesktop.style.display = 'inline-block';
-        badgeDesktop.innerText = data.count > 99 ? '99+' : data.count;
-        } else {
-        badgeDesktop.style.display = 'none';
-        }
-        }
+            fetch('/Chat/DemTinNhanChuaDoc')
+                .then(response => response.json())
+                .then(data => {
+                    var badgeDesktop = document.getElementById('chat-notification-badge-desktop');
+                    if (badgeDesktop) {
+                        if (data.count > 0) {
+                            badgeDesktop.style.display = 'inline-block';
+                            badgeDesktop.innerText = data.count > 99 ? '99+' : data.count;
+                        } else {
+                            badgeDesktop.style.display = 'none';
+                        }
+                    }
 
-        // Cập nhật badge mobile
-        var badgeMobile = document.getElementById('chat-notification-badge');
-        if (badgeMobile) {
-        if (data.count > 0) {
-        badgeMobile.style.display = 'inline-block';
-        badgeMobile.innerText = data.count > 99 ? '99+' : data.count;
-        } else {
-        badgeMobile.style.display = 'none';
-        }
-        }
-        })
-        .catch(error => console.error('Lỗi đếm tin nhắn:', error));
+                    var badgeMobile = document.getElementById('chat-notification-badge');
+                    if (badgeMobile) {
+                        if (data.count > 0) {
+                            badgeMobile.style.display = 'inline-block';
+                            badgeMobile.innerText = data.count > 99 ? '99+' : data.count;
+                        } else {
+                            badgeMobile.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(error => console.error('Lỗi đếm tin nhắn:', error));
         }
 
-        // Gọi khi load trang
-        document.addEventListener('DOMContentLoaded', function() {
-        capNhatThongBao();
-        demTinNhanChuaDoc();
-        });
+        // ===== THÔNG BÁO LOHA KIN =====
+        var notificationBadge = document.getElementById('notification-badge-desktop');
+        var notificationList = document.getElementById('notification-list');
+        var notificationTotalBadge = document.getElementById('notification-total-badge');
 
-        // Tự động cập nhật mỗi 30 giây
-        setInterval(capNhatThongBao, 30000);
-        setInterval(demTinNhanChuaDoc, 30000);
-
-        // Hiệu ứng ẩn/hiện header khi cuộn trên mobile
-        (function() {
-        var lastScrollTop = 0;
-        var header = document.getElementById('mobileHeader');
-        var ticking = false;
-
-        if (!header) return; // Nếu không có header mobile thì thoát
-
-        window.addEventListener('scroll', function() {
-        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-        // Yêu cầu animation frame để tối ưu hiệu suất
-        if (!ticking) {
-        window.requestAnimationFrame(function() {
-        // Cuộn xuống (ẩn header)
-        if (scrollTop > lastScrollTop && scrollTop > 50) {
-        header.classList.add('hide');
-        }
-        // Cuộn lên (hiện header)
-        else if (scrollTop < lastScrollTop) {
-        header.classList.remove('hide');
+        // Hàm tải thông báo
+        function taiThongBao() {
+            fetch('/ThongBao/LayThongBao')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        hienThiThongBao(data.data);
+                        capNhatBadgeThongBao();
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi tải thông báo:', error);
+                    if (notificationList) {
+                        notificationList.innerHTML = `
+                            <div class="notification-empty">
+                                <i class="fa-regular fa-circle-exclamation"></i>
+                                <p>Không thể tải thông báo</p>
+                            </div>
+                        `;
+                    }
+                });
         }
 
-        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-        ticking = false;
-        });
-
-        ticking = true;
-        }
-        });
-
-        // Hiện header khi chạm lên đầu trang
-        window.addEventListener('scroll', function() {
-        if (window.scrollY <= 0) {
-        header.classList.remove('hide');
-        }
-        });
-        })();
+        // Hàm hiển thị thông báo
+        function hienThiThongBao(thongBaos) {
+            if (!notificationList) return;
+    
+            if (!thongBaos || thongBaos.length === 0) {
+                notificationList.innerHTML = `
+                    <div class="notification-empty">
+                        <i class="fa-regular fa-bell-slash"></i>
+                        <p>Chưa có thông báo nào</p>
+                    </div>
+                `;
+                if (notificationTotalBadge) notificationTotalBadge.textContent = '0';
+                return;
+            }
+    
+            var unreadCount = thongBaos.filter(tb => !tb.daDoc).length;
+            if (notificationTotalBadge) notificationTotalBadge.textContent = unreadCount;
+    
+            var html = '';
+            thongBaos.forEach(tb => {
+                var iconClass = tb.loai === 'like' ? 'fa-heart' : 'fa-comment';
+                var iconColor = tb.loai === 'like' ? 'like' : 'comment';
+                var text = tb.loai === 'like' 
+                    ? `<strong>${tb.soLuong}</strong> lượt thích mới` 
+                    : `<strong>${tb.soLuong}</strong> bình luận mới`;
+                var timeAgo = tinhThoiGian(tb.thoiGian);
         
-        // Mở thanh tìm kiếm
-        function moThanhTimKiem() {
-        var header = document.getElementById('mobileHeader');
-        var searchBar = document.getElementById('mobileSearchBar');
-
-        // Ẩn header
-        header.classList.add('hide-for-search');
-
-        // Hiện thanh tìm kiếm
-        searchBar.classList.add('show');
-
-        // Focus vào input sau khi animation kết thúc
-        setTimeout(function() {
-        document.getElementById('searchInput').focus();
-        }, 300);
+                html += `
+                    <a href="/Baiviet/Chitiet/${tb.baiVietId}" 
+                       class="notification-item ${tb.daDoc ? '' : 'unread'}" 
+                       onclick="danhDauDaDoc(${tb.id})">
+                        <div class="notification-icon ${iconColor}">
+                            <i class="fa-regular ${iconClass}"></i>
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-text">${text}</div>
+                            <div class="notification-preview">${tb.noiDungBaiViet || 'Bài viết của bạn'}</div>
+                            <div class="notification-time">
+                                <i class="fa-regular fa-clock"></i> ${timeAgo}
+                            </div>
+                        </div>
+                    </a>
+                `;
+            });
+    
+            notificationList.innerHTML = html;
         }
 
-        // Đóng thanh tìm kiếm
-        function dongThanhTimKiem() {
-        var header = document.getElementById('mobileHeader');
-        var searchBar = document.getElementById('mobileSearchBar');
-
-        // Hiện header
-        header.classList.remove('hide-for-search');
-
-        // Ẩn thanh tìm kiếm
-        searchBar.classList.remove('show');
+        // Hàm cập nhật badge ngoài icon chuông
+        function capNhatBadgeThongBao() {
+            fetch('/ThongBao/DemThongBaoChuaDoc')
+                .then(response => response.json())
+                .then(data => {
+                    if (notificationBadge) {
+                        if (data.count > 0) {
+                            notificationBadge.style.display = 'inline-block';
+                            notificationBadge.innerText = data.count > 9 ? '9+' : data.count;
+                        } else {
+                            notificationBadge.style.display = 'none';
+                        }
+                    }
+                });
         }
 
-        // Tự động submit form khi nhấn Enter
-        document.getElementById('searchInput')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-        e.preventDefault();
-        document.getElementById('searchForm').submit();
+        // Hàm đánh dấu đã đọc
+        function danhDauDaDoc(id) {
+            fetch('/ThongBao/DanhDauDaDoc', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'id=' + id
+            });
         }
-        });
 
-        // Đóng thanh tìm kiếm khi click back button
-        window.addEventListener('popstate', function() {
-        dongThanhTimKiem();
-        });
+        // Hàm tính thời gian tương đối
+        function tinhThoiGian(thoiGian) {
+            var now = new Date();
+            var past = new Date(thoiGian);
+            var diff = Math.floor((now - past) / 1000);
+    
+            if (diff < 60) return 'Vừa xong';
+            if (diff < 3600) return Math.floor(diff / 60) + ' phút trước';
+            if (diff < 86400) return Math.floor(diff / 3600) + ' giờ trước';
+            if (diff < 604800) return Math.floor(diff / 86400) + ' ngày trước';
+            return past.toLocaleDateString('vi-VN');
+        }
+
+        // ===== HIỆU ỨNG ẨN/HIỆN HEADER MOBILE =====
+        (function() {
+            var lastScrollTop = 0;
+            var header = document.getElementById('mobileHeader');
+            var ticking = false;
+
+            if (!header) return;
+
+            window.addEventListener('scroll', function() {
+                var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+                if (!ticking) {
+                    window.requestAnimationFrame(function() {
+                        if (scrollTop > lastScrollTop && scrollTop > 50) {
+                            header.classList.add('hide');
+                        } else if (scrollTop < lastScrollTop) {
+                            header.classList.remove('hide');
+                        }
+
+                        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+                        ticking = false;
+                    });
+
+                    ticking = true;
+                }
+            });
+
+            window.addEventListener('scroll', function() {
+                if (window.scrollY <= 0) {
+                    header.classList.remove('hide');
+                }
+            });
+        })();
+
+        // ===== COMMENT PANEL =====
         let currentOpenPostId = null;
 
         function toggleBinhLuan(baivietId, btn) {
-        const panel = document.getElementById('comment-panel-' + baivietId);
-        const isOpening = panel.style.display === 'none' || panel.style.display === '';
+            const panel = document.getElementById('comment-panel-' + baivietId);
+            const isOpening = panel.style.display === 'none' || panel.style.display === '';
     
-        // Đóng panel đang mở (nếu có và khác ID)
-        if (currentOpenPostId !== null && currentOpenPostId !== baivietId) {
-        const oldPanel = document.getElementById('comment-panel-' + currentOpenPostId);
-        const oldBtn = document.getElementById('comment-btn-' + currentOpenPostId);
-        if (oldPanel) oldPanel.style.display = 'none';
-        if (oldBtn) oldBtn.classList.remove('active');
-        }
+            if (currentOpenPostId !== null && currentOpenPostId !== baivietId) {
+                const oldPanel = document.getElementById('comment-panel-' + currentOpenPostId);
+                const oldBtn = document.getElementById('comment-btn-' + currentOpenPostId);
+                if (oldPanel) oldPanel.style.display = 'none';
+                if (oldBtn) oldBtn.classList.remove('active');
+            }
     
-        if (isOpening) {
-        panel.style.display = 'flex';
-        btn.classList.add('active');
-        currentOpenPostId = baivietId;
-        } else {
-        panel.style.display = 'none';
-        btn.classList.remove('active');
-        currentOpenPostId = null;
-        }
+            if (isOpening) {
+                panel.style.display = 'flex';
+                btn.classList.add('active');
+                currentOpenPostId = baivietId;
+            } else {
+                panel.style.display = 'none';
+                btn.classList.remove('active');
+                currentOpenPostId = null;
+            }
         }
 
         function closeBinhLuan(baivietId) {
-        const panel = document.getElementById('comment-panel-' + baivietId);
-        const btn = document.getElementById('comment-btn-' + baivietId);
-        panel.style.display = 'none';
-        btn.classList.remove('active');
-        if (currentOpenPostId === baivietId) {
-        currentOpenPostId = null;
+            const panel = document.getElementById('comment-panel-' + baivietId);
+            const btn = document.getElementById('comment-btn-' + baivietId);
+            panel.style.display = 'none';
+            btn.classList.remove('active');
+            if (currentOpenPostId === baivietId) {
+                currentOpenPostId = null;
+            }
         }
+
+        // ===== KHỞI TẠO KHI LOAD TRANG =====
+        document.addEventListener('DOMContentLoaded', function() {
+            capNhatThongBao();
+            demTinNhanChuaDoc();
+            capNhatBadgeThongBao();
+            ketNoiSignalRThongBao(); // Gọi hàm kết nối SignalR
+        });
+
+        async function ketNoiSignalRThongBao() {
+            const userId = await getCurrentUserId();
+            console.log('UserId từ API:', userId);  // ← THÊM DÒNG NÀY
+    
+            if (!userId || userId === 0) {
+                console.warn('Chưa có userId, không thể kết nối SignalR');
+                return;
+            }
+    
+            var connection = new signalR.HubConnectionBuilder()
+                .withUrl("/chathub?userId=" + userId)
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("CapNhatBadgeThongBao", function() {
+                console.log('Nhận được CapNhatBadgeThongBao!');  // ← THÊM DÒNG NÀY
+                capNhatBadgeThongBao();
+            });
+
+            connection.start()
+                .then(() => console.log('SignalR thông báo đã kết nối'))
+                .catch(err => console.error('SignalR lỗi:', err));
         }
+
+        // Hàm lấy userId từ server
+        async function getCurrentUserId() {
+            try {
+                const response = await fetch('/User/GetCurrentUserId');
+                const data = await response.json();
+                return data.userId;
+            } catch {
+                return 0;
+            }
+        }
+
+        // ===== TỰ ĐỘNG CẬP NHẬT MỖI 30 GIÂY =====
+        setInterval(capNhatThongBao, 30000);
+        setInterval(demTinNhanChuaDoc, 30000);
+        setInterval(capNhatBadgeThongBao, 30000);
+
+        // ===== LOAD THÔNG BÁO KHI CLICK DROPDOWN =====
+        document.getElementById('notificationDropdownBtn')?.addEventListener('click', function() {
+            taiThongBao();
+        });
     </script>
+    
     <div class="modal fade" id="confirmXoaBaiVietModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content border-0 shadow">

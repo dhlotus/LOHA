@@ -79,5 +79,10 @@ namespace LOHA.Hubs
         {
             await Clients.User(nguoiNhanId.ToString()).SendAsync("CapNhatDanhSachChat");
         }
+        // Gửi sự kiện cập nhật badge thông báo cho user
+        public async Task CapNhatBadgeThongBao(int userId)
+        {
+            await Clients.User(userId.ToString()).SendAsync("CapNhatBadgeThongBao");
+        }
     }
 }

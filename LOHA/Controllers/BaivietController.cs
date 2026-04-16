@@ -1,9 +1,12 @@
-﻿using LOHA.Models;
+﻿using LOHA.Hubs;
+using LOHA.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
 
 namespace LOHA.Controllers
 {
@@ -125,23 +128,26 @@ namespace LOHA.Controllers
         }
 
 
-        // thêm bình luận
         [HttpPost]
-        public IActionResult ThemBinhLuan(int baivietId, string noidung, string anchor)
+        public async Task<IActionResult> ThemBinhLuan(int baivietId, string noidung, string anchor)
         {
-            // Lấy email/sdt từ session
             var userSession = HttpContext.Session.GetString("user");
             if (string.IsNullOrEmpty(userSession))
             {
-                // Nếu chưa đăng nhập, trả về lỗi dạng JSON
                 return Json(new { success = false, message = "Chưa đăng nhập" });
             }
 
-            // Tìm user trong DB để lấy ID
             var user = _context.Users.FirstOrDefault(u => u.EmailorSDT == userSession);
             if (user == null)
             {
                 return Json(new { success = false, message = "Không tìm thấy user" });
+            }
+
+            // Tìm bài viết để lấy chủ bài
+            var baiViet = _context.Baiviets.FirstOrDefault(b => b.Id == baivietId);
+            if (baiViet == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy bài viết" });
             }
 
             // Tạo bình luận mới
@@ -156,34 +162,95 @@ namespace LOHA.Controllers
             _context.Binhluans.Add(binhluan);
             _context.SaveChanges();
 
-            // Load thông tin user của bình luận vừa tạo (để trả về view)
+            // ===== CẬP NHẬT THÔNG BÁO (DÙNG SỐ LƯỢNG THỰC TẾ) =====
+            if (user.ID != baiViet.UserId) // Không tự comment bài mình
+            {
+                // Đếm tổng số bình luận thực tế (không tính comment của chủ bài)
+                var tongSoComment = _context.Binhluans
+                    .Count(bl => bl.BaivietId == baivietId && bl.UserId != baiViet.UserId);
+
+                // Tìm thông báo comment cho bài viết này
+                var thongBao = _context.ThongBaos
+                    .FirstOrDefault(t => t.UserId == baiViet.UserId
+                                      && t.BaiVietId == baivietId
+                                      && t.Loai == "comment");
+
+                if (tongSoComment > 0)
+                {
+                    if (thongBao != null)
+                    {
+                        // Cập nhật số lượng = tổng comment thực tế
+                        thongBao.SoLuong = tongSoComment;
+                        thongBao.DaDoc = false;
+                        thongBao.ThoiGianCapNhat = DateTime.Now;
+                    }
+                    else
+                    {
+                        // Tạo mới với số lượng = tổng comment thực tế
+                        _context.ThongBaos.Add(new ThongBao
+                        {
+                            UserId = baiViet.UserId,
+                            BaiVietId = baivietId,
+                            Loai = "comment",
+                            SoLuong = tongSoComment,
+                            DaDoc = false,
+                            ThoiGianTao = DateTime.Now,
+                            ThoiGianCapNhat = DateTime.Now
+                        });
+                    }
+                    _context.SaveChanges();
+                }
+                else if (thongBao != null)
+                {
+                    // Nếu không còn comment nào -> xoá thông báo
+                    _context.ThongBaos.Remove(thongBao);
+                    _context.SaveChanges();
+                    if (user.ID != baiViet.UserId)
+                    {
+                        var chatHub = HttpContext.RequestServices.GetService<IHubContext<ChatHub>>();
+                        if (chatHub != null)
+                        {
+                            await chatHub.Clients.User(baiViet.UserId.ToString()).SendAsync("CapNhatBadgeThongBao");
+                        }
+                    }
+                }
+            }
+
+
+            // Load thông tin user của bình luận vừa tạo
             var binhluanMoi = _context.Binhluans
-                .Include(bl => bl.User)  // Lấy luôn thông tin user
+                .Include(bl => bl.User)
                 .FirstOrDefault(bl => bl.Id == binhluan.Id);
 
-            // Tạo HTML cho bình luận mới (THEO GIAO DIỆN MỚI)
             string avatarComment = string.IsNullOrEmpty(binhluanMoi.User.Avatar)
                 ? "/images/default.png"
                 : binhluanMoi.User.Avatar;
 
             string html = $@"
-                <div class='comment-item' id='binhluan-{binhluanMoi.Id}'>
-                    <img src='{avatarComment}' class='comment-avatar' />
-                    <div class='comment-content'>
-                        <div class='comment-header'>
-                            <span class='comment-user'>{binhluanMoi.User.Ten}</span>
-                            <div class='comment-meta'>
-                                <small>{binhluanMoi.Ngaydang.ToString("HH:mm")}</small>
-                                <button class='btn-delete-comment' onclick='xoaBinhLuan({binhluanMoi.Id})'>
-                                    <span class='material-icons-outlined'>delete</span>
-                                </button>
-                            </div>
-                        </div>
-                        <p class='comment-text'>{binhluanMoi.Noidung}</p>
+        <div class='comment-item' id='binhluan-{binhluanMoi.Id}'>
+            <img src='{avatarComment}' class='comment-avatar' />
+            <div class='comment-content'>
+                <div class='comment-header'>
+                    <span class='comment-user'>{binhluanMoi.User.Ten}</span>
+                    <div class='comment-meta'>
+                        <small>{binhluanMoi.Ngaydang.ToString("HH:mm")}</small>
+                        <button class='btn-delete-comment' onclick='xoaBinhLuan({binhluanMoi.Id})'>
+                            <span class='material-icons-outlined'>delete</span>
+                        </button>
                     </div>
-                </div>";
-
-            // Trả về JSON chứa kết quả
+                </div>
+                <p class='comment-text'>{binhluanMoi.Noidung}</p>
+            </div>
+        </div>";
+            // ===== GỬI SIGNALR CẬP NHẬT BADGE =====
+            if (user.ID != baiViet.UserId)
+            {
+                var chatHub = HttpContext.RequestServices.GetService<IHubContext<ChatHub>>();
+                if (chatHub != null)
+                {
+                    await chatHub.Clients.User(baiViet.UserId.ToString()).SendAsync("CapNhatBadgeThongBao");
+                }
+            }
             return Json(new
             {
                 success = true,
@@ -193,60 +260,119 @@ namespace LOHA.Controllers
         }
 
 
-        // chưa like thì tăng lên 1 đã like thì bỏ like
         [HttpPost]
-        public IActionResult ThichBaiViet(int baiVietId)
+        public async Task<IActionResult> ThichBaiViet(int baiVietId)
         {
-            // Lấy thông tin người dùng hiện tại từ Session 
-            // Session "user" đang lưu email/sđt 
             var userSession = HttpContext.Session.GetString("user");
-
-            // Tìm user trong database dựa vào email/sđt
             var user = _context.Users.FirstOrDefault(x => x.EmailorSDT == userSession);
 
-            // Nếu không tìm thấy user (chưa đăng nhập hoặc session hết hạn)
             if (user == null)
             {
-                // Trả về JSON báo lỗi, số like = 0 và trạng thái chưa thích
                 return Json(new { soLuong = 0, daThich = false });
             }
 
-            int nguoiDungId = user.ID; // Lấy ID của user để xử lý
+            int nguoiDungId = user.ID;
 
-            // Kiểm tra xem user đã like bài viết này chưa 
-            // Tìm trong bảng Thichs bản ghi có UserId = user hiện tại và BaivietId = bài viết đang thao tác
+            // Tìm bài viết để lấy chủ bài
+            var baiViet = _context.Baiviets.FirstOrDefault(b => b.Id == baiVietId);
+            if (baiViet == null)
+            {
+                return Json(new { soLuong = 0, daThich = false });
+            }
+
             var thich = _context.Thichs
                 .FirstOrDefault(t => t.UserId == nguoiDungId && t.BaivietId == baiVietId);
 
-            // Biến lưu trạng thái LIKE sau khi xử lý (true = đã thích, false = chưa thích)
             bool daThichMoi;
 
-            //Thực hiện toggle (nếu có thì xóa, không có thì thêm) ---
-            if (thich != null) // Đã like trước đó
+            if (thich != null) // Đã like -> bỏ like
             {
-                // bỏ like
                 _context.Thichs.Remove(thich);
-                daThichMoi = false; // Sau khi xóa, trạng thái là chưa thích
+                daThichMoi = false;
             }
-            else // Chưa like
+            else // Chưa like -> thêm like
             {
-                // Thêm bản ghi like mới
                 _context.Thichs.Add(new Thich
                 {
                     UserId = nguoiDungId,
                     BaivietId = baiVietId
                 });
-                daThichMoi = true; // Sau khi thêm, trạng thái là đã thích
+                daThichMoi = true;
             }
 
-            // Lưu thay đổi vào database
+            // Lưu thay đổi like trước
             _context.SaveChanges();
 
-            //  Đếm lại tổng số like của bài viết (để trả về frontend) ---
+            // ===== CẬP NHẬT THÔNG BÁO (DÙNG SỐ LƯỢNG THỰC TẾ) =====
+            if (nguoiDungId != baiViet.UserId) // Không tự like mình
+            {
+                // Đếm tổng số like thực tế của bài viết
+                var tongSoLike = _context.Thichs.Count(t => t.BaivietId == baiVietId);
+
+                // Tìm thông báo like cho bài viết này
+                var thongBao = _context.ThongBaos
+                    .FirstOrDefault(t => t.UserId == baiViet.UserId
+                                      && t.BaiVietId == baiVietId
+                                      && t.Loai == "like");
+
+                if (tongSoLike > 0)
+                {
+                    if (thongBao != null)
+                    {
+                        // Cập nhật số lượng = tổng like thực tế
+                        thongBao.SoLuong = tongSoLike;
+                        thongBao.DaDoc = false;
+                        thongBao.ThoiGianCapNhat = DateTime.Now;
+                    }
+                    else
+                    {
+                        // Tạo mới với số lượng = tổng like thực tế
+                        _context.ThongBaos.Add(new ThongBao
+                        {
+                            UserId = baiViet.UserId,
+                            BaiVietId = baiVietId,
+                            Loai = "like",
+                            SoLuong = tongSoLike,
+                            DaDoc = false,
+                            ThoiGianTao = DateTime.Now,
+                            ThoiGianCapNhat = DateTime.Now
+                        });
+                    }
+                }
+                else
+                {
+                    // Nếu không còn like nào -> xoá thông báo (nếu có)
+                    if (thongBao != null)
+                    {
+                        _context.ThongBaos.Remove(thongBao);
+                    }
+                }
+
+                _context.SaveChanges();
+
+            }
+
+            // Đếm lại tổng số like để trả về frontend
             var soLuong = _context.Thichs.Count(t => t.BaivietId == baiVietId);
 
-            //Trả kết quả về cho frontend dưới dạng JSON 
-            // Trả về cả số lượng like mới VÀ trạng thái like hiện tại của user
+            // ===== THÊM ĐOẠN NÀY: GỬI SIGNALR CẬP NHẬT BADGE =====
+            // Chỉ gửi khi người like không phải chủ bài VÀ đang thực hiện LIKE (không phải unlike)
+            if (nguoiDungId != baiViet.UserId && daThichMoi)
+            {
+                var chatHub = HttpContext.RequestServices.GetService<IHubContext<ChatHub>>();
+                if (chatHub != null)
+                {
+                    await chatHub.Clients.User(baiViet.UserId.ToString()).SendAsync("CapNhatBadgeThongBao");
+                    // Thêm dòng debug:
+                    Console.WriteLine($"Đã gửi SignalR CapNhatBadgeThongBao đến userId: {baiViet.UserId}");
+                }
+                else
+                {
+                    Console.WriteLine("LỖI: chatHub is null!");
+                }
+            }
+            // ===== KẾT THÚC THÊM =====
+
             return Json(new { soLuong, daThich = daThichMoi });
         }
 
@@ -518,7 +644,54 @@ namespace LOHA.Controllers
                 // Xóa bình luận
                 _context.Binhluans.Remove(binhluan);
                 await _context.SaveChangesAsync();
+                // ===== CẬP NHẬT THÔNG BÁO SAU KHI XOÁ BÌNH LUẬN =====
+                var baiViet = await _context.Baiviets.FindAsync(baivietId);
+                if (baiViet != null)
+                {
+                    // Đếm tổng số comment thực tế (không tính comment của chủ bài)
+                    var tongSoComment = await _context.Binhluans
+                        .CountAsync(bl => bl.BaivietId == baivietId && bl.UserId != baiViet.UserId);
 
+                    // Tìm thông báo comment cho bài viết này
+                    var thongBao = await _context.ThongBaos
+                        .FirstOrDefaultAsync(t => t.UserId == baiViet.UserId
+                                               && t.BaiVietId == baivietId
+                                               && t.Loai == "comment");
+
+                    if (tongSoComment > 0)
+                    {
+                        if (thongBao != null)
+                        {
+                            // Cập nhật số lượng
+                            thongBao.SoLuong = tongSoComment;
+                            thongBao.ThoiGianCapNhat = DateTime.Now;
+                        }
+                        else
+                        {
+                            // Tạo mới nếu chưa có (trường hợp trước đó chưa có thông báo)
+                            _context.ThongBaos.Add(new ThongBao
+                            {
+                                UserId = baiViet.UserId,
+                                BaiVietId = baivietId,
+                                Loai = "comment",
+                                SoLuong = tongSoComment,
+                                DaDoc = false,
+                                ThoiGianTao = DateTime.Now,
+                                ThoiGianCapNhat = DateTime.Now
+                            });
+                        }
+                    }
+                    else
+                    {
+                        // Nếu không còn comment nào -> xoá thông báo
+                        if (thongBao != null)
+                        {
+                            _context.ThongBaos.Remove(thongBao);
+                        }
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
                 // Đếm số bình luận còn lại
                 int soLuongConLai = await _context.Binhluans.CountAsync(b => b.BaivietId == baivietId);
 
