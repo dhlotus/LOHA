@@ -381,13 +381,28 @@ namespace LOHA.Controllers
         // chi tiết bài viết
         public async Task<IActionResult> ChiTiet(int id)
         {
+            // Lấy user hiện tại từ session
+            string? userEmail = HttpContext.Session.GetString("user");
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return RedirectToAction("DangNhap", "User");
+            }
+
+            var currentUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.EmailorSDT == userEmail);
+
+            if (currentUser == null)
+            {
+                return RedirectToAction("DangNhap", "User");
+            }
+
             // Lấy bài viết từ database kèm thông tin người đăng và like
-            var baiviet = _context.Baiviets
-                .Include(b => b.User)               // lấy tên người đăng
-                .Include(b => b.Thichs)              // lấy danh sách like (để đếm)
-                .Include(b => b.Binhluans)            // lấy bình luận (sẽ dùng sau)
-                .ThenInclude(b => b.User)           // lấy tên người bình luận
-                .FirstOrDefault(b => b.Id == id);
+            var baiviet = await _context.Baiviets
+                .Include(b => b.User)
+                .Include(b => b.Thichs)
+                .Include(b => b.Binhluans)
+                    .ThenInclude(b => b.User)
+                .FirstOrDefaultAsync(b => b.Id == id);
 
             // Nếu không tìm thấy bài viết -> báo lỗi 404
             if (baiviet == null)
@@ -395,26 +410,22 @@ namespace LOHA.Controllers
                 return NotFound();
             }
 
-            // Kiểm tra user hiện tại đã like bài viết này chưa (cho nút like)
-            // Lấy email từ session
-            string? userEmail = HttpContext.Session.GetString("user");
-            List<int> thichs = new List<int>();
-
-            if (!string.IsNullOrEmpty(userEmail))
+            // ===== KIỂM TRA QUYỀN: CHỈ CHỦ BÀI MỚI ĐƯỢC XEM =====
+            if (baiviet.UserId != currentUser.ID)
             {
-                var currentUser = await _context.Users
-                    .FirstOrDefaultAsync(u => u.EmailorSDT == userEmail);
-
-                if (currentUser != null)
-                {
-                    thichs = await _context.Thichs
-                        .Where(t => t.UserId == currentUser.ID)
-                        .Select(t => t.BaivietId)
-                        .ToListAsync();
-                }
+                // Nếu không phải chủ bài, chuyển hướng về trang chủ
+                TempData["ThongBao"] = "Bạn không có quyền xem bài viết này";
+                return RedirectToAction("Index", "Baiviet");
             }
 
-            ViewBag.Thichs = thichs;  // ← THAY ViewBag.DaThich BẰNG ViewBag.Thichs
+            // Lấy danh sách bài viết đã like của user hiện tại
+            var thichs = await _context.Thichs
+                .Where(t => t.UserId == currentUser.ID)
+                .Select(t => t.BaivietId)
+                .ToListAsync();
+
+            ViewBag.Thichs = thichs;
+            ViewBag.CurrentUserId = currentUser.ID;
 
             return View(baiviet);
         }
