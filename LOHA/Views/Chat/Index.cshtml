@@ -6,28 +6,26 @@
 </head>
 
 <div class="container mt-3 mt-md-4">
-    <!-- Header mới của LOHA -->
-    <div class="chat-page-header">
-        <a href="javascript:history.back()" class="chat-back-btn">
+    <!-- Header với nút back + thanh tìm kiếm cùng hàng -->
+    <div class="d-flex align-items-stretch gap-3 mb-3">
+        <a href="javascript:history.back()"
+           class="chat-back-btn d-flex align-items-center justify-content-center"
+           style="width: 48px; height: 48px;">
             <i class="fa-solid fa-arrow-left"></i>
         </a>
-        <div class="chat-page-title">
-            <i class="fa-regular fa-message"></i>
-            <span>Tin nhắn</span>
-        </div>
-    </div>
 
-    <!-- Thanh tìm kiếm trong chat -->
-    <div class="chat-search-box">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text"
-               id="searchChatInput"
-               placeholder="Tìm kiếm bạn bè để nhắn tin..."
-               autocomplete="off" />
-    
-        <!-- Dropdown kết quả tìm kiếm -->
-        <div class="chat-search-results" id="chatSearchResults" style="display: none;">
-            <!-- Kết quả sẽ được thêm bằng JavaScript -->
+        <!-- Thanh tìm kiếm trong chat -->
+        <div class="chat-search-box flex-grow-1">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text"
+                   id="searchChatInput"
+                   placeholder="Tìm kiếm bạn bè để nhắn tin..."
+                   autocomplete="off"
+                   style="height: 48px;" />
+
+            <!-- Dropdown kết quả tìm kiếm -->
+            <div class="chat-search-results" id="chatSearchResults" style="display: none;">
+            </div>
         </div>
     </div>
 
