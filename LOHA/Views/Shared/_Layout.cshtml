@@ -11,7 +11,7 @@
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <!-- SignalR JavaScript -->  
+    <!-- SignalR JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     <!-- LOHA CSS -->
     <link rel="stylesheet" href="~/css/loha.css" asp-append-version="true" />
@@ -257,48 +257,48 @@
     <script>
         // ===== HÀM CẬP NHẬT SỐ LỜI MỜI KẾT BẠN =====
         function capNhatThongBao() {
-            fetch('/User/DemLoiMoiKetBan')
-                .then(response => response.json())
-                .then(data => {
-                    var badge = document.getElementById('notification-badge');
-                    if (badge) {
-                        if (data.count > 0) {
-                            badge.style.display = 'inline-block';
-                            badge.innerText = data.count > 99 ? '99+' : data.count;
-                        } else {
-                            badge.style.display = 'none';
-                        }
-                    }
-                })
-                .catch(error => console.error('Lỗi khi lấy thông báo:', error));
+        fetch('/User/DemLoiMoiKetBan')
+        .then(response => response.json())
+        .then(data => {
+        var badge = document.getElementById('notification-badge');
+        if (badge) {
+        if (data.count > 0) {
+        badge.style.display = 'inline-block';
+        badge.innerText = data.count > 99 ? '99+' : data.count;
+        } else {
+        badge.style.display = 'none';
+        }
+        }
+        })
+        .catch(error => console.error('Lỗi khi lấy thông báo:', error));
         }
 
         // ===== HÀM ĐẾM TIN NHẮN CHƯA ĐỌC =====
         function demTinNhanChuaDoc() {
-            fetch('/Chat/DemTinNhanChuaDoc')
-                .then(response => response.json())
-                .then(data => {
-                    var badgeDesktop = document.getElementById('chat-notification-badge-desktop');
-                    if (badgeDesktop) {
-                        if (data.count > 0) {
-                            badgeDesktop.style.display = 'inline-block';
-                            badgeDesktop.innerText = data.count > 99 ? '99+' : data.count;
-                        } else {
-                            badgeDesktop.style.display = 'none';
-                        }
-                    }
+        fetch('/Chat/DemTinNhanChuaDoc')
+        .then(response => response.json())
+        .then(data => {
+        var badgeDesktop = document.getElementById('chat-notification-badge-desktop');
+        if (badgeDesktop) {
+        if (data.count > 0) {
+        badgeDesktop.style.display = 'inline-block';
+        badgeDesktop.innerText = data.count > 99 ? '99+' : data.count;
+        } else {
+        badgeDesktop.style.display = 'none';
+        }
+        }
 
-                    var badgeMobile = document.getElementById('chat-notification-badge');
-                    if (badgeMobile) {
-                        if (data.count > 0) {
-                            badgeMobile.style.display = 'inline-block';
-                            badgeMobile.innerText = data.count > 99 ? '99+' : data.count;
-                        } else {
-                            badgeMobile.style.display = 'none';
-                        }
-                    }
-                })
-                .catch(error => console.error('Lỗi đếm tin nhắn:', error));
+        var badgeMobile = document.getElementById('chat-notification-badge');
+        if (badgeMobile) {
+        if (data.count > 0) {
+        badgeMobile.style.display = 'inline-block';
+        badgeMobile.innerText = data.count > 99 ? '99+' : data.count;
+        } else {
+        badgeMobile.style.display = 'none';
+        }
+        }
+        })
+        .catch(error => console.error('Lỗi đếm tin nhắn:', error));
         }
 
         // ===== THÔNG BÁO LOHA KIN =====
@@ -308,223 +308,223 @@
 
         // Hàm tải thông báo
         function taiThongBao() {
-            fetch('/ThongBao/LayThongBao')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        hienThiThongBao(data.data);
-                        capNhatBadgeThongBao();
-                    }
-                })
-                .catch(error => {
-                    console.error('Lỗi tải thông báo:', error);
-                    if (notificationList) {
-                        notificationList.innerHTML = `
-                            <div class="notification-empty">
-                                <i class="fa-regular fa-circle-exclamation"></i>
-                                <p>Không thể tải thông báo</p>
-                            </div>
-                        `;
-                    }
-                });
+        fetch('/ThongBao/LayThongBao')
+        .then(response => response.json())
+        .then(data => {
+        if (data.success) {
+        hienThiThongBao(data.data);
+        capNhatBadgeThongBao();
+        }
+        })
+        .catch(error => {
+        console.error('Lỗi tải thông báo:', error);
+        if (notificationList) {
+        notificationList.innerHTML = `
+        <div class="notification-empty">
+        <i class="fa-regular fa-circle-exclamation"></i>
+        <p>Không thể tải thông báo</p>
+        </div>
+        `;
+        }
+        });
         }
 
         // Hàm hiển thị thông báo
         function hienThiThongBao(thongBaos) {
-            if (!notificationList) return;
+        if (!notificationList) return;
     
-            if (!thongBaos || thongBaos.length === 0) {
-                notificationList.innerHTML = `
-                    <div class="notification-empty">
-                        <i class="fa-regular fa-bell-slash"></i>
-                        <p>Chưa có thông báo nào</p>
-                    </div>
-                `;
-                if (notificationTotalBadge) notificationTotalBadge.textContent = '0';
-                return;
-            }
+        if (!thongBaos || thongBaos.length === 0) {
+        notificationList.innerHTML = `
+        <div class="notification-empty">
+        <i class="fa-regular fa-bell-slash"></i>
+        <p>Chưa có thông báo nào</p>
+        </div>
+        `;
+        if (notificationTotalBadge) notificationTotalBadge.textContent = '0';
+        return;
+        }
     
-            var unreadCount = thongBaos.filter(tb => !tb.daDoc).length;
-            if (notificationTotalBadge) notificationTotalBadge.textContent = unreadCount;
+        var unreadCount = thongBaos.filter(tb => !tb.daDoc).length;
+        if (notificationTotalBadge) notificationTotalBadge.textContent = unreadCount;
     
-            var html = '';
-            thongBaos.forEach(tb => {
-                var iconClass = tb.loai === 'like' ? 'fa-heart' : 'fa-comment';
-                var iconColor = tb.loai === 'like' ? 'like' : 'comment';
-                var text = tb.loai === 'like' 
-                    ? `<strong>${tb.soLuong}</strong> lượt thích mới` 
-                    : `<strong>${tb.soLuong}</strong> bình luận mới`;
-                var timeAgo = tinhThoiGian(tb.thoiGian);
+        var html = '';
+        thongBaos.forEach(tb => {
+        var iconClass = tb.loai === 'like' ? 'fa-heart' : 'fa-comment';
+        var iconColor = tb.loai === 'like' ? 'like' : 'comment';
+        var text = tb.loai === 'like'
+        ? `<strong>${tb.soLuong}</strong> lượt thích mới`
+        : `<strong>${tb.soLuong}</strong> bình luận mới`;
+        var timeAgo = tinhThoiGian(tb.thoiGian);
         
-                html += `
-                    <a href="/Baiviet/Chitiet/${tb.baiVietId}" 
-                       class="notification-item ${tb.daDoc ? '' : 'unread'}" 
-                       onclick="danhDauDaDoc(${tb.id})">
-                        <div class="notification-icon ${iconColor}">
-                            <i class="fa-regular ${iconClass}"></i>
-                        </div>
-                        <div class="notification-content">
-                            <div class="notification-text">${text}</div>
-                            <div class="notification-preview">${tb.noiDungBaiViet || 'Bài viết của bạn'}</div>
-                            <div class="notification-time">
-                                <i class="fa-regular fa-clock"></i> ${timeAgo}
-                            </div>
-                        </div>
-                    </a>
-                `;
-            });
+        html += `
+        <a href="/Baiviet/Chitiet/${tb.baiVietId}"
+        class="notification-item ${tb.daDoc ? '' : 'unread'}"
+        onclick="danhDauDaDoc(${tb.id})">
+        <div class="notification-icon ${iconColor}">
+        <i class="fa-regular ${iconClass}"></i>
+        </div>
+        <div class="notification-content">
+        <div class="notification-text">${text}</div>
+        <div class="notification-preview">${tb.noiDungBaiViet || 'Bài viết của bạn'}</div>
+        <div class="notification-time">
+        <i class="fa-regular fa-clock"></i> ${timeAgo}
+        </div>
+        </div>
+        </a>
+        `;
+        });
     
-            notificationList.innerHTML = html;
+        notificationList.innerHTML = html;
         }
 
         // Hàm cập nhật badge ngoài icon chuông
         function capNhatBadgeThongBao() {
-            fetch('/ThongBao/DemThongBaoChuaDoc')
-                .then(response => response.json())
-                .then(data => {
-                    if (notificationBadge) {
-                        if (data.count > 0) {
-                            notificationBadge.style.display = 'inline-block';
-                            notificationBadge.innerText = data.count > 9 ? '9+' : data.count;
-                        } else {
-                            notificationBadge.style.display = 'none';
-                        }
-                    }
-                });
+        fetch('/ThongBao/DemThongBaoChuaDoc')
+        .then(response => response.json())
+        .then(data => {
+        if (notificationBadge) {
+        if (data.count > 0) {
+        notificationBadge.style.display = 'inline-block';
+        notificationBadge.innerText = data.count > 9 ? '9+' : data.count;
+        } else {
+        notificationBadge.style.display = 'none';
+        }
+        }
+        });
         }
 
         // Hàm đánh dấu đã đọc
         function danhDauDaDoc(id) {
-            fetch('/ThongBao/DanhDauDaDoc', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'id=' + id
-            });
+        fetch('/ThongBao/DanhDauDaDoc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'id=' + id
+        });
         }
 
         // Hàm tính thời gian tương đối
         function tinhThoiGian(thoiGian) {
-            var now = new Date();
-            var past = new Date(thoiGian);
-            var diff = Math.floor((now - past) / 1000);
+        var now = new Date();
+        var past = new Date(thoiGian);
+        var diff = Math.floor((now - past) / 1000);
     
-            if (diff < 60) return 'Vừa xong';
-            if (diff < 3600) return Math.floor(diff / 60) + ' phút trước';
-            if (diff < 86400) return Math.floor(diff / 3600) + ' giờ trước';
-            if (diff < 604800) return Math.floor(diff / 86400) + ' ngày trước';
-            return past.toLocaleDateString('vi-VN');
+        if (diff < 60) return 'Vừa xong';
+        if (diff < 3600) return Math.floor(diff / 60) + ' phút trước';
+        if (diff < 86400) return Math.floor(diff / 3600) + ' giờ trước';
+        if (diff < 604800) return Math.floor(diff / 86400) + ' ngày trước';
+        return past.toLocaleDateString('vi-VN');
         }
 
         // ===== HIỆU ỨNG ẨN/HIỆN HEADER MOBILE =====
         (function() {
-            var lastScrollTop = 0;
-            var header = document.getElementById('mobileHeader');
-            var ticking = false;
+        var lastScrollTop = 0;
+        var header = document.getElementById('mobileHeader');
+        var ticking = false;
 
-            if (!header) return;
+        if (!header) return;
 
-            window.addEventListener('scroll', function() {
-                var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        window.addEventListener('scroll', function() {
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
-                if (!ticking) {
-                    window.requestAnimationFrame(function() {
-                        if (scrollTop > lastScrollTop && scrollTop > 50) {
-                            header.classList.add('hide');
-                        } else if (scrollTop < lastScrollTop) {
-                            header.classList.remove('hide');
-                        }
+        if (!ticking) {
+        window.requestAnimationFrame(function() {
+        if (scrollTop > lastScrollTop && scrollTop > 50) {
+        header.classList.add('hide');
+        } else if (scrollTop < lastScrollTop) {
+        header.classList.remove('hide');
+        }
 
-                        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-                        ticking = false;
-                    });
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        ticking = false;
+        });
 
-                    ticking = true;
-                }
-            });
+        ticking = true;
+        }
+        });
 
-            window.addEventListener('scroll', function() {
-                if (window.scrollY <= 0) {
-                    header.classList.remove('hide');
-                }
-            });
+        window.addEventListener('scroll', function() {
+        if (window.scrollY <= 0) {
+        header.classList.remove('hide');
+        }
+        });
         })();
 
         // ===== COMMENT PANEL =====
         let currentOpenPostId = null;
 
         function toggleBinhLuan(baivietId, btn) {
-            const panel = document.getElementById('comment-panel-' + baivietId);
-            const isOpening = panel.style.display === 'none' || panel.style.display === '';
+        const panel = document.getElementById('comment-panel-' + baivietId);
+        const isOpening = panel.style.display === 'none' || panel.style.display === '';
     
-            if (currentOpenPostId !== null && currentOpenPostId !== baivietId) {
-                const oldPanel = document.getElementById('comment-panel-' + currentOpenPostId);
-                const oldBtn = document.getElementById('comment-btn-' + currentOpenPostId);
-                if (oldPanel) oldPanel.style.display = 'none';
-                if (oldBtn) oldBtn.classList.remove('active');
-            }
+        if (currentOpenPostId !== null && currentOpenPostId !== baivietId) {
+        const oldPanel = document.getElementById('comment-panel-' + currentOpenPostId);
+        const oldBtn = document.getElementById('comment-btn-' + currentOpenPostId);
+        if (oldPanel) oldPanel.style.display = 'none';
+        if (oldBtn) oldBtn.classList.remove('active');
+        }
     
-            if (isOpening) {
-                panel.style.display = 'flex';
-                btn.classList.add('active');
-                currentOpenPostId = baivietId;
-            } else {
-                panel.style.display = 'none';
-                btn.classList.remove('active');
-                currentOpenPostId = null;
-            }
+        if (isOpening) {
+        panel.style.display = 'flex';
+        btn.classList.add('active');
+        currentOpenPostId = baivietId;
+        } else {
+        panel.style.display = 'none';
+        btn.classList.remove('active');
+        currentOpenPostId = null;
+        }
         }
 
         function closeBinhLuan(baivietId) {
-            const panel = document.getElementById('comment-panel-' + baivietId);
-            const btn = document.getElementById('comment-btn-' + baivietId);
-            panel.style.display = 'none';
-            btn.classList.remove('active');
-            if (currentOpenPostId === baivietId) {
-                currentOpenPostId = null;
-            }
+        const panel = document.getElementById('comment-panel-' + baivietId);
+        const btn = document.getElementById('comment-btn-' + baivietId);
+        panel.style.display = 'none';
+        btn.classList.remove('active');
+        if (currentOpenPostId === baivietId) {
+        currentOpenPostId = null;
+        }
         }
 
         // ===== KHỞI TẠO KHI LOAD TRANG =====
         document.addEventListener('DOMContentLoaded', function() {
-            capNhatThongBao();
-            demTinNhanChuaDoc();
-            capNhatBadgeThongBao();
-            ketNoiSignalRThongBao(); // Gọi hàm kết nối SignalR
+        capNhatThongBao();
+        demTinNhanChuaDoc();
+        capNhatBadgeThongBao();
+        ketNoiSignalRThongBao(); // Gọi hàm kết nối SignalR
         });
 
         async function ketNoiSignalRThongBao() {
-            const userId = await getCurrentUserId();
-            console.log('UserId từ API:', userId);  // ← THÊM DÒNG NÀY
+        const userId = await getCurrentUserId();
+        console.log('UserId từ API:', userId);  // ← THÊM DÒNG NÀY
     
-            if (!userId || userId === 0) {
-                console.warn('Chưa có userId, không thể kết nối SignalR');
-                return;
-            }
+        if (!userId || userId === 0) {
+        console.warn('Chưa có userId, không thể kết nối SignalR');
+        return;
+        }
     
-            var connection = new signalR.HubConnectionBuilder()
-                .withUrl("/chathub?userId=" + userId)
-                .withAutomaticReconnect()
-                .build();
+        var connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chathub?userId=" + userId)
+        .withAutomaticReconnect()
+        .build();
 
-            connection.on("CapNhatBadgeThongBao", function() {
-                console.log('Nhận được CapNhatBadgeThongBao!');  // ← THÊM DÒNG NÀY
-                capNhatBadgeThongBao();
-            });
+        connection.on("CapNhatBadgeThongBao", function() {
+        console.log('Nhận được CapNhatBadgeThongBao!');  // ← THÊM DÒNG NÀY
+        capNhatBadgeThongBao();
+        });
 
-            connection.start()
-                .then(() => console.log('SignalR thông báo đã kết nối'))
-                .catch(err => console.error('SignalR lỗi:', err));
+        connection.start()
+        .then(() => console.log('SignalR thông báo đã kết nối'))
+        .catch(err => console.error('SignalR lỗi:', err));
         }
 
         // Hàm lấy userId từ server
         async function getCurrentUserId() {
-            try {
-                const response = await fetch('/User/GetCurrentUserId');
-                const data = await response.json();
-                return data.userId;
-            } catch {
-                return 0;
-            }
+        try {
+        const response = await fetch('/User/GetCurrentUserId');
+        const data = await response.json();
+        return data.userId;
+        } catch {
+        return 0;
+        }
         }
 
         // ===== TỰ ĐỘNG CẬP NHẬT MỖI 30 GIÂY =====
@@ -534,7 +534,7 @@
 
         // ===== LOAD THÔNG BÁO KHI CLICK DROPDOWN =====
         document.getElementById('notificationDropdownBtn')?.addEventListener('click', function() {
-            taiThongBao();
+        taiThongBao();
         });
     </script>
     

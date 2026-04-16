@@ -212,7 +212,7 @@
                 <input type="hidden" id="binhluanIdToDelete" />
                 <div class="d-flex gap-2 justify-content-center">
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-danger rounded-pill px-4" id="confirmXoaBinhLuanBtn">
+                    <button type="button" class="btn btn-danger rounded-pill px-4" onclick="xacNhanXoaBinhLuan()">
                         <span class="material-icons-outlined me-1" style="font-size: 18px;">delete</span>Xóa
                     </button>
                 </div>
@@ -301,36 +301,7 @@
         modal.show();
     }
 
-    // Xử lý khi click nút Xóa trong popup
-    document.getElementById('confirmXoaBinhLuanBtn').addEventListener('click', function() {
-        var modal = bootstrap.Modal.getInstance(document.getElementById('xoaBinhLuanModal'));
-        modal.hide();
     
-        fetch('/Baiviet/XoaBinhLuan', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'id=' + binhLuanIdToDelete
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const commentElement = document.getElementById('binhluan-' + binhLuanIdToDelete);
-                const postCard = commentElement.closest('.post-item');
-                const postId = postCard.id.replace('post-', '');
-            
-                commentElement.remove();
-            
-                const commentCountSpan = document.getElementById('comment-count-' + postId);
-                if (commentCountSpan) commentCountSpan.innerText = data.soLuong;
-            
-                const totalCommentSpan = document.getElementById('total-comment-' + postId);
-                if (totalCommentSpan) totalCommentSpan.innerText = data.soLuong;
-            } else {
-                showToast(data.message, 'error');
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    });
         // Hiển thị thông báo dạng Toast
     function showToast(message, type = 'success') {
         // Tạo container toast nếu chưa có
@@ -441,7 +412,53 @@
         // Sự kiện này sẽ được gắn khi panel được tạo
         // Chúng ta sẽ dùng event delegation
     });
+        // Biến lưu ID bình luận cần xóa (global cho trang)
+    var binhLuanIdToDelete = 0;
 
+    // Hàm mở popup xác nhận xóa bình luận
+    function xoaBinhLuan(binhLuanId) {
+        binhLuanIdToDelete = binhLuanId;
+        var modal = new bootstrap.Modal(document.getElementById('xoaBinhLuanModal'));
+        modal.show();
+    }
+
+    // Hàm xác nhận xóa (gọi từ nút trong popup)
+    function xacNhanXoaBinhLuan() {
+        var modal = bootstrap.Modal.getInstance(document.getElementById('xoaBinhLuanModal'));
+        modal.hide();
+    
+        fetch('/Baiviet/XoaBinhLuan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'id=' + binhLuanIdToDelete
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const commentElement = document.getElementById('binhluan-' + binhLuanIdToDelete);
+                if (commentElement) {
+                    const postCard = commentElement.closest('.post-item');
+                    const postId = postCard.id.replace('post-', '');
+                
+                    commentElement.remove();
+                
+                    const commentCountSpan = document.getElementById('comment-count-' + postId);
+                    if (commentCountSpan) commentCountSpan.innerText = data.soLuong;
+                
+                    const totalCommentSpan = document.getElementById('total-comment-' + postId);
+                    if (totalCommentSpan) totalCommentSpan.innerText = data.soLuong;
+                
+                    showToast('Đã xóa bình luận', 'success');
+                }
+            } else {
+                showToast(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Có lỗi xảy ra', 'error');
+        });
+    }
     // Dùng event delegation cho input trong panel (vì panel được tạo động)
     document.addEventListener('keypress', function(e) {
         if (e.target.matches('input[id^="panel-comment-input-"]')) {

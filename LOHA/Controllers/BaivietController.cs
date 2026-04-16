@@ -617,53 +617,41 @@ namespace LOHA.Controllers
         {
             try
             {
-                // Lấy user hiện tại
                 var userSession = HttpContext.Session.GetString("user");
                 if (string.IsNullOrEmpty(userSession))
-                {
                     return Json(new { success = false, message = "Vui lòng đăng nhập" });
-                }
 
                 var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
                 if (currentUser == null)
-                {
                     return Json(new { success = false, message = "Không tìm thấy user" });
-                }
 
-                // Tìm bình luận
+                // Tìm bình luận kèm bài viết
                 var binhluan = await _context.Binhluans
                     .Include(b => b.Baiviet)
                     .FirstOrDefaultAsync(b => b.Id == id);
 
                 if (binhluan == null)
-                {
                     return Json(new { success = false, message = "Không tìm thấy bình luận" });
-                }
 
-                // Kiểm tra quyền xóa: là chủ comment HOẶC chủ bài viết
+                // Kiểm tra quyền xóa
                 bool coQuyenXoa = (binhluan.UserId == currentUser.ID)
                                || (binhluan.Baiviet != null && binhluan.Baiviet.UserId == currentUser.ID);
 
                 if (!coQuyenXoa)
-                {
                     return Json(new { success = false, message = "Bạn không có quyền xóa bình luận này" });
-                }
 
-                // Lưu ID bài viết để trả về
                 int baivietId = binhluan.BaivietId;
 
                 // Xóa bình luận
                 _context.Binhluans.Remove(binhluan);
-                await _context.SaveChangesAsync();
-                // ===== CẬP NHẬT THÔNG BÁO SAU KHI XOÁ BÌNH LUẬN =====
+
+                // Cập nhật thông báo
                 var baiViet = await _context.Baiviets.FindAsync(baivietId);
                 if (baiViet != null)
                 {
-                    // Đếm tổng số comment thực tế (không tính comment của chủ bài)
                     var tongSoComment = await _context.Binhluans
                         .CountAsync(bl => bl.BaivietId == baivietId && bl.UserId != baiViet.UserId);
 
-                    // Tìm thông báo comment cho bài viết này
                     var thongBao = await _context.ThongBaos
                         .FirstOrDefaultAsync(t => t.UserId == baiViet.UserId
                                                && t.BaiVietId == baivietId
@@ -673,13 +661,11 @@ namespace LOHA.Controllers
                     {
                         if (thongBao != null)
                         {
-                            // Cập nhật số lượng
                             thongBao.SoLuong = tongSoComment;
                             thongBao.ThoiGianCapNhat = DateTime.Now;
                         }
                         else
                         {
-                            // Tạo mới nếu chưa có (trường hợp trước đó chưa có thông báo)
                             _context.ThongBaos.Add(new ThongBao
                             {
                                 UserId = baiViet.UserId,
@@ -694,18 +680,15 @@ namespace LOHA.Controllers
                     }
                     else
                     {
-                        // Nếu không còn comment nào -> xoá thông báo
                         if (thongBao != null)
-                        {
                             _context.ThongBaos.Remove(thongBao);
-                        }
                     }
-
-                    await _context.SaveChangesAsync();
                 }
-                // Đếm số bình luận còn lại
-                int soLuongConLai = await _context.Binhluans.CountAsync(b => b.BaivietId == baivietId);
 
+                // 👉 CHỈ GỌI SaveChangesAsync MỘT LẦN DUY NHẤT
+                await _context.SaveChangesAsync();
+
+                int soLuongConLai = await _context.Binhluans.CountAsync(b => b.BaivietId == baivietId);
                 return Json(new { success = true, message = "Đã xóa bình luận", soLuong = soLuongConLai });
             }
             catch (Exception ex)
