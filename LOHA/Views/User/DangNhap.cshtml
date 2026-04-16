@@ -49,9 +49,7 @@
     </div>
     @if (!ViewData.ModelState.IsValid)
     {
-        <div class="alert-custom">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        </div>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     }
     <button type="submit" class="login-btn" id="loginBtn">Đăng nhập</button>
 
