@@ -37,7 +37,6 @@
                 <div class="magazine-meta">
                     <i class="fa-regular fa-clock"></i> @Model.Ngaydang.ToString("dd/MM/yyyy HH:mm")
                     <span class="mx-2">•</span>
-                    <i class="fa-regular fa-eye"></i> Chi tiết
                 </div>
             </div>
             <div class="dropdown">
@@ -52,12 +51,6 @@
 
         <!-- NỘI DUNG CHÍNH -->
         <div class="magazine-body">
-            <!-- Tiêu đề (nếu có) -->
-            @if (!string.IsNullOrEmpty(Model.Noidung) && Model.Noidung.Length > 0)
-            {
-                <h3 class="magazine-headline">@(Model.Noidung.Length > 60 ? Model.Noidung.Substring(0, 60) + "..." : Model.Noidung)</h3>
-            }
-            
             <!-- Nội dung đầy đủ -->
             <p class="magazine-content">@Model.Noidung</p>
         </div>
