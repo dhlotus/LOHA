@@ -7,23 +7,14 @@
 
 <div class="container mt-3 mt-md-4">
     <!-- Header với nút back + thanh tìm kiếm cùng hàng -->
-    <div class="d-flex align-items-stretch gap-3 mb-3">
-        <a href="javascript:history.back()"
-           class="chat-back-btn d-flex align-items-center justify-content-center"
-           style="width: 48px; height: 48px;">
-            <i class="fa-solid fa-arrow-left"></i>
-        </a>
-
-        <!-- Thanh tìm kiếm trong chat -->
-        <div class="chat-search-box flex-grow-1">
+    <div class="d-flex align-items-stretch gap-3 mb-3 justify-content-center">
+        <div class="chat-search-box mx-auto" style="max-width: 550px; width: 100%;">
             <i class="fa-solid fa-magnifying-glass"></i>
             <input type="text"
                    id="searchChatInput"
                    placeholder="Tìm kiếm bạn bè để nhắn tin..."
                    autocomplete="off"
                    style="height: 48px;" />
-
-            <!-- Dropdown kết quả tìm kiếm -->
             <div class="chat-search-results" id="chatSearchResults" style="display: none;">
             </div>
         </div>
