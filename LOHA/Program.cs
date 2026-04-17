@@ -53,7 +53,7 @@ app.MapStaticAssets(); // sử dụng các file tĩnh trong project (css, js, �
 // Định nghĩa route mặc định
 app.MapControllerRoute(
     name: "default", // đặt tên cho route
-    pattern: "{controller=User}/{action=Trangcanhan}/{id?}") // url mặc định: vào trang cá nhân
+    pattern: "{controller=BangDieuKhien}/{action=DangNhap}/{id?}") // url mặc định: vào trang cá nhân
     .WithStaticAssets(); // cho phép route sử dụng file tĩnh
 
 app.Run(); // khởi chạy website

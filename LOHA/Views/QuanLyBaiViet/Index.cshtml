@@ -72,9 +72,6 @@
                                         <span><i class="fa-regular fa-comment me-1"></i>@bv.Binhluans?.Count ?? 0</span>
                                     </div>
                                     <div>
-                                        <a href="/Baiviet/ChiTiet/@bv.Id" target="_blank" class="btn btn-sm btn-outline-info me-2">
-                                            <span class="material-icons-outlined" style="font-size: 16px;">visibility</span>
-                                        </a>
                                         <button class="btn btn-sm btn-outline-danger" onclick="xoaBaiViet(@bv.Id)">
                                             <span class="material-icons-outlined" style="font-size: 16px;">delete</span>
                                         </button>
@@ -131,7 +128,7 @@
     function confirmXoaBaiViet() {
         const id = document.getElementById('xoaBaiVietId').value;
         
-        fetch('/QuanLyBaiViet/XoaBaiViet', {
+        fetch('/Admin/QuanLyBaiViet/XoaBaiViet', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',

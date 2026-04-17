@@ -101,25 +101,25 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-secondary">
-                <a href="#" id="linkDenBaiViet" target="_blank" class="btn btn-outline-info">
-                    <span class="material-icons-outlined me-1">open_in_new</span>
-                    Xem đầy đủ
-                </a>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            <div class="modal-footer border-secondary justify-content-center">
+                <span style="font-size: 16px; font-weight: 600; background: linear-gradient(135deg, #6D5DFC, #A86DFC); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 1px;">✦ LOHA ✦</span>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Xem trước bài viết
+        // Xem trước bài viết
     function xemTruocBaiViet(baiVietId) {
         var modal = new bootstrap.Modal(document.getElementById('xemTruocModal'));
         modal.show();
+    
         
-        document.getElementById('linkDenBaiViet').href = '/Baiviet/ChiTiet/' + baiVietId;
-        
+        var linkElement = document.getElementById('linkDenBaiViet');
+        if (linkElement) {
+            linkElement.href = '/Baiviet/ChiTiet/' + baiVietId;
+        }
+    
         fetch('/Admin/BaoCaoBaiViet/XemTruocBaiViet?id=' + baiVietId)
             .then(response => response.text())
             .then(html => {

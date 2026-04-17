@@ -45,20 +45,21 @@ namespace LOHA.Controllers.Admin
         }
         // ===== XÓA BÀI VIẾT =====
         [HttpPost]
+        [Route("XoaBaiViet")] 
         public async Task<IActionResult> XoaBaiViet(int id)
         {
             try
             {
-                // Kiểm tra đăng nhập admin
-                var lotusSession = HttpContext.Session.GetString("lotus");
-                if (string.IsNullOrEmpty(lotusSession))
+                // Dùng KiemTraDangNhap() thay vì kiểm tra trực tiếp
+                var check = KiemTraDangNhap();
+                if (check != null)
                 {
                     return Json(new { success = false, message = "Vui lòng đăng nhập admin" });
                 }
 
                 // Tìm bài viết
                 var baiViet = await _context.Baiviets
-                    .Include(b => b.User)  // ← lấy tên người đăng
+                    .Include(b => b.User)
                     .Include(b => b.Binhluans)
                     .Include(b => b.Thichs)
                     .FirstOrDefaultAsync(b => b.Id == id);
@@ -86,7 +87,7 @@ namespace LOHA.Controllers.Admin
                 _context.Baiviets.Remove(baiViet);
                 await _context.SaveChangesAsync();
 
-                // ===== GHI NHẬT KÝ =====
+                // Ghi nhật ký
                 await GhiNhatKy(
                     "XOA_BAI",
                     $"Xóa bài viết #{id} của {tenNguoiDang} (User #{userId})",
