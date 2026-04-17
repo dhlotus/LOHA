@@ -2902,3 +2902,22 @@ h2.fw-bold {
     vertical-align: middle;
     line-height: 1;
 }
+/* ===== POST AVATAR VỚI VIỀN GRADIENT ===== */
+.post-avatar-wrapper {
+    display: inline-block;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6D5DFC, #A86DFC, #FF6B8A);
+    padding: 2.5px;
+    flex-shrink: 0;
+}
+
+.post-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(109, 93, 252, 0.15);
+}

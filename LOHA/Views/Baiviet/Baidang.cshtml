@@ -12,8 +12,8 @@
             
             <!-- ===== HEADER ===== -->
             <div class="post-header">
-                <a asp-controller="User" asp-action="TrangCaNhan" asp-route-id="@Model.UserId">
-                    <img src="@avatar" class="post-avatar" style="width:48px; height:48px;" />
+                <a asp-controller="User" asp-action="TrangCaNhan" asp-route-id="@Model.UserId" class="post-avatar-wrapper">
+                    <img src="@avatar" class="post-avatar-img" />
                 </a>
                 <div class="post-user-info">
                     <a asp-controller="User" asp-action="TrangCaNhan" asp-route-id="@Model.UserId" class="post-user-name">
