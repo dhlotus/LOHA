@@ -554,7 +554,7 @@
                         <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">
                             <i class="fa-regular fa-xmark me-2"></i>Huỷ
                         </button>
-                        <button type="button" class="btn btn-danger rounded-pill px-4" onclick="window.confirmDeletePost?.()">
+                        <button type="button" class="btn btn-danger rounded-pill px-4" onclick="if(typeof xoaBaiViet === 'function') xoaBaiViet(); else if(typeof confirmDelete === 'function') confirmDelete();">
                             <i class="fa-regular fa-check me-2"></i>Xoá
                         </button>
                     </div>

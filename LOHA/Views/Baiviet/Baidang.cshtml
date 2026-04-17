@@ -29,7 +29,11 @@
                     <ul class="dropdown-menu">
                         @if (currentUserId != null && currentUserId == Model.UserId)
                         {
-                            <li><a class="dropdown-item text-danger" onclick="openDeleteModal(@Model.Id)"><i class="fa-regular fa-trash-can me-2"></i>Xóa</a></li>
+                            <li><a class="dropdown-item text-danger" onclick="if(typeof showXoaPopup === 'function') showXoaPopup(@Model.Id); else if(typeof openDeleteModal === 'function') openDeleteModal(@Model.Id);">
+                                    <i class="fa-regular fa-trash-can me-2"></i>
+                                    Xóa
+                                </a>
+                            </li>
                         }
                         else
                         {

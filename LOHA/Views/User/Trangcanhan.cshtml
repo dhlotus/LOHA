@@ -778,7 +778,7 @@
         }
     });
 
-    // Hiển thị popup xoá bài viết
+        // Hiển thị popup xoá bài viết
     function showXoaPopup(postId) {
         var menu = document.getElementById('postMenu-' + postId);
         if (menu) menu.style.display = 'none';
@@ -791,6 +791,10 @@
     // Xử lý xoá bài viết
     function xoaBaiViet() {
         var postId = document.getElementById('postIdToDelete').value;
+    
+        // Đóng popup trước
+        var modal = bootstrap.Modal.getInstance(document.getElementById('confirmXoaBaiVietModal'));
+        modal.hide();
 
         fetch('/Baiviet/XoaBaiViet', {
             method: 'POST',
@@ -806,17 +810,15 @@
                 if (postElement) {
                     postElement.remove();
                 }
-                console.log('Đã xoá bài viết');
+                showToast('Đã xóa bài viết thành công!', 'success');
             } else {
-                console.error('Lỗi:', data.message);
+                showToast(data.message || 'Có lỗi xảy ra', 'error');
             }
         })
         .catch(error => {
             console.error('Error:', error);
+            showToast('Có lỗi xảy ra', 'error');
         });
-
-        var modal = bootstrap.Modal.getInstance(document.getElementById('confirmXoaBaiVietModal'));
-        modal.hide();
     }
 
     // Gắn sự kiện cho nút xoá trong popup
@@ -1077,5 +1079,57 @@
             alert('Có lỗi xảy ra');
         });
     });
+        // Hàm này để khớp với nút trong _Layout.cshtml
+    window.confirmDeletePost = function() {
+        xoaBaiViet();
+    };
+        // Hàm hiển thị Toast
+    function showToast(message, type = 'success') {
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+            document.body.appendChild(toastContainer);
+        }
+    
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            background: ${type === 'success' ? '#10B981' : '#EF4444'};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+            min-width: 250px;
+        `;
+    
+        const icon = type === 'success' ? 'check_circle' : 'error_outline';
+        toast.innerHTML = `
+            <span class="material-icons-outlined">${icon}</span>
+            <span style="flex: 1;">${message}</span>
+            <button onclick="this.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer; opacity: 0.7; font-size: 18px;">×</button>
+        `;
+    
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Thêm animation CSS
+    if (!document.getElementById('toast-animation-style')) {
+        const style = document.createElement('style');
+        style.id = 'toast-animation-style';
+        style.textContent = `
+            @@keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
 </script>
 
