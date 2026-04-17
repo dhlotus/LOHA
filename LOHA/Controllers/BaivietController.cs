@@ -433,50 +433,60 @@ namespace LOHA.Controllers
         [HttpGet]
         public async Task<IActionResult> TaiThemBaiViet(int page = 1, int pageSize = 5)
         {
-            var baiviets = _context.Baiviets
+            // Lấy user hiện tại
+            var userSession = HttpContext.Session.GetString("user");
+            if (string.IsNullOrEmpty(userSession))
+            {
+                return Json(new { html = "", hasMore = false });
+            }
+
+            var userHT = await _context.Users.FirstOrDefaultAsync(u => u.EmailorSDT == userSession);
+            if (userHT == null)
+            {
+                return Json(new { html = "", hasMore = false });
+            }
+
+            int currentUserId = userHT.ID;
+
+            // Lấy danh sách ID bạn bè
+            var friendIds = _context.KetBans
+                .Where(kb => (kb.NguoiGuiId == currentUserId || kb.NguoiNhanId == currentUserId) && kb.TrangThai == 1)
+                .Select(kb => kb.NguoiGuiId == currentUserId ? kb.NguoiNhanId : kb.NguoiGuiId)
+                .ToList();
+            friendIds.Add(currentUserId);
+
+            var baiviets = await _context.Baiviets
                 .Include(b => b.User)
                 .Include(b => b.Binhluans)
                     .ThenInclude(bl => bl.User)
                 .Include(b => b.Thichs)
+                .Where(b => friendIds.Contains(b.UserId))
                 .OrderByDescending(b => b.Ngaydang)
                 .Skip((page - 1) * pageSize)
-                .Take(pageSize + 1) // Lấy thêm 1 để kiểm tra còn không
-                .ToList();
+                .Take(pageSize + 1)
+                .AsNoTracking() 
+                .ToListAsync();
 
             bool hasMore = baiviets.Count > pageSize;
             var postsToReturn = baiviets.Take(pageSize).ToList();
 
-            // Lấy danh sách bài viết đã like của user hiện tại
-            var userSession = HttpContext.Session.GetString("user");
-            List<int> thichs = new List<int>();
-
-            if (!string.IsNullOrEmpty(userSession))
-            {
-                var user = _context.Users.FirstOrDefault(u => u.EmailorSDT == userSession);
-                if (user != null)
-                {
-                    thichs = _context.Thichs
-                        .Where(t => t.UserId == user.ID)
-                        .Select(t => t.BaivietId)
-                        .ToList();
-                }
-            }
+            // Lấy danh sách bài viết đã like
+            var thichs = await _context.Thichs
+                .Where(t => t.UserId == currentUserId)
+                .Select(t => t.BaivietId)
+                .ToListAsync();
 
             ViewBag.Thichs = thichs;
-            int? currentUserId = null;
-
-            if (!string.IsNullOrEmpty(userSession))
-            {
-                var user = _context.Users.FirstOrDefault(u => u.EmailorSDT == userSession);
-                if (user != null)
-                    currentUserId = user.ID;
-            }
-
             ViewBag.CurrentUserId = currentUserId;
 
+            // 👉 Render từng bài thành HTML
             string html = "";
             foreach (var bv in postsToReturn)
             {
+                // Đảm bảo ViewBag được truyền đúng
+                ViewBag.Thichs = thichs;
+                ViewBag.CurrentUserId = currentUserId;
+
                 html += await RenderPartialViewToStringAsync("Baidang", bv);
             }
 
@@ -484,7 +494,7 @@ namespace LOHA.Controllers
             {
                 html = html,
                 hasMore = hasMore,
-                totalPosts = _context.Baiviets.Count()
+                totalPosts = await _context.Baiviets.CountAsync(b => friendIds.Contains(b.UserId))
             });
         }
 

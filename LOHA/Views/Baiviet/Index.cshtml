@@ -272,46 +272,77 @@
     const postsPerPage = 5;
 
     function loadMorePosts() {
-        if (loading || !hasMore) return;
-        loading = true;
-        document.getElementById('loading-spinner').style.display = 'block';
-        document.getElementById('load-more-btn').disabled = true;
-        currentPage++;
+    if (loading || !hasMore) return;
+    loading = true;
+    document.getElementById('loading-spinner').style.display = 'block';
+    document.getElementById('load-more-btn').disabled = true;
+    currentPage++;
 
-        fetch(`/Baiviet/TaiThemBaiViet?page=${currentPage}&pageSize=${postsPerPage}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.html && data.html.trim() !== '') {
-                    document.getElementById('posts-container').insertAdjacentHTML('beforeend', data.html);
+    fetch(`/Baiviet/TaiThemBaiViet?page=${currentPage}&pageSize=${postsPerPage}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.html && data.html.trim() !== '') {
+                const container = document.getElementById('posts-container');
                 
-                    if (!data.hasMore) {
-                        hasMore = false;
-                        document.getElementById('load-more-container').style.display = 'none';
-                        document.getElementById('end-message').style.display = 'block';
-                    }
+                //  KIỂM TRA TRÙNG TRƯỚC KHI APPEND
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data.html;
                 
-                    // Cập nhật badge số bài viết
-                    const badgeNumber = document.querySelector('#total-posts .badge-number');
-                    if (badgeNumber) {
-                        badgeNumber.innerText = data.totalPosts;
+                // Lấy danh sách ID bài viết hiện có trong container
+                const existingIds = new Set();
+                container.querySelectorAll('[id^="post-"]').forEach(el => {
+                    const id = el.id.replace('post-', '');
+                    existingIds.add(id);
+                });
+                
+                // Lọc và chỉ append bài viết CHƯA tồn tại
+                const newPosts = tempDiv.children;
+                let addedCount = 0;
+                
+                for (let post of newPosts) {
+                    if (post.id && post.id.startsWith('post-')) {
+                        const postId = post.id.replace('post-', '');
+                        if (!existingIds.has(postId)) {
+                            container.appendChild(post.cloneNode(true));
+                            existingIds.add(postId);
+                            addedCount++;
+                        } else {
+                            console.warn('🔄 Bài viết trùng lặp, bỏ qua: post-' + postId);
+                        }
                     }
-                } else {
+                }
+                
+                console.log(`✅ Đã thêm ${addedCount} bài viết mới`);
+                
+                // Cập nhật trạng thái hasMore dựa vào server
+                if (!data.hasMore) {
                     hasMore = false;
                     document.getElementById('load-more-container').style.display = 'none';
                     document.getElementById('end-message').style.display = 'block';
                 }
+                
+                // Cập nhật badge tổng số bài viết (từ server)
+                const badgeNumber = document.querySelector('#total-posts .badge-number');
+                if (badgeNumber) {
+                    badgeNumber.innerText = data.totalPosts;
+                }
+            } else {
+                hasMore = false;
+                document.getElementById('load-more-container').style.display = 'none';
+                document.getElementById('end-message').style.display = 'block';
+            }
             
-                loading = false;
-                document.getElementById('loading-spinner').style.display = 'none';
-                document.getElementById('load-more-btn').disabled = false;
-            })
-            .catch(error => {
-                console.error('Lỗi tải thêm bài viết:', error);
-                loading = false;
-                document.getElementById('loading-spinner').style.display = 'none';
-                document.getElementById('load-more-btn').disabled = false;
-            });
-    }
+            loading = false;
+            document.getElementById('loading-spinner').style.display = 'none';
+            document.getElementById('load-more-btn').disabled = false;
+        })
+        .catch(error => {
+            console.error('❌ Lỗi tải thêm bài viết:', error);
+            loading = false;
+            document.getElementById('loading-spinner').style.display = 'none';
+            document.getElementById('load-more-btn').disabled = false;
+        });
+}
 
     window.addEventListener('scroll', () => {
         if (!hasMore || loading) return;
