@@ -305,3 +305,30 @@ body {
 .table-dark td:nth-child(6) {
     white-space: nowrap;
 }
+/* ===== PAGINATION LOTUS STYLE ===== */
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #6D5DFC, #A86DFC) !important;
+    border-color: #6D5DFC !important;
+    color: white !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(109, 93, 252, 0.3);
+}
+
+.pagination .page-link {
+    background: #1E293B;
+    color: #A0AEC0;
+    border-color: #334155;
+    transition: all 0.2s ease;
+}
+
+    .pagination .page-link:hover {
+        background: #2D3748;
+        color: white;
+        border-color: #6D5DFC;
+    }
+
+.pagination .page-item.disabled .page-link {
+    background: #1A202C;
+    color: #4A5568;
+    border-color: #2D3748;
+}

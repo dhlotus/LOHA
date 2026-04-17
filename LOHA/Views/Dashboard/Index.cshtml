@@ -158,14 +158,13 @@
             let moTaHtml = item.moTa;
         
             // Tìm bài viết #số
-            moTaHtml = moTaHtml.replace(/#(\d+)/g, '<a href="#" onclick="xemTruocBaiViet($1); return false;" class="text-info fw-bold">#$1</a>');
+            moTaHtml = moTaHtml.replace(/#(\d+)/g, '<span class="text-info fw-semibold">#$1</span>');
         
-            // Tìm User #số
-            moTaHtml = moTaHtml.replace(/User #(\d+)/g, '<a href="#" onclick="xemTruocNguoiDung($1); return false;" class="text-warning fw-bold">User #$1</a>');
+            // USER #số
+            moTaHtml = moTaHtml.replace(/User #(\d+)/g, '<a href="#" onclick="xemTruocNguoiDung($1); return false;" class="badge text-white text-decoration-none" style="font-size: 12px; padding: 4px 8px; cursor: pointer; transition: all 0.2s; background: #6D5DFC;" onmouseover="this.style.transform=\'scale(1.05)\'; this.style.background=\'#7B6DFF\'" onmouseout="this.style.transform=\'scale(1)\'; this.style.background=\'#6D5DFC\'">User #$1</a>');
         
             // Tìm (ID: số)
-            moTaHtml = moTaHtml.replace(/\(ID:\s*(\d+)\)/g, '(<a href="#" onclick="xemTruocNguoiDung($1); return false;" class="text-info">ID: $1</a>)');
-
+            moTaHtml = moTaHtml.replace(/\(ID:\s*(\d+)\)/g, '(<a href="#" onclick="xemTruocNguoiDung($1); return false;" class="badge text-white text-decoration-none" style="font-size: 12px; padding: 4px 8px; cursor: pointer; transition: all 0.2s; background: #A86DFC;" onmouseover="this.style.transform=\'scale(1.05)\'; this.style.background=\'#B87DFF\'" onmouseout="this.style.transform=\'scale(1)\'; this.style.background=\'#A86DFC\'">ID: $1</a>)');
             html += `
                 <tr>
                     <td class="text-white-50">#${item.id}</td>
@@ -230,41 +229,6 @@
     window.addEventListener('beforeunload', function() {
         if (intervalId) clearInterval(intervalId);
     });
-        // Xem trước bài viết
-    function xemTruocBaiViet(baiVietId) {
-        fetch('/Admin/BaoCaoBaiViet/XemTruocBaiViet?id=' + baiVietId)
-            .then(response => response.text())
-            .then(html => {
-                // Xóa popup cũ nếu có
-                dongPopup();
-            
-                // Tạo overlay
-                const overlay = document.createElement('div');
-                overlay.className = 'popup-overlay';
-                overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9998;';
-                overlay.onclick = dongPopup;
-            
-                // Tạo popup
-                const popup = document.createElement('div');
-                popup.className = 'popup-content';
-                popup.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1E293B; padding:20px; border-radius:16px; z-index:9999; max-width:500px; max-height:80vh; overflow:auto; box-shadow:0 10px 40px rgba(0,0,0,0.5);';
-                popup.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="text-white mb-0">Xem trước bài viết #${baiVietId}</h5>
-                        <button class="btn-close btn-close-white" onclick="dongPopup()"></button>
-                    </div>
-                    ${html}
-                    <div class="mt-3 text-end">
-                        <a href="/Admin/QuanLyBaiViet/XemChiTiet/${baiVietId}" class="btn btn-sm btn-outline-info">Xem đầy đủ</a>
-                        <button class="btn btn-sm btn-outline-secondary ms-2" onclick="dongPopup()">Đóng</button>
-                    </div>
-                `;
-            
-                document.body.appendChild(overlay);
-                document.body.appendChild(popup);
-            });
-    }
-
 
         // Xem trước người dùng
     function xemTruocNguoiDung(userId) {
@@ -273,29 +237,90 @@
             .then(html => {
                 // Xóa popup cũ nếu có
                 dongPopup();
-            
+        
                 // Tạo overlay
                 const overlay = document.createElement('div');
                 overlay.className = 'popup-overlay';
-                overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9998;';
+                overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9998; backdrop-filter: blur(4px);';
                 overlay.onclick = dongPopup;
-            
+        
                 // Tạo popup
                 const popup = document.createElement('div');
                 popup.className = 'popup-content';
-                popup.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1E293B; padding:20px; border-radius:16px; z-index:9999; max-width:400px; box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+                popup.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: linear-gradient(145deg, #1E293B, #1A2234);
+                    padding: 0;
+                    border-radius: 24px;
+                    z-index: 9999;
+                    width: 420px;
+                    max-width: 90vw;
+                    max-height: 85vh;
+                    overflow: hidden;
+                    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(109, 93, 252, 0.1);
+                    border: 1px solid rgba(109, 93, 252, 0.15);
+                    animation: popupFadeIn 0.3s ease;
+                `;
+            
                 popup.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="text-white mb-0">Thông tin người dùng</h5>
-                        <button class="btn-close btn-close-white" onclick="dongPopup()"></button>
+                    <!-- Header với gradient -->
+                    <div style="background: linear-gradient(135deg, #6D5DFC, #A86DFC); padding: 18px 24px;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-3">
+                                <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                    <span class="material-icons-outlined" style="color: white; font-size: 22px;">person</span>
+                                </div>
+                                <h5 class="text-white mb-0 fw-bold" style="letter-spacing: -0.3px;">Thông tin người dùng</h5>
+                            </div>
+                            <button class="btn-close btn-close-white" onclick="dongPopup()" style="filter: brightness(0) invert(1); opacity: 0.8;"></button>
+                        </div>
                     </div>
-                    ${html}
-                    <div class="mt-3 text-end">
-                        <a href="/Admin/QuanLyNguoiDung/XemChiTiet/${userId}" class="btn btn-sm btn-outline-info">Xem chi tiết</a>
-                        <button class="btn btn-sm btn-outline-secondary ms-2" onclick="dongPopup()">Đóng</button>
+                
+                    <!-- Body -->
+                    <div style="padding: 24px; max-height: 55vh; overflow-y: auto;" class="custom-scrollbar">
+                        ${html}
+                    </div>
+                
+                    <!-- Footer -->
+                    <div style="padding: 16px 24px; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: flex-end; gap: 12px;">
+                        <button class="btn px-4 py-2" onclick="dongPopup()" style="background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 40px; font-weight: 500; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                            <span class="material-icons-outlined me-1" style="font-size: 16px; vertical-align: middle;">close</span>
+                            Đóng
+                        </button>
+                        <a href="/Admin/QuanLyNguoiDung/XemChiTiet/${userId}" class="btn px-4 py-2 text-white text-decoration-none" style="background: linear-gradient(135deg, #6D5DFC, #A86DFC); border: none; border-radius: 40px; font-weight: 500; transition: all 0.2s; box-shadow: 0 4px 12px rgba(109, 93, 252, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(109, 93, 252, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(109, 93, 252, 0.3)'">
+                            <span class="material-icons-outlined me-1" style="font-size: 16px; vertical-align: middle;">open_in_new</span>
+                            Xem chi tiết
+                        </a>
                     </div>
                 `;
             
+                // Thêm animation CSS nếu chưa có
+                if (!document.getElementById('popup-animation-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'popup-animation-style';
+                    style.textContent = `
+                        @@keyframes popupFadeIn {
+                            from { opacity: 0; transform: translate(-50%, -48%); }
+                            to { opacity: 1; transform: translate(-50%, -50%); }
+                        }
+                        .custom-scrollbar::-webkit-scrollbar {
+                            width: 4px;
+                        }
+                        .custom-scrollbar::-webkit-scrollbar-track {
+                            background: rgba(255,255,255,0.05);
+                            border-radius: 10px;
+                        }
+                        .custom-scrollbar::-webkit-scrollbar-thumb {
+                            background: #6D5DFC;
+                            border-radius: 10px;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+        
                 document.body.appendChild(overlay);
                 document.body.appendChild(popup);
             });
