@@ -27,28 +27,46 @@
                         <span class="chat-time">@tinCuoi.ThoiGian.ToString("HH:mm")</span>
                     }
                 </div>
-            
-                <div class="chat-preview">
-                    @if (tinCuoi != null)
+
+                @{
+                    // Lấy nhóm của user này
+                    string nhom = "Bạn bè";
+                    if (ViewBag.NhomCuaUser != null && ViewBag.NhomCuaUser.ContainsKey(user.ID))
                     {
-                        <span class="chat-last-message">
-                            @if (tinCuoi.NguoiGuiID == currentUserId)
-                            {
-                                <span style="opacity: 0.7;">Bạn: </span>
-                            }
-                            @tinCuoi.NoiDung
-                        </span>
-                    
-                        @if (isUnread)
-                        {
-                            <span class="chat-badge-new"></span>
-                        }
+                        nhom = ViewBag.NhomCuaUser[user.ID];
                     }
-                    else
+    
+                    // Xác định class và icon theo nhóm
+                    string tagClass = nhom switch
                     {
-                        <span class="chat-last-message" style="opacity: 0.5;">👋 Bắt đầu trò chuyện</span>
-                    }
-                </div>
+                        "Gia đình" => "tag-family",
+                        "Đồng nghiệp" => "tag-colleague",
+                        "Khác" => "tag-other",
+                        _ => "tag-friend"
+                    };
+    
+                    string tagIcon = nhom switch
+                    {
+                        "Gia đình" => "fa-heart",
+                        "Đồng nghiệp" => "fa-briefcase",
+                        "Khác" => "fa-ellipsis",
+                        _ => "fa-user"
+                    };
+                }
+
+                @if (isUnread)
+                {
+                    <div class="chat-unread-indicator">
+                        <span class="chat-badge-new"></span>
+                        <span class="chat-new-text">Tin nhắn mới</span>
+                    </div>
+                }
+                else
+                {
+                    <span class="chat-group-tag @tagClass">
+                        <i class="fa-solid @tagIcon"></i> @nhom
+                    </span>
+                }
             </div>
         </a>
         <div class="chat-card-menu">
