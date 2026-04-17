@@ -6,42 +6,181 @@
 }
 
 <div class="lotus-dashboard">
-    <div class="mb-3">
-        <a href="javascript:history.back()" class="btn btn-outline-light">
-            <span class="material-icons-outlined me-1">arrow_back</span>Quay lại
+    <!-- Header với navigation -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="javascript:history.back()" class="btn btn-outline-light rounded-pill px-4" style="border-color: rgba(255,255,255,0.2);">
+            <span class="material-icons-outlined me-2">arrow_back</span>Quay lại
         </a>
+        <div>
+            <h2 class="text-white mb-0 d-flex align-items-center gap-2">
+                <span class="material-icons-outlined" style="color: #6D5DFC;">person</span>
+                Chi tiết người dùng
+            </h2>
+            <p class="text-white-50 mb-0">ID: #@Model.ID • Quản lý thông tin tài khoản</p>
+        </div>
     </div>
 
-    <div class="lotus-card">
-        <div class="lotus-card-body">
-            <div class="text-center mb-3">
-                <img src="@avatar" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;" />
-                <h4 class="text-white mt-3 mb-1">@Model.Ten</h4>
-                <p class="text-white-50">@Model.EmailorSDT</p>
-                <span class="badge @(Model.TrangThai ? "bg-success" : "bg-danger")">
-                    @(Model.TrangThai ? "Hoạt động" : "Đã khóa")
-                </span>
+    <div class="row g-4">
+        <!-- Cột trái - Profile Card -->
+        <div class="col-lg-4">
+            <div class="lotus-card h-100" style="overflow: visible;">
+                <div class="lotus-card-body text-center p-4">
+                    <!-- Avatar với viền gradient -->
+                    <div style="position: relative; display: inline-block; margin-top: -60px;">
+                        <div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #6D5DFC, #A86DFC, #FF6B8A); padding: 4px;">
+                            <img src="@avatar" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover; border: 3px solid #1E293B;" />
+                        </div>
+                        <!-- Badge trạng thái -->
+                        <span class="badge @(Model.TrangThai ? "bg-success" : "bg-danger") position-absolute"
+                              style="bottom: 5px; right: 5px; padding: 6px 12px; border-radius: 40px; font-size: 11px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                            <span class="material-icons-outlined" style="font-size: 12px; vertical-align: middle;">@(Model.TrangThai ? "check_circle" : "block")</span>
+                            @(Model.TrangThai ? "Hoạt động" : "Đã khóa")
+                        </span>
+                    </div>
+                    
+                    <h3 class="text-white mt-4 mb-1 fw-bold">@Model.Ten</h3>
+                    <p class="text-white-50 mb-3 d-flex align-items-center justify-content-center gap-2">
+                        <span class="material-icons-outlined" style="font-size: 14px;">email</span>
+                        @Model.EmailorSDT
+                    </p>
+                    
+                    <!-- Thông tin cơ bản -->
+                    <div class="d-flex justify-content-center gap-4 py-3 border-top border-secondary">
+                        <div class="text-center">
+                            <h4 class="text-white mb-0 fw-bold">@(Model.Baiviets?.Count ?? 0)</h4>
+                            <small class="text-white-50">Bài viết</small>
+                        </div>
+                        <div class="text-center">
+                            <h4 class="text-white mb-0 fw-bold">@(Model.Ngaytao?.ToString("dd/MM") ?? "N/A")</h4>
+                            <small class="text-white-50">Ngày tham gia</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Thông tin cá nhân -->
+                    <div class="text-start mt-3">
+                        <div class="d-flex align-items-center gap-3 py-2">
+                            <div style="width: 32px; height: 32px; background: rgba(109, 93, 252, 0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <span class="material-icons-outlined" style="color: #6D5DFC; font-size: 18px;">cake</span>
+                            </div>
+                            <div>
+                                <small class="text-white-50">Ngày sinh</small>
+                                <p class="text-white mb-0 fw-medium">@(Model.Ngaysinh?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3 py-2">
+                            <div style="width: 32px; height: 32px; background: rgba(168, 109, 252, 0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <span class="material-icons-outlined" style="color: #A86DFC; font-size: 18px;">wc</span>
+                            </div>
+                            <div>
+                                <small class="text-white-50">Giới tính</small>
+                                <p class="text-white mb-0 fw-medium">@(Model.Gioitinh ?? "Chưa cập nhật")</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3 py-2">
+                            <div style="width: 32px; height: 32px; background: rgba(255, 107, 138, 0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <span class="material-icons-outlined" style="color: #FF6B8A; font-size: 18px;">fingerprint</span>
+                            </div>
+                            <div>
+                                <small class="text-white-50">User ID</small>
+                                <p class="text-white mb-0 fw-medium">#@Model.ID</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cột phải - Thống kê & Hoạt động -->
+        <div class="col-lg-8">
+            <!-- Card Thống kê nhanh -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="lotus-stat-card" style="padding: 20px;">
+                        <div class="lotus-stat-icon" style="background: linear-gradient(135deg, #6D5DFC, #A86DFC);">
+                            <span class="material-icons-outlined">article</span>
+                        </div>
+                        <div class="lotus-stat-info">
+                            <h3>@(Model.Baiviets?.Count ?? 0)</h3>
+                            <p>Tổng bài viết</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="lotus-stat-card" style="padding: 20px;">
+                        <div class="lotus-stat-icon" style="background: linear-gradient(135deg, #F59E0B, #D97706);">
+                            <span class="material-icons-outlined">schedule</span>
+                        </div>
+                        <div class="lotus-stat-info">
+                            <h3>@(Model.Ngaytao?.ToString("dd/MM") ?? "N/A")</h3>
+                            <p>Ngày tham gia</p>
+                        </div>
+                    </div>
+                </div>
             </div>
             
-            <hr class="border-secondary" />
-            
-            <div class="row text-center">
-                <div class="col-6">
-                    <h5 class="text-white mb-0">@(Model.Baiviets?.Count ?? 0)</h5>
-                    <small class="text-white-50">Bài viết</small>
+            <!-- Card Hành động -->
+            <div class="lotus-card">
+                <div class="lotus-card-header">
+                    <h5 class="d-flex align-items-center gap-2">
+                        <span class="material-icons-outlined" style="color: #F59E0B;">settings</span>
+                        Quản lý tài khoản
+                    </h5>
                 </div>
-                <div class="col-6">
-                    <h5 class="text-white mb-0">@(Model.Ngaytao?.ToString("dd/MM/yyyy") ?? "N/A")</h5>
-                    <small class="text-white-50">Ngày tham gia</small>
+                <div class="lotus-card-body">
+                    <div class="d-flex gap-3">
+                        @if (Model.TrangThai)
+                        {
+                            <button class="btn btn-danger rounded-pill px-4 py-2" onclick="khoaNguoiDung(@Model.ID)" style="background: linear-gradient(135deg, #EF4444, #DC2626); border: none;">
+                                <span class="material-icons-outlined me-2">lock</span>Khóa tài khoản
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-success rounded-pill px-4 py-2" onclick="moKhoaNguoiDung(@Model.ID)" style="background: linear-gradient(135deg, #10B981, #059669); border: none;">
+                                <span class="material-icons-outlined me-2">lock_open</span>Mở khóa tài khoản
+                            </button>
+                        }
+                    </div>
                 </div>
-            </div>
-            
-            <hr class="border-secondary" />
-            
-            <div class="text-white-50">
-                <p class="mb-2"><span class="material-icons-outlined" style="font-size: 14px;">cake</span> Ngày sinh: @(Model.Ngaysinh?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</p>
-                <p class="mb-0"><span class="material-icons-outlined" style="font-size: 14px;">wc</span> Giới tính: @(Model.Gioitinh ?? "Chưa cập nhật")</p>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function khoaNguoiDung(userId) {
+        if (!confirm('Bạn có chắc muốn KHÓA tài khoản này?')) return;
+        
+        fetch('/Admin/QuanLyNguoiDung/KhoaNguoiDung', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'userId=' + userId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        });
+    }
+    
+    function moKhoaNguoiDung(userId) {
+        if (!confirm('Bạn có chắc muốn MỞ KHÓA tài khoản này?')) return;
+        
+        fetch('/Admin/QuanLyNguoiDung/MoKhoaNguoiDung', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'userId=' + userId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        });
+    }
+</script>
