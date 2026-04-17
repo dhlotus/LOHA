@@ -459,11 +459,11 @@
             showToast('Có lỗi xảy ra', 'error');
         });
     }
-    // Dùng event delegation cho input trong panel (vì panel được tạo động)
-    document.addEventListener('keypress', function(e) {
+        // Dùng event delegation cho input trong panel
+    document.addEventListener('keydown', function(e) {
         if (e.target.matches('input[id^="panel-comment-input-"]')) {
             if (e.key === 'Enter') {
-                e.preventDefault();
+                e.preventDefault(); // Ngăn xuống dòng
                 const inputId = e.target.id;
                 const baivietId = inputId.replace('panel-comment-input-', '');
                 guiBinhLuanPanel(baivietId);
