@@ -399,58 +399,6 @@ namespace LOHA.Controllers // nhóm chứa các class
             ViewBag.DaGuiLoiMoi = daGuiLoiMoi;
             ViewBag.SoBanBe = soBanBe;
 
-            // ===== LẤY THAM SỐ LỌC NHÓM TỪ QUERY STRING =====
-            string nhomLoc = HttpContext.Request.Query["nhom"].ToString();
-            ViewBag.NhomDangChon = nhomLoc; // Để view biết đang lọc nhóm nào
-
-            // Lấy danh sách bạn bè
-            var danhSachBanBe = new List<User>();
-            var danhSachNhom = new List<string>(); // Lưu nhóm tương ứng với từng bạn
-
-            // Lấy tất cả quan hệ bạn bè của user này
-            var cacKetBan = await _context.KetBans
-                .Where(k => (k.NguoiGuiId == user.ID || k.NguoiNhanId == user.ID) && k.TrangThai == 1)
-                .OrderByDescending(k => k.NgayPhanHoi ?? k.NgayGui) // Mới nhất lên đầu
-                .ToListAsync();
-
-            ViewBag.NgayKetBan = new Dictionary<int, DateTime>();
-            ViewBag.NhomCuaBan = new Dictionary<int, string>(); // Lưu nhóm của từng bạn
-
-            foreach (var ketBan in cacKetBan)
-            {
-                User? ban = null;
-                string nhomCuaBanBe = "Bạn bè";
-
-                if (ketBan.NguoiGuiId == user.ID)
-                {
-                    ban = await _context.Users.FindAsync(ketBan.NguoiNhanId);
-                    // Nhóm mà user xếp cho người này
-                    nhomCuaBanBe = ketBan.NhomNguoiGui ?? "Bạn bè";
-                }
-                else
-                {
-                    ban = await _context.Users.FindAsync(ketBan.NguoiGuiId);
-                    // Nhóm mà user xếp cho người này
-                    nhomCuaBanBe = ketBan.NhomNguoiNhan ?? "Bạn bè";
-                }
-
-                if (ban != null)
-                {
-                    // Lọc theo nhóm nếu có tham số
-                    if (!string.IsNullOrEmpty(nhomLoc) && nhomLoc != "TatCa")
-                    {
-                        if (nhomCuaBanBe != nhomLoc)
-                            continue; // Bỏ qua nếu không đúng nhóm
-                    }
-
-                    ViewBag.NgayKetBan[ban.ID] = ketBan.NgayPhanHoi ?? ketBan.NgayGui;
-                    ViewBag.NhomCuaBan[ban.ID] = nhomCuaBanBe;
-                    danhSachBanBe.Add(ban);
-                }
-            }
-
-            ViewBag.DanhSachBanBe = danhSachBanBe;
-
             return View(user);
         }
         // ===== CHỈNH SỬA TRANG CÁ NHÂN =====
