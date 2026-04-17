@@ -84,6 +84,18 @@
             </div>
         }
     </div>
+    <!-- Toast Container -->
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+        <div id="liveToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <span class="material-icons-outlined me-2" style="vertical-align: middle;">check_circle</span>
+                    <span id="toastMessage">Đã xóa bài viết thành công!</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Popup xác nhận xóa -->
@@ -127,7 +139,7 @@
     
     function confirmXoaBaiViet() {
         const id = document.getElementById('xoaBaiVietId').value;
-        
+    
         fetch('/Admin/QuanLyBaiViet/XoaBaiViet', {
             method: 'POST',
             headers: {
@@ -139,16 +151,77 @@
         .then(data => {
             var modal = bootstrap.Modal.getInstance(document.getElementById('xoaBaiVietModal'));
             modal.hide();
-            
+        
             if (data.success) {
-                location.reload();
+                //  Xóa bài viết khỏi giao diện (không cần reload)
+                const postElement = document.querySelector(`.post-item[data-user]`);
+                // Tìm chính xác hơn nếu cần, hoặc dùng ID
+                const postToRemove = document.querySelector(`.post-item:has(button[onclick*="${id}"])`);
+                if (postToRemove) {
+                    postToRemove.remove();
+                }
+            
+                // HIỂN THỊ TOAST
+                showToast('Đã xóa bài viết thành công!', 'success');
             } else {
-                alert('Lỗi: ' + data.message);
+                showToast(data.message || 'Có lỗi xảy ra', 'error');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Có lỗi xảy ra');
+            var modal = bootstrap.Modal.getInstance(document.getElementById('xoaBaiVietModal'));
+            modal.hide();
+            showToast('Có lỗi xảy ra', 'error');
         });
+    }
+        function showToast(message, type = 'success') {
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+            document.body.appendChild(toastContainer);
+        }
+    
+        // Tạo toast element
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            background: ${type === 'success' ? '#10B981' : '#EF4444'};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+            min-width: 280px;
+        `;
+    
+        const icon = type === 'success' ? 'check_circle' : 'error_outline';
+        toast.innerHTML = `
+            <span class="material-icons-outlined">${icon}</span>
+            <span style="flex: 1;">${message}</span>
+            <button onclick="this.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer; opacity: 0.7; font-size: 18px;">×</button>
+        `;
+    
+        toastContainer.appendChild(toast);
+    
+        // Tự động ẩn sau 3 giây
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Thêm animation CSS (nếu chưa có)
+    if (!document.getElementById('toast-animation-style')) {
+        const style = document.createElement('style');
+        style.id = 'toast-animation-style';
+        style.textContent = `
+            @@keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
     }
 </script>
