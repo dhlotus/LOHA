@@ -41,10 +41,10 @@
             <!-- Kết quả tìm kiếm -->
             @if (ViewBag.KetQua != null)
             {
-                if (ViewBag.KetQua.Count == 0)
+                @if (ViewBag.KetQua.Count == 0)
                 {
                     <div class="text-center py-5 bg-white rounded-4 shadow-sm">
-                        <i class="fa-regular fa-user-slash fa-4x text-secondary mb-3"></i>
+                        <span class="material-icons-outlined" style="font-size: 64px; color: #9CA3AF; margin-bottom: 16px;">person_off</span>
                         <h4 class="fw-bold">Không tìm thấy kết quả</h4>
                         <p class="text-secondary">Thử tìm kiếm với từ khóa khác</p>
                     </div>
