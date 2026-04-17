@@ -639,7 +639,29 @@
         vertical-align: middle;
     }
 </style>
-
+<!-- ===== POPUP XÁC NHẬN XÓA BÌNH LUẬN ===== -->
+<div class="modal fade" id="xoaBinhLuanModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-body text-center p-4">
+                <div class="mb-3">
+                    <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex p-3">
+                        <span class="material-icons-outlined" style="font-size: 40px; color: #EF4444;">delete</span>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2" style="color: #1E2A78;">Xóa bình luận?</h5>
+                <p class="text-secondary mb-4">Bình luận sẽ bị xóa vĩnh viễn. Bạn có chắc chắn?</p>
+                <input type="hidden" id="binhluanIdToDelete" />
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-danger rounded-pill px-4" onclick="xacNhanXoaBinhLuan()">
+                        <span class="material-icons-outlined me-1" style="font-size: 18px;">delete</span>Xóa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts {
     <script>
         // Like function
@@ -678,20 +700,31 @@
                 }
             });
         }
-                // Hàm xóa bình luận
+                // Biến lưu ID bình luận cần xóa
+        var binhLuanIdToDelete = 0;
+
+        // Hàm mở popup xác nhận xóa bình luận
         function xoaBinhLuan(id) {
-            if (!confirm('Bạn có chắc muốn xóa bình luận này?')) return;
+            binhLuanIdToDelete = id;
+            var modal = new bootstrap.Modal(document.getElementById('xoaBinhLuanModal'));
+            modal.show();
+        }
+
+        // Hàm xác nhận xóa (gọi từ nút trong popup)
+        function xacNhanXoaBinhLuan() {
+            var modal = bootstrap.Modal.getInstance(document.getElementById('xoaBinhLuanModal'));
+            modal.hide();
     
             fetch('/Baiviet/XoaBinhLuan', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'id=' + id
+                body: 'id=' + binhLuanIdToDelete
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     // Xóa bình luận khỏi giao diện
-                    document.getElementById('binhluan-' + id)?.remove();
+                    document.getElementById('binhluan-' + binhLuanIdToDelete)?.remove();
             
                     // Cập nhật số lượng
                     document.getElementById('comment-count-header').innerText = '(' + data.soLuong + ')';
@@ -706,9 +739,15 @@
                             </div>
                         `;
                     }
+            
+                    showToast('Đã xóa bình luận', 'success');
                 } else {
-                    alert(data.message);
+                    showToast(data.message, 'error');
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Có lỗi xảy ra', 'error');
             });
         }
                 let deletePostId = 0;
