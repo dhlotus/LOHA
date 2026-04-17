@@ -2897,3 +2897,8 @@ h2.fw-bold {
         opacity: 1;
     }
 }
+.btn .material-icons-outlined {
+    font-size: 18px;
+    vertical-align: middle;
+    line-height: 1;
+}
