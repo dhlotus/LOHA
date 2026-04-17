@@ -107,19 +107,91 @@
         </div>
     </div>
 </div>
+<!-- Popup xác nhận xử lý báo cáo -->
+<div class="modal fade" id="xacNhanBaoCaoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <div class="modal-body text-center p-4">
+                <div class="mb-3">
+                    <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex p-3" id="modalIconWrapper">
+                        <span class="material-icons-outlined" id="modalIcon" style="font-size: 40px; color: #F59E0B;">help</span>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2" id="modalTitle">Xác nhận</h5>
+                <p class="text-white-50 mb-4" id="modalMessage">Bạn có chắc muốn thực hiện hành động này?</p>
+                <input type="hidden" id="actionType" />
+                <input type="hidden" id="baoCaoId" />
+                <input type="hidden" id="baiVietId" />
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                        <span class="material-icons-outlined me-1" style="font-size: 16px;">close</span>Hủy
+                    </button>
+                    <button type="button" class="btn btn-warning rounded-pill px-4" id="confirmActionBtn">
+                        <span class="material-icons-outlined me-1" style="font-size: 16px;">check</span>Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Toast Container -->
+<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 <script>
-        // Xem trước bài viết
+    // ===== TOAST FUNCTION =====
+    function showToast(message, type = 'success') {
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+            document.body.appendChild(toastContainer);
+        }
+        
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            background: ${type === 'success' ? '#10B981' : '#EF4444'};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+            min-width: 280px;
+        `;
+        
+        const icon = type === 'success' ? 'check_circle' : 'error_outline';
+        toast.innerHTML = `
+            <span class="material-icons-outlined">${icon}</span>
+            <span style="flex: 1;">${message}</span>
+            <button onclick="this.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer; opacity: 0.7; font-size: 18px;">×</button>
+        `;
+        
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Thêm animation CSS
+    if (!document.getElementById('toast-animation-style')) {
+        const style = document.createElement('style');
+        style.id = 'toast-animation-style';
+        style.textContent = `
+            @@keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // ===== XEM TRƯỚC BÀI VIẾT =====
     function xemTruocBaiViet(baiVietId) {
         var modal = new bootstrap.Modal(document.getElementById('xemTruocModal'));
         modal.show();
-    
         
-        var linkElement = document.getElementById('linkDenBaiViet');
-        if (linkElement) {
-            linkElement.href = '/Baiviet/ChiTiet/' + baiVietId;
-        }
-    
         fetch('/Admin/BaoCaoBaiViet/XemTruocBaiViet?id=' + baiVietId)
             .then(response => response.text())
             .then(html => {
@@ -129,11 +201,61 @@
                 document.getElementById('xemTruocContent').innerHTML = '<p class="text-danger">Lỗi tải bài viết</p>';
             });
     }
-    
-    // Đồng ý báo cáo (xóa bài viết)
-    function dongYBaoCao(baoCaoId, baiVietId) {
-        if (!confirm('Đồng ý báo cáo sẽ XÓA bài viết này. Bạn chắc chắn?')) return;
+
+    // ===== MỞ POPUP XÁC NHẬN =====
+    function moPopupXacNhan(type, baoCaoId, baiVietId = 0) {
+        document.getElementById('actionType').value = type;
+        document.getElementById('baoCaoId').value = baoCaoId;
+        document.getElementById('baiVietId').value = baiVietId;
         
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalIcon = document.getElementById('modalIcon');
+        const modalIconWrapper = document.getElementById('modalIconWrapper');
+        const confirmBtn = document.getElementById('confirmActionBtn');
+        
+        if (type === 'dongY') {
+            modalTitle.innerText = 'Đồng ý báo cáo?';
+            modalMessage.innerText = 'Đồng ý báo cáo sẽ XÓA bài viết này. Bạn chắc chắn?';
+            modalIcon.innerText = 'delete';
+            modalIcon.style.color = '#EF4444';
+            modalIconWrapper.className = 'bg-danger bg-opacity-10 rounded-circle d-inline-flex p-3';
+            confirmBtn.className = 'btn btn-danger rounded-pill px-4';
+            confirmBtn.innerHTML = '<span class="material-icons-outlined me-1" style="font-size: 16px;">delete</span>Xóa bài viết';
+        } else {
+            modalTitle.innerText = 'Từ chối báo cáo?';
+            modalMessage.innerText = 'Báo cáo sẽ bị từ chối và chuyển sang trạng thái đã xử lý. Bạn chắc chắn?';
+            modalIcon.innerText = 'close';
+            modalIcon.style.color = '#F59E0B';
+            modalIconWrapper.className = 'bg-warning bg-opacity-10 rounded-circle d-inline-flex p-3';
+            confirmBtn.className = 'btn btn-warning rounded-pill px-4';
+            confirmBtn.innerHTML = '<span class="material-icons-outlined me-1" style="font-size: 16px;">close</span>Từ chối';
+        }
+        
+        var modal = new bootstrap.Modal(document.getElementById('xacNhanBaoCaoModal'));
+        modal.show();
+    }
+
+    // ===== XỬ LÝ XÁC NHẬN =====
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('confirmActionBtn').addEventListener('click', function() {
+            const actionType = document.getElementById('actionType').value;
+            const baoCaoId = document.getElementById('baoCaoId').value;
+            const baiVietId = document.getElementById('baiVietId').value;
+            
+            var modal = bootstrap.Modal.getInstance(document.getElementById('xacNhanBaoCaoModal'));
+            modal.hide();
+            
+            if (actionType === 'dongY') {
+                thucHienDongYBaoCao(baoCaoId, baiVietId);
+            } else {
+                thucHienTuChoiBaoCao(baoCaoId);
+            }
+        });
+    });
+
+    // ===== THỰC HIỆN ĐỒNG Ý BÁO CÁO =====
+    function thucHienDongYBaoCao(baoCaoId, baiVietId) {
         fetch('/Admin/BaoCaoBaiViet/DongYBaoCao', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -143,17 +265,23 @@
         .then(data => {
             if (data.success) {
                 document.getElementById('baoCao-' + baoCaoId).remove();
-                location.reload();
+                showToast('Đã xóa bài viết và xử lý báo cáo thành công!', 'success');
+                
+                // Kiểm tra nếu hết báo cáo thì reload để hiện thông báo trống
+                if (document.querySelectorAll('tbody tr').length === 0) {
+                    setTimeout(() => location.reload(), 1500);
+                }
             } else {
-                alert('Lỗi: ' + data.message);
+                showToast(data.message || 'Có lỗi xảy ra', 'error');
             }
+        })
+        .catch(error => {
+            showToast('Có lỗi xảy ra', 'error');
         });
     }
-    
-    // Từ chối báo cáo
-    function tuChoiBaoCao(baoCaoId) {
-        if (!confirm('Từ chối báo cáo này?')) return;
-        
+
+    // ===== THỰC HIỆN TỪ CHỐI BÁO CÁO =====
+    function thucHienTuChoiBaoCao(baoCaoId) {
         fetch('/Admin/BaoCaoBaiViet/TuChoiBaoCao', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -163,9 +291,27 @@
         .then(data => {
             if (data.success) {
                 document.getElementById('baoCao-' + baoCaoId).remove();
+                showToast('Đã từ chối báo cáo!', 'success');
+                
+                // Kiểm tra nếu hết báo cáo thì reload
+                if (document.querySelectorAll('tbody tr').length === 0) {
+                    setTimeout(() => location.reload(), 1500);
+                }
             } else {
-                alert('Lỗi: ' + data.message);
+                showToast(data.message || 'Có lỗi xảy ra', 'error');
             }
+        })
+        .catch(error => {
+            showToast('Có lỗi xảy ra', 'error');
         });
+    }
+
+    // ===== GỌI TỪ NÚT (thay thế onclick cũ) =====
+    function dongYBaoCao(baoCaoId, baiVietId) {
+        moPopupXacNhan('dongY', baoCaoId, baiVietId);
+    }
+
+    function tuChoiBaoCao(baoCaoId) {
+        moPopupXacNhan('tuChoi', baoCaoId);
     }
 </script>
