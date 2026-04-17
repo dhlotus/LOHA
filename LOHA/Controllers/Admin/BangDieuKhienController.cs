@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using LOHA.Models;
 using Microsoft.EntityFrameworkCore;
-// vừa đẩy
+
 namespace LOHA.Controllers.Admin
 {
     /// <summary>
