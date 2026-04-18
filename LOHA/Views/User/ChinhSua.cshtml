@@ -22,17 +22,20 @@
                 <a asp-action="Trangcanhan" class="nav-back">
                     <span class="material-icons">arrow_back</span> Quay lại
                 </a>
-                <div class="nav-title">
-                    <span>Cài đặt</span>
-                    <h1>Thông tin cá nhân</h1>
-                </div>
+               
                 <div class="nav-placeholder"></div>
             </div>
-
+            <div class="nav-title">
+                <span>Cài đặt</span>
+                <h1>Thông tin cá nhân</h1>
+            </div>
             <!-- Avatar Section -->
             <div class="avatar-section">
-                <div class="avatar-wrapper">
-                    <img src="/images/default.png" alt="Avatar" class="avatar-img">
+                <div class="avatar-wrapper" style="background: linear-gradient(135deg, #6D5DFC, #A86DFC, #FF6B8A); padding: 3px; border-radius: 50%;">
+                    @{
+                        string avatarImage = !string.IsNullOrEmpty(Model.Avatar) ? Model.Avatar : "/images/default.png";
+                    }
+                    <img src="@avatarImage" alt="Avatar" class="avatar-img" style="border: 3px solid white;">
                 </div>
                 <h3 class="avatar-name">@Model.Ten</h3>
                 <p class="avatar-email">@Model.EmailorSDT</p>
@@ -450,7 +453,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 32px;
+    margin-bottom: 0;
 }
 
 .nav-back {
@@ -479,6 +482,7 @@
 }
 .nav-title {
     text-align: center;
+    margin-bottom: 16px;
 }
 
 .nav-title span {
