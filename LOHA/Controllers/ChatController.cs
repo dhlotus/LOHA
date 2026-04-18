@@ -46,7 +46,7 @@ namespace LOHA.Controllers
 
             // TẠO DICTIONARY ĐỂ LƯU NHÓM
             ViewBag.NhomCuaUser = new Dictionary<int, string>();
-
+            var thoiGianCuoiDict = new Dictionary<int, DateTime>();
             foreach (var userId in banBeIds)
             {
                 var tinCuoi = await _context.TinNhans
@@ -77,6 +77,7 @@ namespace LOHA.Controllers
 
                         ViewBag.NhomCuaUser[userId] = nhom;
                         ViewBag.TinCuoi[userId] = tinCuoi;
+                        thoiGianCuoiDict[userId] = tinCuoi.ThoiGian; 
                         danhSachUser.Add(user);
                     }
                 }
@@ -110,11 +111,17 @@ namespace LOHA.Controllers
                         if (tinCuoi != null)
                         {
                             ViewBag.TinCuoi[userId] = tinCuoi;
+                            thoiGianCuoiDict[userId] = tinCuoi.ThoiGian; 
                             danhSachUser.Add(user);
                         }
                     }
                 }
             }
+
+            // SẮP XẾP LẠI DANH SÁCH THEO THỜI GIAN TIN NHẮN CUỐI (MỚI NHẤT LÊN ĐẦU)
+            danhSachUser = danhSachUser
+                .OrderByDescending(u => thoiGianCuoiDict.ContainsKey(u.ID) ? thoiGianCuoiDict[u.ID] : DateTime.MinValue)
+                .ToList();
 
             ViewBag.DanhSachUser = danhSachUser;
             ViewBag.CurrentUserId = currentUser.ID;
@@ -371,16 +378,16 @@ namespace LOHA.Controllers
             if (currentUser == null)
                 return Unauthorized();
 
-            // Lấy danh sách người có tin nhắn chưa xóa (giống action Index)
+            // Lấy danh sách người có tin nhắn chưa xóa
             var danhSachUser = new List<User>();
-            ViewBag.TinCuoi = new Dictionary<int, TinNhan>();
+            var tinCuoiDict = new Dictionary<int, TinNhan>();
+            var thoiGianCuoiDict = new Dictionary<int, DateTime>(); 
 
             var banBeIds = await _context.KetBans
                 .Where(k => (k.NguoiGuiId == currentUser.ID || k.NguoiNhanId == currentUser.ID) && k.TrangThai == 1)
                 .Select(k => k.NguoiGuiId == currentUser.ID ? k.NguoiNhanId : k.NguoiGuiId)
                 .ToListAsync();
 
-            // TẠO DICTIONARY ĐỂ LƯU NHÓM
             ViewBag.NhomCuaUser = new Dictionary<int, string>();
 
             foreach (var userId in banBeIds)
@@ -396,14 +403,13 @@ namespace LOHA.Controllers
                     var user = await _context.Users.FindAsync(userId);
                     if (user != null)
                     {
-                        // 👉 LẤY NHÓM TỪ KETBAN
                         var ketBan = await _context.KetBans
                             .FirstOrDefaultAsync(k =>
                                 ((k.NguoiGuiId == currentUser.ID && k.NguoiNhanId == userId) ||
                                  (k.NguoiGuiId == userId && k.NguoiNhanId == currentUser.ID))
                                 && k.TrangThai == 1);
 
-                        string nhom = "Bạn bè"; // Mặc định
+                        string nhom = "Bạn bè";
                         if (ketBan != null)
                         {
                             nhom = (ketBan.NguoiGuiId == currentUser.ID)
@@ -412,12 +418,19 @@ namespace LOHA.Controllers
                         }
 
                         ViewBag.NhomCuaUser[userId] = nhom;
-                        ViewBag.TinCuoi[userId] = tinCuoi;
+                        tinCuoiDict[userId] = tinCuoi;
+                        thoiGianCuoiDict[userId] = tinCuoi.ThoiGian; 
                         danhSachUser.Add(user);
                     }
                 }
             }
 
+            // SẮP XẾP LẠI DANH SÁCH THEO THỜI GIAN TIN NHẮN CUỐI (MỚI NHẤT LÊN ĐẦU)
+            danhSachUser = danhSachUser
+                .OrderByDescending(u => thoiGianCuoiDict[u.ID])
+                .ToList();
+
+            ViewBag.TinCuoi = tinCuoiDict;
             ViewBag.DanhSachUser = danhSachUser;
             ViewBag.CurrentUserId = currentUser.ID;
 
