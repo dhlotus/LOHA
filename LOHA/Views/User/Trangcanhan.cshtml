@@ -27,32 +27,61 @@
              class="img-fluid w-100 rounded-4"
              style="height: 200px; object-fit: cover;" />
         
-        <!-- Icon camera cho ảnh bìa (chỉ hiện khi là chủ trang) -->
+        <!-- Icon camera cho ảnh bìa -->
         @if (ViewBag.CurrentUserId == Model.ID)
         {
             <label for="uploadCover"
-                   class="shadow"
-                   style="position: absolute; bottom: 10px; right: 10px; background: white; border-radius: 50%; padding: 8px; cursor: pointer; z-index: 5;">
-                <i class="fa-solid fa-camera"></i>
+                   style="position: absolute; bottom: 15px; right: 15px;
+                background: linear-gradient(135deg, #6D5DFC, #A86DFC);
+                color: white;
+                width: 36px; height: 36px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                z-index: 10;
+                box-shadow: 0 4px 12px rgba(109, 93, 252, 0.4);
+                border: 2px solid white;
+                transition: all 0.2s ease;"
+                   onmouseover="this.style.transform='scale(1.1)';"
+                   onmouseout="this.style.transform='scale(1)';">
+                <span class="material-icons-outlined" style="font-size: 20px;">photo_camera</span>
             </label>
             <input type="file" id="uploadCover" class="d-none" accept="image/*" />
         }
     </div>
 
     <!-- AVATAR + ICON CAMERA -->
-    <div class="position-absolute" style="bottom: -40px; left: 20px; z-index: 10;">
+    <div class="position-absolute" style="bottom: -50px; left: 20px; z-index: 10;">
         <div class="position-relative">
-            <img id="avatarImg" src="@avatarImage"
-                 class="rounded-circle border border-4 border-white shadow"
-                 style="width: 90px; height: 90px; object-fit: cover;" />
-            
+            <!-- Avatar với viền gradient -->
+            <div style="width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(135deg, #6D5DFC, #A86DFC, #FF6B8A); padding: 3px;">
+                <img id="avatarImg" src="@avatarImage"
+                     class="rounded-circle"
+                     style="width: 100%; height: 100%; object-fit: cover; border: 3px solid white;" />
+            </div>
+        
             <!-- Icon camera cho avatar (chỉ hiện khi là chủ trang) -->
             @if (ViewBag.CurrentUserId == Model.ID)
             {
                 <label for="uploadAvatar"
-                       class="shadow"
-                       style="position: absolute; bottom: 0; right: 0; background: white; border-radius: 50%; padding: 5px; cursor: pointer; z-index: 5;">
-                    <i class="fa-solid fa-camera" style="font-size: 12px;"></i>
+                       style="position: absolute; bottom: 5px; right: 5px;
+                    background: linear-gradient(135deg, #6D5DFC, #A86DFC);
+                    color: white;
+                    width: 32px; height: 32px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    z-index: 10;
+                    box-shadow: 0 4px 12px rgba(109, 93, 252, 0.4);
+                    border: 2px solid white;
+                    transition: all 0.2s ease;"
+                       onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 6px 16px rgba(109, 93, 252, 0.5)';"
+                       onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(109, 93, 252, 0.4)';">
+                    <span class="material-icons-outlined" style="font-size: 18px;">photo_camera</span>
                 </label>
                 <input type="file" id="uploadAvatar" class="d-none" accept="image/*" />
             }
@@ -552,6 +581,42 @@
         .card:hover {
             box-shadow: 0 8px 20px rgba(0,0,0,0.08) !important;
         }
+    /* Responsive cho avatar */
+    @@media (max-width: 768px) {
+        .position-absolute[style*="bottom: -40px"] div[style*="width: 90px"] {
+            width: 70px !important;
+            height: 70px !important;
+        }
+    
+        .position-absolute[style*="bottom: -40px"] label[for="uploadAvatar"] {
+            width: 28px !important;
+            height: 28px !important;
+            bottom: 3px !important;
+            right: 3px !important;
+        }
+    
+            .position-absolute[style*="bottom: -40px"] label[for="uploadAvatar"] span {
+                font-size: 16px !important;
+            }
+    }
+
+    @@media (min-width: 992px) {
+        .position-absolute[style*="bottom: -40px"] div[style*="width: 90px"] {
+            width: 120px !important;
+            height: 120px !important;
+        }
+    
+        .position-absolute[style*="bottom: -40px"] label[for="uploadAvatar"] {
+            width: 36px !important;
+            height: 36px !important;
+            bottom: 8px !important;
+            right: 8px !important;
+        }
+    
+            .position-absolute[style*="bottom: -40px"] label[for="uploadAvatar"] span {
+                font-size: 20px !important;
+            }
+    }
 </style>
 
 <!-- JavaScript -->
@@ -627,7 +692,6 @@
         alert('Tính năng đang phát triển');
     }
 
-        // Sửa lại hàm guiLoiMoiKetBan (bỏ alert)
     function guiLoiMoiKetBan(nguoiNhanId) {
         fetch('/User/GuiLoiMoiKetBan', {
             method: 'POST',
@@ -1083,6 +1147,31 @@
     window.confirmDeletePost = function() {
         xoaBaiViet();
     };
+        // Hàm xác nhận xóa (dùng cho Index.cshtml)
+    function confirmDelete() {
+        fetch('/Baiviet/XoaBaiViet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'id=' + deletePostId
+        })
+        .then(res => res.json())
+        .then(data => {
+            var modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+            modal.hide();
+        
+            if (data.success) {
+                document.getElementById('post-' + deletePostId)?.remove();
+                showToast('Đã xóa bài viết thành công!', 'success');
+            } else {
+                showToast(data.message || 'Có lỗi xảy ra', 'error');
+            }
+        })
+        .catch(error => {
+            var modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+            modal.hide();
+            showToast('Có lỗi xảy ra', 'error');
+        });
+    }
         // Hàm hiển thị Toast
     function showToast(message, type = 'success') {
         let toastContainer = document.getElementById('toast-container');
