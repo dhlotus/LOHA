@@ -212,42 +212,66 @@
     <div class="tab-content mt-3">
         <!-- Tab Bài viết -->
         <div class="tab-pane fade show active" id="posts" role="tabpanel">
-            <!-- Form đăng bài -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
+            <!-- ===== FORM ĐĂNG BÀI - MINIMALIST LOHA STYLE ===== -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 24px; overflow: hidden; transition: all 0.3s ease;">
+                <div class="card-body p-4">
                     <form action="/Baiviet/Taobaiviet" method="post" enctype="multipart/form-data" id="postForm">
-                        <div class="d-flex gap-3">
-                            <img src="@avatarImage" class="rounded-circle" style="width: 48px; height: 48px; object-fit: cover;" />
+            
+                        <!-- Ô nhập liệu chính - KHÔNG AVATAR, KHÔNG VIỀN -->
+                        <div class="post-input-wrapper" id="postInputWrapper">
                             <textarea name="Noidung"
-                                      class="form-control rounded-3"
-                                      rows="2"
-                                      placeholder="Bạn đang nghĩ gì, @Model.Ten?"
+                                      class="form-control border-0 p-0"
+                                      rows="1"
+                                      placeholder="Bắt đầu bài viết LOHA của bạn..."
                                       id="postContent"
-                                      style="resize: none;"></textarea>
+                                      style="resize: none; box-shadow: none; font-size: 18px; font-weight: 400; color: #2D1B69; background: transparent; transition: all 0.2s; line-height: 1.5;"
+                                      onfocus="expandTextarea(this)"
+                                      oninput="expandTextarea(this); checkPostContent()"></textarea>
                         </div>
 
-                        <!-- Preview ảnh -->
+                        <!-- Preview ảnh - Minimalist -->
                         <div id="imagePreviewArea" class="mt-3 position-relative" style="display: none;">
-                            <img id="imagePreview" class="img-fluid rounded-3" style="max-height: 300px; width: 100%; object-fit: contain;" />
-                            <button type="button" class="position-absolute top-0 end-0 m-2 btn btn-dark btn-sm rounded-circle"
-                                    onclick="removeImage()">
-                                <i class="fa-regular fa-xmark"></i>
+                            <img id="imagePreview" class="img-fluid" style="border-radius: 20px; max-height: 350px; width: 100%; object-fit: cover;" />
+                            <button type="button" class="btn position-absolute top-0 end-0 m-3"
+                                    onclick="removeImage()"
+                                    style="background: rgba(0,0,0,0.6); color: white; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); border: none;">
+                                <span class="material-icons-outlined" style="font-size: 20px;">close</span>
                             </button>
                         </div>
 
-                        <!-- Toolbar -->
-                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                            <div class="d-flex gap-2">
-                                <label for="postImage" class="btn btn-outline-secondary rounded-pill">
-                                    <i class="fa-regular fa-image me-2"></i>Ảnh
-                                </label>
-                                <input type="file" name="AnhFile" id="postImage" class="d-none" accept="image/*" onchange="previewPostImage(this)" />
-                                <button type="button" class="btn btn-outline-secondary rounded-pill" onclick="openEmojiPicker()">
-                                    <i class="fa-regular fa-face-smile me-2"></i>Cảm xúc
-                                </button>
-                            </div>
-                            <button type="submit" class="btn btn-primary rounded-pill px-4" id="submitPostBtn" disabled>
-                                <i class="fa-regular fa-paper-plane me-2"></i>Đăng
+                        <!-- Floating Toolbar - Hiện khi focus hoặc có ảnh -->
+                        <div id="floatingToolbar" class="d-flex align-items-center gap-2 pt-3" style="opacity: 0; max-height: 0; overflow: hidden; transition: all 0.3s ease;">
+                            <!-- Nút chọn ảnh -->
+                            <label for="postImage" class="btn rounded-pill d-flex align-items-center gap-2"
+                                   style="background: #F3F0FF; color: #6D5DFC; border: none; padding: 10px 20px; font-weight: 500; transition: all 0.2s;"
+                                   onmouseover="this.style.background='#6D5DFC'; this.style.color='white';"
+                                   onmouseout="this.style.background='#F3F0FF'; this.style.color='#6D5DFC';">
+                                <span class="material-icons-outlined" style="font-size: 20px;">image</span>
+                                <span>Thêm ảnh</span>
+                            </label>
+                            <input type="file" name="AnhFile" id="postImage" class="d-none" accept="image/*" onchange="previewPostImage(this)" />
+                
+                            <!-- Nút cảm xúc (tùy chọn) -->
+                            <button type="button" class="btn rounded-pill d-flex align-items-center gap-2"
+                                    onclick="openEmojiPicker()"
+                                    style="background: #F3F0FF; color: #FF6B8A; border: none; padding: 10px 20px; font-weight: 500;"
+                                    onmouseover="this.style.background='#FF6B8A'; this.style.color='white';"
+                                    onmouseout="this.style.background='#F3F0FF'; this.style.color='#FF6B8A';">
+                                <span class="material-icons-outlined" style="font-size: 20px;">sentiment_satisfied</span>
+                                <span>Cảm xúc</span>
+                            </button>
+                        </div>
+
+                        <!-- Nút Đăng - Góc phải, chỉ hiện khi có nội dung -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn px-5 py-2 text-white"
+                                    id="submitPostBtn"
+                                    style="background: #E9E7F5; border-radius: 60px; font-weight: 600; border: none; transition: all 0.3s; color: #9CA3AF;"
+                                    disabled>
+                                <span class="d-flex align-items-center gap-2">
+                                    <span>Đăng</span>
+                                    <span class="material-icons-outlined" style="font-size: 18px;">send</span>
+                                </span>
                             </button>
                         </div>
                     </form>
@@ -616,6 +640,46 @@
             .position-absolute[style*="bottom: -40px"] label[for="uploadAvatar"] span {
                 font-size: 20px !important;
             }
+    }
+    /* Hiệu ứng focus cho textarea */
+    #postContent:focus {
+        outline: none;
+    }
+    
+    #postContent::placeholder {
+        color: #9CA3AF;
+        font-weight: 300;
+        letter-spacing: -0.2px;
+    }
+    
+    /* Nút đăng active */
+    #submitPostBtn.active {
+        background: linear-gradient(135deg, #6D5DFC, #A86DFC) !important;
+        color: white !important;
+        box-shadow: 0 6px 18px rgba(109, 93, 252, 0.3);
+    }
+    
+        #submitPostBtn.active:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(109, 93, 252, 0.4);
+        }
+    
+    /* Floating toolbar hiện ra */
+    #floatingToolbar.show {
+        opacity: 1 !important;
+        max-height: 100px !important;
+    }
+    
+    /* Responsive */
+    @@media (max-width: 576px) {
+        #postContent {
+            font-size: 16px !important;
+        }
+        
+        #floatingToolbar .btn {
+            padding: 8px 16px !important;
+            font-size: 14px !important;
+        }
     }
 </style>
 
@@ -1220,5 +1284,87 @@
         `;
         document.head.appendChild(style);
     }
+    // Mở rộng textarea khi nhập
+    function expandTextarea(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+        
+        // Hiển thị/ẩn floating toolbar khi có nội dung hoặc focus
+        const toolbar = document.getElementById('floatingToolbar');
+        const hasContent = textarea.value.trim() !== '';
+        const hasImage = document.getElementById('postImage').files.length > 0;
+        
+        if (hasContent || hasImage) {
+            toolbar.classList.add('show');
+        }
+    }
+    
+    // Hiện toolbar khi focus
+    document.getElementById('postContent').addEventListener('focus', function() {
+        document.getElementById('floatingToolbar').classList.add('show');
+    });
+    
+    // Ẩn toolbar khi blur (nếu không có nội dung và không có ảnh)
+    document.getElementById('postContent').addEventListener('blur', function() {
+        const hasContent = this.value.trim() !== '';
+        const hasImage = document.getElementById('postImage').files.length > 0;
+        
+        if (!hasContent && !hasImage) {
+            document.getElementById('floatingToolbar').classList.remove('show');
+        }
+    });
+    
+    // Kiểm tra nội dung để enable nút đăng
+    function checkPostContent() {
+        const content = document.getElementById('postContent').value.trim();
+        const hasImage = document.getElementById('postImage').files.length > 0;
+        const submitBtn = document.getElementById('submitPostBtn');
+        const isValid = content !== '' || hasImage;
+        
+        if (isValid) {
+            submitBtn.disabled = false;
+            submitBtn.classList.add('active');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.classList.remove('active');
+        }
+    }
+    
+    // Preview ảnh
+    function previewPostImage(input) {
+        const preview = document.getElementById('imagePreview');
+        const previewArea = document.getElementById('imagePreviewArea');
+        const toolbar = document.getElementById('floatingToolbar');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                previewArea.style.display = 'block';
+                toolbar.classList.add('show');
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+        checkPostContent();
+    }
+    
+    // Xóa ảnh
+    function removeImage() {
+        const input = document.getElementById('postImage');
+        const previewArea = document.getElementById('imagePreviewArea');
+        
+        input.value = '';
+        previewArea.style.display = 'none';
+        checkPostContent();
+        
+        // Kiểm tra lại toolbar
+        const hasContent = document.getElementById('postContent').value.trim() !== '';
+        if (!hasContent) {
+            document.getElementById('floatingToolbar').classList.remove('show');
+        }
+    }
+    
+    // Lắng nghe sự kiện nhập text
+    document.getElementById('postContent').addEventListener('input', checkPostContent);
 </script>
 
