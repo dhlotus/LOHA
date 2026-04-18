@@ -84,5 +84,10 @@ namespace LOHA.Hubs
         {
             await Clients.User(userId.ToString()).SendAsync("CapNhatBadgeThongBao");
         }
+        // Gửi tín hiệu force logout đến user bị khóa
+        public async Task ForceLogout(int userId, string message)
+        {
+            await Clients.User(userId.ToString()).SendAsync("ForceLogout", message);
+        }
     }
 }

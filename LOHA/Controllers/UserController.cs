@@ -293,11 +293,19 @@ namespace LOHA.Controllers // nhóm chứa các class
             return RedirectToAction("Trangcanhan", "User");
         }
 
-        // đăng xuất
+        // đăng xuất - Hỗ trợ cả GET và POST
+        [HttpGet]
+        [HttpPost]
         public IActionResult DangXuat()
         {
-            HttpContext.Session.Clear(); // thống tin request hiện tại, truy cập sesstion, xoá toàn bộ dữ liệu trong sesstion => xoá thông tin đăng nhập
-            return RedirectToAction("DangNhap"); // chuyển về trang đăng nhập
+            HttpContext.Session.Clear();
+
+            // Nếu là POST (AJAX) -> trả về Ok
+            if (HttpContext.Request.Method == "POST")
+                return Ok();
+
+            // Nếu là GET -> redirect về trang đăng nhập
+            return RedirectToAction("DangNhap");
         }
         //trang cá nhân
         public async Task<IActionResult> Trangcanhan(int id)

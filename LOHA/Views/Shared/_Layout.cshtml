@@ -465,27 +465,41 @@
         });
 
         async function ketNoiSignalRThongBao() {
-        const userId = await getCurrentUserId();
-        console.log('UserId từ API:', userId);  // ← THÊM DÒNG NÀY
+            const userId = await getCurrentUserId();
+            console.log('UserId từ API:', userId);  // ← THÊM DÒNG NÀY
     
-        if (!userId || userId === 0) {
-        console.warn('Chưa có userId, không thể kết nối SignalR');
-        return;
-        }
+            if (!userId || userId === 0) {
+                console.warn('Chưa có userId, không thể kết nối SignalR');
+                return;
+            }
     
-        var connection = new signalR.HubConnectionBuilder()
-        .withUrl("/chathub?userId=" + userId)
-        .withAutomaticReconnect()
-        .build();
+            var connection = new signalR.HubConnectionBuilder()
+                .withUrl("/chathub?userId=" + userId)
+                .withAutomaticReconnect()
+                .build();
 
-        connection.on("CapNhatBadgeThongBao", function() {
-        console.log('Nhận được CapNhatBadgeThongBao!');  // ← THÊM DÒNG NÀY
-        capNhatBadgeThongBao();
-        });
-
-        connection.start()
-        .then(() => console.log('SignalR thông báo đã kết nối'))
-        .catch(err => console.error('SignalR lỗi:', err));
+            connection.on("CapNhatBadgeThongBao", function() {
+                console.log('Nhận được CapNhatBadgeThongBao!');  // ← THÊM DÒNG NÀY
+                capNhatBadgeThongBao();
+            });
+            // ===== LẮNG NGHE SỰ KIỆN FORCE LOGOUT (BỊ KHÓA TÀI KHOẢN) =====
+            connection.on("ForceLogout", function(message) {
+                console.log('🚨 Nhận được ForceLogout:', message);
+    
+                // Hiển thị thông báo
+                showToast(message || 'Tài khoản của bạn đã bị khóa!', 'error');
+    
+                // Xóa session và chuyển về trang đăng nhập sau 2 giây
+                setTimeout(() => {
+                    fetch('/User/DangXuat', { method: 'POST' })
+                        .then(() => {
+                            window.location.href = '/User/DangNhap';
+                        });
+                }, 2000);
+            });
+            connection.start()
+            .then(() => console.log('SignalR thông báo đã kết nối'))
+            .catch(err => console.error('SignalR lỗi:', err));
         }
 
         // Hàm lấy userId từ server

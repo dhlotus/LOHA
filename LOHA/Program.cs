@@ -43,8 +43,12 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection(); // chuyển http sang https
+app.UseStaticFiles();
 app.UseRouting(); // bật chức năng định tuyến (routing)
 app.UseSession(); // cho phép dùng session trong project
+// Kiểm tra trạng thái user
+app.UseMiddleware<LOHA.Middleware.CheckUserStatusMiddleware>();
+
 app.UseAuthorization(); // bật chức năng kiểm tra quyền truy cập
 
 app.MapHub<ChatHub>("/chathub"); // định nghĩa đường dẫn cho hub realtime (chat)

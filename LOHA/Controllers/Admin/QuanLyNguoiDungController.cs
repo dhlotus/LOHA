@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LOHA.Hubs;
 using LOHA.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace LOHA.Controllers.Admin
@@ -72,6 +74,13 @@ namespace LOHA.Controllers.Admin
 
                 user.TrangThai = false;
                 await _context.SaveChangesAsync();
+
+                // ===== GỬI TÍN HIỆU SIGNALR FORCE LOGOUT =====
+                var hubContext = HttpContext.RequestServices.GetService<IHubContext<ChatHub>>();
+                if (hubContext != null)
+                {
+                    await hubContext.Clients.User(userId.ToString()).SendAsync("ForceLogout", "Tài khoản của bạn đã bị khóa.");
+                }
 
                 // ===== GHI NHẬT KÝ =====
                 await GhiNhatKy(
