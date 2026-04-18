@@ -96,7 +96,13 @@
             <div>
                 <h1 class="fw-bold display-6 display-md-5" style="color: #1E2A78;">@Model.Ten</h1>
             </div>
-
+            @if (ViewBag.CurrentUserId == Model.ID)
+            {
+                <a href="/User/ChinhSua" class="btn-edit-profile">
+                    <span class="material-icons-outlined">edit</span>
+                    <span>Chỉnh sửa trang cá nhân</span>
+                </a>
+            }
         <!-- NÚT KẾT BẠN + BÁO CÁO -->
         @if (ViewBag.CurrentUserId != Model.ID)
         {
