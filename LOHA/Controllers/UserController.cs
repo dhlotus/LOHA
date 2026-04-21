@@ -51,7 +51,7 @@ namespace LOHA.Controllers // nhóm chứa các class
                     Email = user.EmailorSDT,
                     MaOTP = maOTP,
                     Ten = user.Ten,
-                    Matkhau = user.Matkhau,
+                    Matkhau = BCrypt.Net.BCrypt.HashPassword(user.Matkhau),  // Hash mật khẩu
                     Ngaysinh = user.Ngaysinh,
                     Gioitinh = user.Gioitinh,
                     ThoiGianTao = DateTime.Now,
@@ -275,8 +275,8 @@ namespace LOHA.Controllers // nhóm chứa các class
             var user = _context.Users
                 .FirstOrDefault(x => x.EmailorSDT == model.EmailorSDT);
             // Thêm kiểm tra tài khoản bị khóa
-            
-            if (user == null || user.Matkhau != model.Matkhau) // So sánh trực tiếp
+
+            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Matkhau, user.Matkhau))
             {
                 ModelState.AddModelError("", "Sai email hoặc mật khẩu");
                 return View(model);
@@ -413,13 +413,13 @@ namespace LOHA.Controllers // nhóm chứa các class
 
         [HttpPost]
         public async Task<IActionResult> ChinhSua(
-    string? Ten,
-    DateTime? Ngaysinh,
-    string? MatKhauCu,
-    string? MatKhauMoi,
-    string? XacNhanMatKhau,
-    string? confirm,
-    string? activeTab)
+            string? Ten,
+            DateTime? Ngaysinh,
+            string? MatKhauCu,
+            string? MatKhauMoi,
+            string? XacNhanMatKhau,
+            string? confirm,
+            string? activeTab)
         {
             var userSession = HttpContext.Session.GetString("user");
 
@@ -437,7 +437,7 @@ namespace LOHA.Controllers // nhóm chứa các class
             // ===== KIỂM TRA MẬT KHẨU =====
             if (string.IsNullOrWhiteSpace(MatKhauCu))
                 ModelState.AddModelError("MatKhauCu", "Phải nhập mật khẩu hiện tại");
-            else if (MatKhauCu != user.Matkhau)
+            else if (!BCrypt.Net.BCrypt.Verify(MatKhauCu, user.Matkhau))
                 ModelState.AddModelError("MatKhauCu", "Mật khẩu không đúng");
 
             // ===== VALIDATE TÊN =====
@@ -551,7 +551,7 @@ namespace LOHA.Controllers // nhóm chứa các class
 
             if (coNhapMK)
             {
-                user.Matkhau = MatKhauMoi;
+                user.Matkhau = BCrypt.Net.BCrypt.HashPassword(MatKhauMoi);
             }
 
             await _context.SaveChangesAsync();
@@ -1121,7 +1121,7 @@ namespace LOHA.Controllers // nhóm chứa các class
             }
 
             // 9. Cập nhật mật khẩu mới
-            user.Matkhau = matKhauMoi;
+            user.Matkhau = BCrypt.Net.BCrypt.HashPassword(matKhauMoi);
 
             // 10. Đánh dấu OTP đã sử dụng
             datLai.DaSuDung = true;

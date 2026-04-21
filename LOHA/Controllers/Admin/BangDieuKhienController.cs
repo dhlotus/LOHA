@@ -45,7 +45,7 @@ namespace LOHA.Controllers.Admin
                 .FirstOrDefaultAsync(l => l.TenDangNhap == tenDangNhap && l.TrangThai == true);
 
             // 3. Kiểm tra tài khoản và mật khẩu
-            if (lotus == null || lotus.MatKhau != matKhau)
+            if (lotus == null || !BCrypt.Net.BCrypt.Verify(matKhau, lotus.MatKhau))
             {
                 ViewBag.Loi = "Sai tên đăng nhập hoặc mật khẩu";
                 return View();
