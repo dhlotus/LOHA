@@ -23,14 +23,6 @@
 }
 
 <form asp-action="DangNhap" method="post">
-    @if (TempData["ThongBao"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fa-regular fa-circle-check me-2"></i>
-            @TempData["ThongBao"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
     <div class="input-group">
         <div class="email-wrapper">
             <input asp-for="EmailorSDT" class="login-input" type="text" placeholder="Số di động, tên người dùng hoặc email" />
