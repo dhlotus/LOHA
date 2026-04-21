@@ -48,8 +48,8 @@ namespace LOHA.Models
             var age = today.Year - ngaySinh.Value.Year;
             if (ngaySinh.Value.Date > today.AddYears(-age)) age--;
 
-            if (age < 13)
-                return new ValidationResult("Bạn phải từ 13 tuổi trở lên để đăng ký");
+            if (age < 10)
+                return new ValidationResult("Bạn phải từ 10 tuổi trở lên để đăng ký");
 
             if (ngaySinh.Value > today)
                 return new ValidationResult("Ngày sinh không được lớn hơn ngày hiện tại");
