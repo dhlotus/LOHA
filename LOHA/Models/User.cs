@@ -61,29 +61,24 @@ namespace LOHA.Models
         public static ValidationResult? ValidateEmailOrPhone(string? value, ValidationContext context)
         {
             if (string.IsNullOrEmpty(value))
-                return new ValidationResult("Vui lòng nhập email hoặc số điện thoại");
+                return new ValidationResult("Vui lòng nhập email");
 
-            // Kiểm tra email
-            if (value.Contains("@"))
+            // Chỉ kiểm tra email
+            if (!value.Contains("@"))
+                return new ValidationResult("Vui lòng nhập địa chỉ email hợp lệ");
+
+            try
             {
-                try
-                {
-                    var addr = new System.Net.Mail.MailAddress(value);
-                    if (addr.Address == value)
-                        return ValidationResult.Success;
-                }
-                catch
-                {
-                    return new ValidationResult("Email không hợp lệ");
-                }
+                var addr = new System.Net.Mail.MailAddress(value);
+                if (addr.Address == value)
+                    return ValidationResult.Success;
             }
-            // Kiểm tra số điện thoại (10 số, bắt đầu bằng 0)
-            else if (System.Text.RegularExpressions.Regex.IsMatch(value, @"^0[0-9]{9}$"))
+            catch
             {
-                return ValidationResult.Success;
+                return new ValidationResult("Email không hợp lệ");
             }
 
-            return new ValidationResult("Email không hợp lệ hoặc số điện thoại phải bắt đầu bằng 0 và đủ 10 số");
+            return new ValidationResult("Email không hợp lệ");
         }
         // Validation tùy chỉnh cho tên
         public static ValidationResult? ValidateTen(string? ten, ValidationContext context)
