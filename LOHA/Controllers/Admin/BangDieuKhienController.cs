@@ -44,8 +44,42 @@ namespace LOHA.Controllers.Admin
             var lotus = await _context.Lotuss
                 .FirstOrDefaultAsync(l => l.TenDangNhap == tenDangNhap && l.TrangThai == true);
 
-            // 3. Kiểm tra tài khoản và mật khẩu
-            if (lotus == null || !BCrypt.Net.BCrypt.Verify(matKhau, lotus.MatKhau))
+            if (lotus == null)
+            {
+                ViewBag.Loi = "Sai tên đăng nhập hoặc mật khẩu";
+                return View();
+            }
+
+            // 3. Kiểm tra mật khẩu (hỗ trợ cả plain text cũ và hash mới)
+            bool isPasswordValid = false;
+
+            // KIỂM TRA XEM MẬT KHẨU ĐÃ ĐƯỢC HASH CHƯA
+            // Hash BCrypt luôn bắt đầu bằng $2a$, $2b$, hoặc $2y$
+            if (lotus.MatKhau.StartsWith("$2a$") || lotus.MatKhau.StartsWith("$2b$") || lotus.MatKhau.StartsWith("$2y$"))
+            {
+                // Đã hash → dùng BCrypt.Verify
+                try
+                {
+                    isPasswordValid = BCrypt.Net.BCrypt.Verify(matKhau, lotus.MatKhau);
+                }
+                catch
+                {
+                    isPasswordValid = false;
+                }
+            }
+            else
+            {
+                // Chưa hash (plain text cũ) → so sánh trực tiếp
+                isPasswordValid = (lotus.MatKhau == matKhau);
+
+                // Nếu đúng → tự động nâng cấp lên hash
+                if (isPasswordValid)
+                {
+                    lotus.MatKhau = BCrypt.Net.BCrypt.HashPassword(matKhau);
+                }
+            }
+
+            if (!isPasswordValid)
             {
                 ViewBag.Loi = "Sai tên đăng nhập hoặc mật khẩu";
                 return View();
@@ -60,7 +94,7 @@ namespace LOHA.Controllers.Admin
             HttpContext.Session.SetString("lotusHoTen", lotus.HoTen);
 
             // 6. Chuyển đến Dashboard
-            return RedirectToAction("Index", "BangDieuKhien");
+            return RedirectToAction("Index", "Dashboard");
         }
 
         // ===== TRANG DASHBOARD (TỔNG QUAN) =====

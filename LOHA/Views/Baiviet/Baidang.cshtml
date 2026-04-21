@@ -73,7 +73,7 @@
             <!-- ===== ACTIONS ===== -->
             <div class="post-actions">
                 <button onclick="thichBaiViet(@Model.Id, this)" class="post-action-btn @(ViewBag.Thichs?.Contains(Model.Id) == true ? "liked" : "")">
-                    <i class="fa-regular fa-heart"></i>
+                    <i class="fa-solid fa-heart"></i>
                 </button>
                 <button onclick="toggleBinhLuan(@Model.Id, this)" class="post-action-btn" id="comment-btn-@Model.Id">
                     <i class="fa-regular fa-comment"></i>
