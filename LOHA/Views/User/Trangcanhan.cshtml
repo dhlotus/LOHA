@@ -322,7 +322,7 @@
             <div class="modal-body text-center p-4">
                 <div class="mb-3">
                     <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex p-3">
-                        <i class="fa-regular fa-user-slash fa-3x text-danger"></i>
+                        <span class="material-icons-outlined" style="font-size: 48px; color: #EF4444;">person_remove</span>
                     </div>
                 </div>
                 <h5 class="fw-bold mb-2">Huỷ kết bạn?</h5>
@@ -331,10 +331,10 @@
                 </p>
                 <div class="d-flex gap-2 justify-content-center">
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">
-                        <i class="fa-regular fa-xmark me-2"></i>Không
+                        <span class="material-icons-outlined me-1" style="vertical-align: middle; font-size: 18px;">close</span>Không
                     </button>
                     <button type="button" class="btn btn-danger rounded-pill px-4" id="confirmHuyKetBanBtn">
-                        <i class="fa-regular fa-check me-2"></i>Huỷ kết bạn
+                        <span class="material-icons-outlined me-1" style="vertical-align: middle; font-size: 18px;">check</span>Huỷ kết bạn
                     </button>
                 </div>
             </div>
@@ -1203,16 +1203,17 @@
             modal.hide();
         
             if (data.success) {
-                alert('Đã gửi báo cáo. Cảm ơn bạn!');
+                 showToast('Đã gửi báo cáo. Cảm ơn bạn!', 'success');
             } else {
-                alert(data.message);
+               showToast(data.message, 'error');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Có lỗi xảy ra');
+            showToast('Có lỗi xảy ra', 'error');
         });
     });
+
         // Hàm này để khớp với nút trong _Layout.cshtml
     window.confirmDeletePost = function() {
         xoaBaiViet();
