@@ -126,14 +126,16 @@
 <!-- JavaScript TỐI GIẢN - CHỈ XỬ LÝ PHẦN KHÔNG CÓ TAG HELPER -->
 <script>
     // Cập nhật ngày sinh vào input hidden
-    function updateDateOfBirth() {
+        function updateDateOfBirth() {
         var day = document.getElementById('daySelect').value;
         var month = document.getElementById('monthSelect').value;
         var year = document.getElementById('yearSelect').value;
-        
+    
         if (day && month && year) {
-            var date = new Date(year, month - 1, day);
-            var formattedDate = date.toISOString().split('T')[0];
+            var formattedDay = day.padStart(2, '0');
+            var formattedMonth = month.padStart(2, '0');
+            var formattedDate = year + '-' + formattedMonth + '-' + formattedDay;
+        
             document.getElementById('ngaysinhHidden').value = formattedDate;
         }
     }
