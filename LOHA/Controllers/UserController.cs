@@ -490,6 +490,8 @@ namespace LOHA.Controllers // nhóm chứa các class
                     ModelState.AddModelError("MatKhauMoi", "Phải nhập mật khẩu mới");
                 else if (MatKhauMoi.Length < 6)
                     ModelState.AddModelError("MatKhauMoi", "Mật khẩu phải tối thiểu 6 ký tự");
+                else if (!MatKhauMoi.Any(char.IsLetter) || !MatKhauMoi.Any(char.IsDigit))
+                    ModelState.AddModelError("MatKhauMoi", "Mật khẩu phải bao gồm cả chữ và số");
                 else if (string.IsNullOrWhiteSpace(XacNhanMatKhau))
                     ModelState.AddModelError("XacNhanMatKhau", "Phải xác nhận mật khẩu");
                 else if (MatKhauMoi != XacNhanMatKhau)
