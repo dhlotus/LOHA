@@ -22,7 +22,7 @@ namespace LOHA.Models
         [Required(ErrorMessage = "Giới tính không được để trống")]
         public string? Gioitinh { get; set; }
 
-        [Required(ErrorMessage = "Email/SĐT không được để trống")]
+        [Required(ErrorMessage = "Email không được để trống")]
         [CustomValidation(typeof(User), nameof(ValidateEmailOrPhone))]
         public string? EmailorSDT { get; set; }
 
